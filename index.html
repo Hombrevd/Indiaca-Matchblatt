@@ -1,0 +1,2484 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0A46E4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Matchblatt">
+<title>Indiaca Matchblatt</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+/* ============================================================
+   Indiaca Matchblatt – Gestaltung
+   Richtung: sportlich-kräftig. Die Anzeigetafel ist das laute
+   Element, alles andere bleibt still. Der gelbe Punkt ist die
+   Indiaca: er steht immer dort, wo der Aufschlag ist.
+   ============================================================ */
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(data:font/woff2;base64,d09GMgABAAAAAB/sAA4AAAAATYwAAB+VAAFocgAAAAAAAAAAAAAAAAAAAAAAAAAAGnwbl0YcgVIGYACDCBEICu982CIBNgIkA4QoC4IaAAQgBYM8ByAboz9FB+KkzJoiooKUFvxfJtjGrB+zRQud3WBXxgpKtVxSMFpllamL7JJmH9523v0KzchCkcvQDII7c5zrcB4OfneExj7J5Xn+9/vfz7XPxTVpaBCiaGKQxaRCUo0MSiTR+N3TL8nSY/08bas38YmZAaElJBxCFJVWsUFolTYwcoxNN9Pd64q9u92L7v+1qV8vm7TC2VxiOCjDssRrsko6B9nUcgD4oAh+/drmz54oRGKDUExCoRRe3R1KI/RLJA1J3Chkd4uI4sDbn82ZTFXKOVKoyLh5hQDF6/5LAMU2n0cs2Rpe0NbOEmWstrGFsbq/bPaZ9lPvLBy3iQ8pyAgiY5DcJUlPt0Y9PW9mQfpbq5Y+0RwuVmkOB3S/ZsckyXQE0WZGGB2CgTl0XWyOHANGrtyVOwidJk5tw2ZlQI2lIUFkudLe9ybqtHs/fRJEJNgvQzasLQ+5yk1UshSM3Wv/BxVgKQCDDI6E4aFhRGQwCioYjSoYIyOMmR3GoRbGyQXj4YMJCMK06YQJCcNExGASEjApaZheebgddsBhwGIWPvjuvekCiK+c3LAaxEhAbRiQy2fXrQYBMIDA8XwFJ0BgnOh+GBMSWCKgS1RayYgpK620zhY4QtEocNMSoZ12ouCKxUoImGJpmGK/cMWOlTuCKRbDFAtwxRqWmoAploIpA0OponJfcCoksJ8BhgC9t4PBzVuAwxUU4MrKMDgFEtjMAIODTmEwZTgQ83AYDE6AJM7L8x9f5ITxIIG1xowZy1qLWWvGokWL1trkeKdmbTbl6tyYG3M7jAKOcPoPkYCIkopaJS2zHklppcGSlRozPPzUqJgMA4ihNmNt00jMfnsVmhL9aIK3jpBARlExXjl8rQUAIVBAA6NFfGJJl2Q1KLTS1irSaoLK4ZrqtKU4OlQLqAMn1EMDNIJruLskT8dae9dWdAegU3dZutuHUDRcQ0+xSCaM9iUmD4z3IhEmC1Ks01pnYjrLJ851bL4lC0uXurSpw1KjFIajvFpAHTihHhqgEVzQAZ1huLZNLKys0N8sFIK0mKxAUxk+ZZBgejD9RUILrEeUj6xdsZdbE+H37QnezPTErnZzZRradO/0yQZA+ehqNudal0PwTyfVvBCaR3YX+pNzeToSAKfBBiyTBPUIFkGXEG4GNYWX5kwhDqiQO1sxnVKQWUm1xvUqKKsHHJXeySXb3kFxx66CT/PeFpLZ7dbuFZF9dwzmNCCyS1meqlHPZP6HGq/RXZ3qTRJBHhNdhe9I6ndxLEkbuWKkpEjuaFb6JNwbHttw2a+rMofwhtJY2L4QcU56RoWCQTymPrwDtXtDUEqozk+rfwkKzouunIgybc9DOof4IYgjwIOJ8UnIUJRMRD8no9EjjhyDU0IMw2MIn2EETIxhOBFDxKyChFGkjCBD0jsNogbjqWSIhvFpmYDu/oT0qlAMjGimgowSKqp6ensbhL6MX0FAlHSBQiVoRiJBjX+3AUA9wCYA+uPFAYjOrQIDQFnNuKISQ0lMVihItbAGKsQKnj30puU9hUBdjVGWSBj9YDmAJ44EeZSfMERzAfHMzBxn4TyviE4iclez1JnpTS4Q8ZXT0tMoWbOxpfWXzIKnzAiclZQ31nMOWAVPPDf7TeTNWcRyAJMwOLIqtMIz/eZHAkaHZWFlY1fDoZabh5dPi1ZtOnTq0i0kLCIuISVnE5yMRQ0SDcYtGMXDcF5G8jFaCxKMSJ4M0kWM1M1wIcYTZnwRFAgZoRSYUI7hNj04gpNj2VEcXPiylESBoOFpJmSkkC+CAn4qpKQhJBkRLiVkZJFSKAgtiMU5pGU/cb5ttsPhjkYCH12JoAAdd63UPwLklwGA492hrvtnz51BdizmKQ7Sy5JlezKxF3pPoSskBTAoWNX04dJDNAKGbMxGoS9RGVS0GLLV6qxRFJ+Q5xKGTyFQ5kW0gsqwwoWoBDH/MTgz54kxoIiKkBzhk9KUpiSlkXEtlI3HUpGoGOmooACMQFqgHKnIJ0feCfMvjU1XBe+AX7k4NwniwLaNq0DRgdi96ueBoZEJYJryDsQUjE7NqvYYFJ++FF2SCjCkfjgJEkVGyySD4OaTTcOgXrhp+uCDyIMcNt/H8rADNrWRipWlfeYwMpeMQQQYT/VTwKF7zjGeeAAL5sPbWSdfkqNHQkPwMNOWtdMXdYLZzsiAAFJHB7AlEwZMei0jVjEyG3BXHP9RUGA1ahHRr2zUuI222eEuD3vcsw57x0c+8bXv/eg3/2xR1Aa2sHIJispkP33SJva0N+D9p37uOyrfwI4ghRuD3N/jAtVsPbkA9YB6QX2F8he8MzA+QeAwcALgFrDXTof3qz9fvrqx0jZr7XfAduust8ZOCzaZt2TRCvvssdcqy/A/F/nPojW1raOf7WBi1TYIL9xUx3nSzTUInmLwIx1FE6Ko7NbDzsKqlku9Bo0wWG0VAM8B2Qh8AavfA6w7CHIH+AcARu1CwOCwvg2EHQS5AYcAE0pSqug8cniHgJqAeiiq4k3ndgAJh8mTZImiO7NLMNX0Kg3pBdUEVboGwT1NOr7BGkolEtVJxE6r1ykx1KsbbGKxWqQTW0QtBoO6zmm0OUSsuK6bFZtFPoe4hpFIGGW9pLOmukYsZkW5pTnos6vralkLMyiJpHQwDoWYYSTKR2Vaf4+/s05urFEqFG9/YnpPzN9drzDVKBROhYgRSZg6JjnCiLUag0FyIuLdTklTZWWDv0vIlBQBcXB4hbjyBIRwM4Edhgg1XLttE1fYTQA7XSPCr6kCeuW382SrQjpOTRd4JcJaXfhB1Gf0I/T5g5/IfYs6HiL4cL4QOM4o4nZ1kQ5wuZNItxnaJCGSr+FgYa/dvpzTIzHpj+fx3OiTYC3JUpGBp5znozNp0D/jg5MaiiHpN6fT/mqOpv6pLSh0AwkCwPUsfhaRVQr2djyWUpAalvAByLbUrsMIvSJgSmA/Jr+mBNVFQkTcE0UnJXXBi/Y7DDSVrmuZITXLJiFmAMzBF12VNiJnOaG5Ra8b0dWcXPfPSXdFMg3wxKD3hPD1Oj7Ge3XC67dT4deUV6Wk9TsE80Zumm2Zfp2HTNeuqbn77OAuoffs5KwbTJUaY0VFHP1XLSBer1DVLsK1nd/iy0l+4f226Q2Bu9MH+jyKZAxtsk1EdGBMWjEfZdrMgL6jpxDtFWMJZqnTYUbByykrpFN4rEfI7BCRUC5pKtpRpad4X/VQozEw5V3fwUHqS595TfET4Bq8T72mdLcvkVrLO9Lh0oaiplEjwpI53U9Fr8QO77d2RLBOYALzMqXFbSYbNBthHx8SpFI4aZ4D77F1pbSRGreEUXEz9FYEVZGN9vDRUMdJKs7ejV/zTfGudqyikiCIPUOPShrVFIfcLlfqzCluiw2Ov9LQ27vv63d7QARJySKZ60uBnT6vm8y6ENRVpBPowGOVmrV0SKITNG/yn4AEJaffMQ8qD0+mv3wFBLrwp3l310TWuOMGHvzZpeGnQKUBwVcpraSdyEp5mkckbNuMO2jyPeZ6rvD6wB2OiQQVlSwOVLa/Nm2rDtgOYtn6cnYZOKjxfaAlUMBjHn7LucJMa3s0pb7quIdWIi0IzfXbxgqa2pM2klrUVLe1dbIXzLZVjQ6MxXgOB2KkWua2Za/ubvMOc6rMJndZ3tO0fKYs9LJdqVb96bjgpPZT1Gr+m5BsP79WtxoJKX+p3ekDk5WSWGNmPFHHDHn3O0rfTvAuG5c+fcM5xWplxj62z/9GDsatzqgDV7MqjCmzt+gbrf+JJXkFT6L26icb9Xx/pVGvVllVY7oAtW9F2qg7gpJ1KS+oor25XqcOnZJ0vbUomJmxGYrqjTeFktAsX275RHQvPNzvr/eVm4pOFuwJ4N2dHEg5NBX4D0QqfsssjuXJbjiDRenropZwCUJssnp0ozS9T5mDNWs5FZl3jTfuwnnB0qiKbddSJ872HRBQAEP5uSGfVd0roVykHlBfoFXJvIZr/Nb/NaPstkbSiP35DkKsekHeWgpEjXwT2XihdtvWO5cyTd9wdu9Y69o06pGcoKGbyhHWV+y2edu6jOFlZQqsyJrUDjMJBP/nlf5C2tRHRAzLu59V6esyWSSFKW45MByellEEWhOPpSLJKpc9mRYoLMt6iK7g8PVUoNWjHwhOvwBAtlwdeBXAajtth24WSYLDHCs6tYuROulgR9tfoepmLCf5b+O0dXEcOmb576Ml4vJfEC9U6ZHz9jWg1wBiNbnQ2jXwRiApHov77RNTmIORhN7eSjpqAZAlPz8qNkF/QG2rHGQl4ag8MQKBs0Shf39L1k/Q08BJrznJ8ebmOlY0pkDkMHIybh1flxL3luCm0tbbNjNkMZUxGrfsNlsrk0Tnh7bQNUJkWgI69+AVy0TNd9OtSbJmJVCJZxpSLmmCk0I5XP2LAgEtQiy6ZUBbHe5tIXyr5zKOA7iGhDUisj9WqOdBU/P9sO8tt25HBaZ16hsphuxbCNUK9O9jrN6O83DQlm95VnhQSPDICJNTErPtTCJTcLodgelrl6KRtKldqOxGzx7xtaXmAX4jfs/tt/+e2Uu4tx8zct37IbzHuMHuTpvWnd+iQ2I0iNxQ3PANQeB/wXpOzvrP4+E9MesJm0eYwzwDzJINRb6OI7+wZdFo7FNrX3eOt4TjJfHURXVMIjUJmkBaz/cXlyB4XvQEjqMnAdedOp+c3vuxiF4d5v1l+i3hsGaFjyr+gkAptKR/W1mRdb7zB5G/h+HeS+3od/4ZweRet9Sz60cBD5ftEazJOKaAsrVLvaV/gk0P9mfP32cqOjPW4xlVqfnpCMOiTLXB6/mmDhuwc0Sq1R45BAc6o47XJptHvFN56FpKMWWx87TLtPQirS0/N6SQHr3+EG8Nj2xpxUm8uRVunV6cLt2MOHQ54tCF4yvGR+bidaHq+bp8UHAWuhchr+OVBtchh3fyp8Ne31s1QYReRigIJ/M5rlgscTPF0txMiUFzaIRgGA273WzaznJl3GQ2GsS59rqcKc5xJWgXNv+6Ejc30DGAT6x03dw0utm8TLvql9lWhL6CU8c4dAShBxDa84LpRdxh0IPIMxxKDxAJLm9MGk5J0cPWbrLb08l2hld6hMbTUznBpxXF4vxU3o5X4rAcZzZvt8xYtm/N4ywTbwDtkIBrp+/JJW5RBM/tLMXvfh0S5ADU9qLWysSQlbCJPzuVS3ZdIc2WjcYVLGpfQ+S4qTxpqYJ0yc6ojFPT/Car/uAI/JI9GCmgpumajSbcJbWH5PjrFIkmH/PPrWDDfZRy84+QpKx0QUyRGJGtOqJgGRWbuJZlx66F7O1dUO6NLlCO06/CuwhoqiuZmzjj8uilcCp/fq6UKV3qpYUWG0PM0xfahm0XVlefWD+CE6vBfX/G6xxtGx5b1VdESCUZrvjM7pcGn3Z7nrW2IfQCQm0QeGx2xUA00j11ioscxO8cJF37uicj0YEnpfnIndZVRuOodcw6yr/4Kit0OwoGOeFHSG/OV+5+f8bjHGnraBy60kVOOjFCSE9cPICeQqjd8pTL9bSlHY7iz05ntXY9foV9jdG4w6otLj0kf6qmz5efnszlZ7liZcQbDudm+2qTgR7Msve+54+Yw43FWS4Pl9znZhHnXMz51pYrbISz+dzq8nfHK/xVs2Q2L9X81f7F+a48t7oIN2hPvIwQ0rMMlfsAJ/HMBxQzJXKedJmW5uBCahmHTExELh7vuNjNWKPhjlGRftdlFFM8jhi6miCJ9qs7S2BuUh6dxnEpsiQcpxz9R1Jvou+IgxrjYxw4Sjv6Dj9I/2EHPQY3A4ek6NhjfMUxkYTxJGye4JVULl9kghHTFTMC2/ufYXL8tfNMHHnnwLevhFreZDlVsPafn5xwy2rCLaWu0vB8atiHkNYS1CnvtdHMJEOT4YlsQnzj69UtCPmqT2eN/2kgzEsW088lEwPhgEfqJphR9UV6luhiTd+rNMeq9JX/tbze8l+lXmW6B5b5YwOpZxNjg7nceCksDu0HQTAMpbHodGrjPUa1TmfRUr0aLu8DWWS8kIOjhwb/gVoj/W9lvXFXI8+iKO6jQrpbX+nrxHns1aGvovkumYNAVg1+awzhlnoC4cRA8rl0shhS/1AtdRPPsnm1PziTSg9Hvc2hdxGqN6p1aibqoAbL4Z3wIgPJ/txYKfWcGC6HJJafe0RtrEdo6RVBPo79p1vn7R0InZfAtm4jE+q1EUGa4WxiCATbDBamF6CXb7cptneA7Hctv6gfrJzcsEt18c1Mr+iRPS8MNdKES0a1hyOl1OO90UKonZK5CJXpJJ7xNhPPP/dwm1GlgwQvVMqE9t1KWQ7rq/60xiMEr0TU7ZDq2Ww0nvXctMLg7uHQ53jy90Co6VgVp7sn4XoZk2KYm3vriHr4zsKavmJdAcB/+SBmSFK28romaoLf7J87X45vbk/g3eOUI/EhDsAbIvSMQnfhPVIdLzSc7YdyGLO9qdX/HNV+1i81wee/f8klhFvmlVYmG9hS53NGh1ifjyj+OnPt5tdXnPXERsdDJ2o0n4W+fIKvesJyqvf2Tc3vv61mBv/Mf3k5/5i1XGWiH/BMctzNy2bymZRZVtDN2Ex3G+16veoQKXI3cV6ilHq2N1EMp15aoIC580a/5li1Xsc33WPi6SbQQNnvI+3u3dLqH9ShZCn9bCpRmox19swsJv+PqB9RQ365QVMxQj9+iGFOvc1mW/qsz+6ngXQR2q522I5GU938AUqPF1X267TvqhXnvrvmQDwcjg72pfuGc9EChc8jr7JCo/1ALd/6XsPJe66vD4/2ZqCLQx/MldfkC+MzWHG2qyaXs9kG2pv1hZH6AKnIzbZzA4FhTDx5YVvvpMpQ1+gzVn3U+POIbgNx25S5iMeeezJ/KxCt7ulxR9wIsT0EXbYFq2GQrIaO2wiC4vdo3J2KcMue7WpPxtOzPV+4dCpY9Zc1Bic7tn5BCmmOoVoDOIkHAxQzi4mdWz5z0IuwR7v4+SMyWPFCwO2zJpqaxn1NnSVM5Fz8VEsPHxM+dtzLfkIDoIra1n+H4+u/leMCeoZqbj/Kau04qpma4T+Ab63vjtRxrNXWfswHDdYnAyiOSiSMLcbRzu9JIT3FUG1JvUgSpj6BA4ws6oikqmIIjBwqCgLXGa28CxCHshLM9h3cbF13YS1s6pmbnOJ93atd2yAIcj2LzncGRz86FhmYcIlpobWY6xnEyaqbZUh8cJZdnxL9kD8pMfBiY3F4rZ4kxJ5xJ57qib0nn34Vv/vg91r0dsFf4SJUqGh6L1FA+feA6NZm0nUxYBg8ydAXD321rpImy2P+Jg8XQqmszzxfCl+8s9c5/zhqdnGgb+DSKhS5Fo5hRdPMavuIfbXZNFbf+JgJlu4TTJj4kflwVpKtIGgaD1HrB+1w1ZyceHvG1qPygTPCyMx0csW5LeOdNfVVVXpyFQxjP0p1RP/MZKZ/git4zJOxo3rGbzx8CPZRbvcUHS4kEunxDIooNQwzwjBSSd8Pmsr/0r0u7+TQ2+qKu/MEnv/ei0h2xzVSlnhwxFbX3A/Rz48tnefPLAfDp8JthoTbZUDoijXhDPpt+ki6hcpjL3JQM7ySavfRCG1CaMtAsuWDMMBJeJ2jjUyM9vclyylhqk6ZD4bm6R5wab5PN9utw4lv1K53aykz9QkSopD+qr6J0GOES4qRurZ4mheBk/+xqjVkaizXlyynBclhC/Rkp8ay6fHxjGYL8wWvZtT6OnaOcEufrYsUB3jxNUN6bfqexsrvej3mKmv/hxrNx10w4Ly8R8k7CiFLVsdoBvb0Oo9/i2RJzZVRBz0JHatzOK+v1f+7v9DWGiy0+r/0tWo+L3o8pCLoDwZac41NgVxDaqjZ16Igr7hvUm84d+YuufJpbrOh+vSZOxWyyyc3HK21HTvwrFL53NDWauNQ6juV+v+Q3VcpD9zIM1+8Lmt1A5Eay/Unymlhste83m02WKhut+bnLnWNtTv1rbryu3Y4k5rPLTJfH1hosS9DqmcutI/YL2TNJ9Y3caIZPriPSrLH48U9kuN9EoKMIOij9p8Uhvur9fnIigcI9o3tINpHu2tWmYxp664yemS8f34yn5v+VNipiD8zvwEuoT3uJEYKusd7k73TGV7Eot19kGRbn1mvayjn67xL83qN6EsPIr0v71YsXyWVEy+IreS3CKL7rvRWfBTu3AAP5NnJjSN/wgkwDXtPvvULYISrzFjR4/Xy4uP9md6xFJW0I5yiR2m6+v4mnTGVmK75hrdpb+XIpzPwOD4IPFLVkUoKwnAjr7GKRanJHL/7ECYtugrogX5uvNA/vVmVJ5CxKa1xBbv8eZEpYvqudB8/tmaCtWXKVRqtcSRRa2/tM+v01S7YP6C8PTyd0oWVhQMEyttLqGkYWB2SKcfayr/qyEBbe+tQa+Qrb3P9b7OhkNKS8jY3lUuu5qZiQ3m+xZ9glXdcbzCfufGwSvXHxhwrMV2x4XNlnWH/bo3xlLm/VCpqcYdRNzpcodGYynDxVRluvNg3o/7zqtNa0x1Udfb18WLlWmmn1feRTY8lqVSavegU40i87hB2bPV0mQ22ff60YBvmkOZ9is6InK73tXQA0j3nm43PV1U9bzSfb+q4gEOyt7RUNvSM2rcoZsXY1xyi7xLuUS3zI8SXm43GTWePK6lfXDjhdQ45XEPd//zH2jsM5kyNkmbKBJpDFS2Ng0VXc26SK9bvUl999+W6anZt8RtzLHBTEf5Cn3Msh8YJtzTT6MZ5gagc5+ULbikpKbgOJOKKU0P9LqmbGEccciIOwVhivN91AD8QfwhUyLskpDTvPiMxaNm7q8PY4c7BdxmH2nlIshmRDWVQtpcoTqaYMjCM4oT7ggUQNGJjB7FsaLpr4DXA+qETnmKI/Hk3oBlQPn+Zgxrh/f58wcJ4U32q6fU9e5vfrE82UcP8mNKSdR/atsX1ijWLEWQBleH636PPTDa/sXuvhhRp+ojzrle3bnW9ZMlhpIAqg/kYDh2DOHSvimEvQi8iZRuidwXU7+PQPUhM42AaVuH2Y8D8F4Tf5W/ujHxpOcecFtEkoLKDbijLphTYdzYh4WMMPUAznYusQZ3noXkQ3iePktEJ6tGhPXDGLIe6EIeW0flqta0HM32aXUS/HyPMXEYib7ksJaUjI36c7HnXS+J5kujQi0jvu7dLvaOjXu9I+cqf7YtY0faJvwtxXEAXqf34Ui6HLy0Li/wNucVr91NZ4fLiNXB+m+le47rZh3z23BR8qwIeLCnCpaf11NgjtQ7Jdd1Rgxp31EL4iqc1WVdc0UQH+eBhI6+QNquCtchtNoUl9FaYnITP4ggva1fYbHLL4P+h4F+OiqX2lTQOZmJ2ZapL7WE/uVXlva5R2u9SD0iXpkXP3DvDxymmmWHUdyGm+metxRXfblOEm6Zn/KH4zmR+WZi3qxKt85P+5tQ9IYJnPUeGULh5oqo5szseP1g2BZm5FZdfXh7zvX9dwCIU5iTWlFx+n9VS4u/mB+VQRZF8alpYerLaHWsaLU0NFEKtI80etjH0oLVvZKTX219b3+vt6Bgc9LD+Km9USmL74sNXhG1nDpq7OlnZiYFEKPWZUfXxMxbPF1iVAWkM/388bH/PEOu5JcBeYANzP4dcZUTCPlixISsFOiqgg8JYfNaCL+VxuinIwVUdA/4g12R+LwTN/gQXFbaAviMa6OCaqDlhrJtTYnwqSsUMFktDjIpMCbANDixwVPZ4YPfkY6Kkghc+NoPBcRSWgKoCJTd2wP2BvsHjALAwbUoDwJFfD174qGx88jERBk56GrecdK3lpEuWk/Ko/5rH+Q08+Si/Bx2Ablgd1YK6r+lLdWMFaQWT+CC6wNHummtl1we9UAL4E3O1+5uHexPPFiI2u2zNW094jWpHLwCYPuOWwcYbg6zg7w/GB/CV4CFgCci36eSGbRU4tXcnrq0y10wn8ejrc7oKL+6Ecf/UITTYio8G1qEj39/XgL/hweD/fn0cDqytOsccqgL5dff38YhA7EfuzIz7sbXc7HgtcE/mbVaH3ZpZOr+PQMp07sgFef5ne0TA+BUG5MKtzKeKzO1w278En/gC8NeCfz4BfvPhXj1Xl3n6eOYCFsABAv4PPjP9HyJj4pF8K3mcncAvINMYHX1RIM+ozRFddBuAi/SLEfLuhA/MfaSW7D/C0PLm7205pBaGz/DnKdIveHd2K1Mep897PM3ww3TjHOo8rypPF3MmTZRz0S3N0e/QkCvZ4I5TuzZkqXITyu7S4DCLO5kx0dfu+0GHOp9bNHhK7ThHQ9QBT76Zjd3Dw1m3eOGJDHmUo1rS3Kk2d/ELLiIfmZlcQo/vNJKsVZk/qPIl1ThPYMK1/pWie9lyOUsexXAZKteoyrX0eS4fXs+eGyg8miS3xhZeRZW3NQBC4AInqKElaMIB3xfW7hDWU0z+0eItbETQlQsoHWbNAtkYU5t95FEDHNieJJ0ZTUQfuJVuZDvPII2HzNmQ6OAuYA4wsGr+iE0kBMbvbCPC5Do68PNH48UK7wUGPLcBcgF+Pn1kMySwwDACNhMCeAtQh2I8Tj0UJ/b4oYSoV/Mk7qGINpVfGB5XPMLWWGurdRbMmbeBiYeLWxOTggOzJmRy1Ssz4WYmmWrWWAzg9MN026jNvDW+Xm+zGvNmg7WDCWoUrTkLmHY8nNJguupVLlu0VjcOMSlFDplCT7PaDLiC9XqGdF6HqywIRWClzlUzZyMLDsPdGvi4NGtV4DUhQ1q5Zx1PuR5KwipcoMmZ4J7l2CC8nVfTPAAA) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(data:font/woff2;base64,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) format('woff2')}
+
+
+/* ============================================================
+   Farbwelten
+   Drei Paletten, jede in hell und dunkel. Die Palette hängt an
+   data-palette am <html>, die Helligkeit an data-theme:
+   kein data-theme = der Einstellung des Geräts folgen.
+   Eigene Teamfarben setzt die App als Inline-Werte für --home
+   und --guest; --home-on/--guest-on ist die Schriftfarbe darauf.
+   ============================================================ */
+
+/* ---- Halle (Vorgabe): Kobalt und Zinnober auf Kreide ---- */
+:root{
+  --halle:#EDEDEB;          /* Hallenwand, Grundton */
+  --surface:#FFFFFF;
+  --surface-2:#F6F6F4;
+  --ink:#101010;            /* Linien und Schrift */
+  --ink-2:#3A3C3E;
+  --muted:#63666A;
+  --line:#DCDCD8;
+  --line-strong:#101010;    /* Bodenmarkierung: schwarz, nicht grau */
+  --home:#0A46E4;           /* Kobalt */
+  --guest:#CE1F14;          /* Zinnober */
+  --home-on:#FFFFFF;        /* Schrift auf Teamfarbe */
+  --guest-on:#FFFFFF;
+  --ball:#FFD400;           /* Signalgelb, nur für den Aufschlag */
+  --court:#FFFFFF;
+  --warn:#8A5A00;
+  --ok:#0F7038;
+  --mid-bg:#101010; --mid-fg:#EDEDEB;
+  --radius:4px;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --halle:#0E0F11; --surface:#17191C; --surface-2:#1E2125;
+    --ink:#F2F2F0; --ink-2:#C9CBCD; --muted:#8B8F94;
+    --line:#2A2D31; --line-strong:#F2F2F0;
+    --home:#5B8CFF; --guest:#FF6A5C;
+    --home-on:#0B0C0E; --guest-on:#0B0C0E;
+    --ball:#FFD400; --court:#15181B;
+    --warn:#D9A441; --ok:#4FBF7E;
+    --mid-bg:#000000; --mid-fg:#F2F2F0;
+  }
+}
+:root[data-theme="dark"]{
+  --halle:#0E0F11; --surface:#17191C; --surface-2:#1E2125;
+  --ink:#F2F2F0; --ink-2:#C9CBCD; --muted:#8B8F94;
+  --line:#2A2D31; --line-strong:#F2F2F0;
+  --home:#5B8CFF; --guest:#FF6A5C;
+  --home-on:#0B0C0E; --guest-on:#0B0C0E;
+  --ball:#FFD400; --court:#15181B;
+  --warn:#D9A441; --ok:#4FBF7E;
+  --mid-bg:#000000; --mid-fg:#F2F2F0;
+}
+
+/* ---- Anzeigetafel: härtester Kontrast, für dunkle Hallen ---- */
+:root[data-palette="tafel"]{
+  --halle:#FFFFFF; --surface:#FFFFFF; --surface-2:#F1F1F1;
+  --ink:#000000; --ink-2:#1A1A1A; --muted:#4A4A4A;
+  --line:#BFBFBF; --line-strong:#000000;
+  --home:#0033CC; --guest:#C50000;
+  --home-on:#FFFFFF; --guest-on:#FFFFFF;
+  --ball:#FFD400; --court:#FFFFFF;
+  --warn:#7A4E00; --ok:#0A6B33;
+  --mid-bg:#000000; --mid-fg:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="tafel"]:not([data-theme="light"]){
+    --halle:#000000; --surface:#0B0B0B; --surface-2:#151515;
+    --ink:#FFFFFF; --ink-2:#E6E6E6; --muted:#9C9C9C;
+    --line:#333333; --line-strong:#FFFFFF;
+    --home:#4D8BFF; --guest:#FF5544;
+    --home-on:#000000; --guest-on:#000000;
+    --ball:#FFE100; --court:#000000;
+    --warn:#E0AC3C; --ok:#4ECB7B;
+    --mid-bg:#000000; --mid-fg:#FFFFFF;
+  }
+}
+:root[data-palette="tafel"][data-theme="dark"]{
+  --halle:#000000; --surface:#0B0B0B; --surface-2:#151515;
+  --ink:#FFFFFF; --ink-2:#E6E6E6; --muted:#9C9C9C;
+  --line:#333333; --line-strong:#FFFFFF;
+  --home:#4D8BFF; --guest:#FF5544;
+  --home-on:#000000; --guest-on:#000000;
+  --ball:#FFE100; --court:#000000;
+  --warn:#E0AC3C; --ok:#4ECB7B;
+  --mid-bg:#000000; --mid-fg:#FFFFFF;
+}
+
+/* ---- Papier: wie das gedruckte Matchblatt, Farbe nur am Aufschlag ---- */
+:root[data-palette="papier"]{
+  --halle:#F2EFE8; --surface:#FBF9F4; --surface-2:#EFECE3;
+  --ink:#1B1A17; --ink-2:#45423C; --muted:#6E6A62;
+  --line:#D6D0C4; --line-strong:#1B1A17;
+  --home:#1F3A6E; --guest:#7C2128;
+  --home-on:#FBF9F4; --guest-on:#FBF9F4;
+  --ball:#D9A400; --court:#FBF9F4;
+  --warn:#7A5200; --ok:#2F5D3A;
+  --mid-bg:#1B1A17; --mid-fg:#F2EFE8;
+}
+@media (prefers-color-scheme:dark){
+  :root[data-palette="papier"]:not([data-theme="light"]){
+    --halle:#14130F; --surface:#1D1B16; --surface-2:#25231D;
+    --ink:#EDE9E0; --ink-2:#C6C1B6; --muted:#908B80;
+    --line:#302D26; --line-strong:#EDE9E0;
+    --home:#8FA9DC; --guest:#DE8F8F;
+    --home-on:#14130F; --guest-on:#14130F;
+    --ball:#E8C24A; --court:#1A1813;
+    --warn:#D9A441; --ok:#6FAE80;
+    --mid-bg:#000000; --mid-fg:#EDE9E0;
+  }
+}
+:root[data-palette="papier"][data-theme="dark"]{
+  --halle:#14130F; --surface:#1D1B16; --surface-2:#25231D;
+  --ink:#EDE9E0; --ink-2:#C6C1B6; --muted:#908B80;
+  --line:#302D26; --line-strong:#EDE9E0;
+  --home:#8FA9DC; --guest:#DE8F8F;
+  --home-on:#14130F; --guest-on:#14130F;
+  --ball:#E8C24A; --court:#1A1813;
+  --warn:#D9A441; --ok:#6FAE80;
+  --mid-bg:#000000; --mid-fg:#EDE9E0;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0; background:var(--halle); color:var(--ink-2);
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  font-variant-numeric:tabular-nums;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overscroll-behavior:none; touch-action:manipulation;
+}
+h1,h2,h3{color:var(--ink);margin:0;line-height:1.1}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--ball);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* verdichtete Schrift für alles, was aus zwei Metern lesbar sein muss */
+.cond,h1,h2,h3,.board,.ptbtn,.lbl,.tag,.divider,.pcard,.sc,.tm,.plist .pos,.count{
+  font-family:"Barlow Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+}
+.lbl{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* ---------- Bedienelemente ---------- */
+.field{margin-bottom:12px}
+input[type=text],input[type=number],select,textarea{
+  width:100%; min-height:46px; padding:8px 10px;
+  background:var(--surface); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius);
+}
+input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+input[type=color]{width:100%;height:46px;padding:3px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:2px}
+.btn{
+  min-height:46px; padding:10px 16px; border-radius:var(--radius);
+  border:1.5px solid var(--ink); background:var(--surface); color:var(--ink);
+  font-weight:600; font-size:15px;
+}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.primary{background:var(--home);border-color:var(--home);color:var(--home-on)}
+.btn.danger{border-color:var(--guest);color:var(--guest)}
+.btn.wide{width:100%}
+.btn.sm{min-height:38px;padding:6px 11px;font-size:14px;border-width:1px;border-color:var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px}
+.card > h2{font-size:20px;text-transform:uppercase;letter-spacing:.02em;font-weight:700;margin-bottom:12px}
+.hint{font-size:13px;color:var(--muted)}
+.err{color:var(--guest);font-size:14px;font-weight:600}
+
+/* ---------- Aktualisierungsband ---------- */
+.updatebar{
+  position:fixed;top:0;left:0;right:0;z-index:90;
+  display:flex;align-items:center;gap:12px;justify-content:center;
+  padding:calc(9px + env(safe-area-inset-top)) 12px 9px;
+  background:var(--ball);color:#101010;font-size:14px;font-weight:700;
+  letter-spacing:.02em;
+}
+.updatebar .btn{min-height:32px;padding:3px 12px;background:transparent;border-color:#101010;color:#101010}
+body.has-update .screen{padding-top:54px}
+
+/* ---------- Bildschirme ---------- */
+.screen{max-width:840px;margin:0 auto;padding:18px 16px 32px}
+.apphead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.apphead h1{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:30px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.01em}
+.apphead .ver{font-size:12px;color:var(--muted)}
+
+/* ---------- Erfassung ---------- */
+.teamcard{border-top:5px solid var(--tc)}
+.plist{display:flex;flex-direction:column;gap:6px;margin:0 0 10px;padding:0;list-style:none}
+.plist li{display:flex;align-items:center;gap:8px}
+.plist .pos{flex:0 0 30px;text-align:center;font-size:16px;font-weight:700;color:var(--muted)}
+.plist li.field-slot .pos{color:var(--tc)}
+.plist input{flex:1;min-width:0}
+.plist .cap{flex:0 0 auto;display:flex;align-items:center;gap:4px;font-size:12px;
+  font-weight:700;color:var(--muted)}
+.plist .cap input{width:22px;height:22px;min-height:0;flex:0 0 auto;accent-color:var(--tc)}
+.plist .del{flex:0 0 auto;width:38px;height:38px;min-height:0;padding:0;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font-size:17px;line-height:1}
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0 8px;font-size:13px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--ink);padding:6px 0}
+
+/* ============================================================
+   Anzeigetafel – randlos, zwei Teamblöcke, schwarzer Mittelsteg
+   ============================================================ */
+.board{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  margin:-18px -16px 14px;
+}
+.board .side{
+  background:var(--tc);color:var(--tc-on);
+  padding:10px 12px 10px;min-width:0;
+  display:flex;flex-direction:column;
+}
+.board .side.b{text-align:right;align-items:flex-end}
+.board .tn{
+  font-size:clamp(15px,min(4.6vw,3.2vh),21px);font-weight:700;text-transform:uppercase;
+  letter-spacing:.02em;color:inherit;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.95;
+}
+.board .pts{
+  font-size:clamp(42px,min(20vw,12.5vh),104px);font-weight:700;line-height:.86;
+  letter-spacing:-.02em;color:inherit;margin:2px 0 2px;
+  font-variant-numeric:tabular-nums;
+}
+.board .sub{font-size:13px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+  color:inherit;opacity:.72}
+.board .serve{
+  display:inline-flex;align-items:center;gap:7px;margin-top:6px;
+  font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:inherit;
+}
+.board .serve::before{
+  content:"";width:13px;height:13px;border-radius:50%;background:var(--ball);
+  box-shadow:0 0 0 1.5px var(--tc-on),0 0 0 4px rgba(255,212,0,.22);
+}
+.board .side.b .serve{flex-direction:row-reverse}
+.board .acts{display:flex;flex-wrap:nowrap;gap:6px;margin-top:auto;padding-top:8px;max-width:100%}
+.board .side.b .acts{margin-left:auto}
+.board .acts .tbtn{
+  flex:0 1 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:"Barlow Condensed",system-ui,sans-serif;
+  min-height:44px;padding:3px 7px;border:1.5px solid currentColor;border-radius:3px;
+  background:transparent;color:inherit;white-space:nowrap;
+  font-size:clamp(10.5px,3.05vw,13px);font-weight:700;letter-spacing:.02em;
+  text-transform:uppercase;
+}
+.board.tight .acts .tbtn{font-size:10.5px;padding:2px 4px;letter-spacing:0}
+.board.tight .acts{gap:4px}
+.board .acts .tbtn .sh{display:none}
+.board.short .acts .tbtn .lg{display:none}
+.board.short .acts .tbtn .sh{display:inline}
+.board .acts .tbtn .n{margin-left:.35em;opacity:.78;font-variant-numeric:tabular-nums}
+.board .acts .tbtn:disabled{opacity:.42;cursor:not-allowed}
+.board .acts .tbtn:active{background:rgba(255,255,255,.16)}
+.board .mid{
+  background:var(--mid-bg);color:var(--mid-fg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:12px 14px;text-align:center;
+  font-size:12px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;
+}
+.board .mid b{display:block;font-size:clamp(20px,3.4vh,30px);font-weight:700;letter-spacing:0;color:var(--mid-fg);line-height:1}
+
+/* ============================================================
+   Spielfeld – weisse Fläche mit schwarzen Bodenmarkierungen
+   Die Grösse setzt fitCourt() in Pixeln, damit das Feld in
+   beiden Ausrichtungen genau den Restplatz füllt.
+   ============================================================ */
+.courtwrap{display:flex;align-items:center;justify-content:center;min-height:0}
+.court{
+  position:relative;aspect-ratio:5/6;max-width:100%;max-height:100%;
+  background:var(--court);border:2px solid var(--line-strong);overflow:hidden;
+  container-type:size;
+}
+.court .attackline{position:absolute;left:0;right:0;height:0;
+  border-top:2px dashed var(--line-strong);opacity:.55}
+.court .net{position:absolute;left:0;right:0;top:50%;height:4px;background:var(--line-strong)}
+.court .netlbl{position:absolute;left:6px;top:calc(50% - 15px);font-size:10px;font-weight:600;
+  letter-spacing:.11em;color:var(--muted)}
+
+/* Rotationspfeile: nur im Moment des Aufschlagwechsels sichtbar */
+.rotfx{
+  position:absolute;inset:0;width:100%;height:100%;z-index:3;
+  pointer-events:none;opacity:1;transition:opacity .35s ease-out;
+}
+.rotfx.fade{opacity:0}
+.rotfx .halo{fill:none;stroke:var(--court);stroke-width:3.6;stroke-linecap:round}
+.rotfx .arc{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;
+  marker-end:url(#rotarrow)}
+
+.pcard{
+  position:absolute;transform:translate(-50%,-50%);z-index:1;
+  transition:left .45s cubic-bezier(.4,0,.2,1),top .45s cubic-bezier(.4,0,.2,1),opacity .2s;
+  width:23%;min-width:52px;background:none;border:none;padding:0;
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+}
+.pcard .ini{
+  display:flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:50%;background:var(--tc);color:var(--tc-on);
+  font-family:"Barlow Condensed",system-ui,sans-serif;
+  font-size:14px;font-weight:700;letter-spacing:.02em;
+}
+.pcard .nm{
+  display:block;width:max-content;max-width:min(140px,34vw);padding:1px 5px;
+  background:var(--surface);border:1px solid var(--line);border-radius:2px;
+  font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  font-size:11px;font-weight:600;color:var(--ink);line-height:1.25;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.pcard .po{order:-1;display:block;font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.08em;line-height:1}
+
+/* Spielerkreise wachsen mit dem Feld, nicht mit dem Bildschirm */
+@supports (width:1cqw){
+  .pcard{width:clamp(34px,23cqw,150px);min-width:0}
+  .pcard .ini{width:clamp(20px,9.5cqw,48px);height:clamp(20px,9.5cqw,48px);
+    font-size:clamp(9px,4cqw,20px)}
+  .pcard .nm{font-size:clamp(8.5px,3.3cqw,13px);max-width:min(150px,44cqw);padding:0 4px}
+  .pcard .po{font-size:clamp(8.5px,3.4cqw,14px)}
+  .pcard.serving .ini{width:clamp(24px,12cqw,58px);height:clamp(24px,12cqw,58px);
+    font-size:clamp(10px,4.8cqw,23px)}
+  /* Auf einem kleinen Feld zählt die Position, nicht der ausgeschriebene
+     Name – die Namen stehen weiterhin auf der Bankleiste und im Bericht. */
+  @container (max-width:300px){
+    .pcard .nm{max-width:74px;font-size:9px}
+    .court .netlbl{display:none}
+  }
+  @container (max-width:235px){ .pcard .nm{display:none} }
+}
+
+.pcard.serving{z-index:4}
+.pcard.serving .ini{
+  width:40px;height:40px;font-size:17px;
+  box-shadow:0 0 0 4px var(--ball),0 0 0 5.5px rgba(0,0,0,.22),0 2px 8px rgba(0,0,0,.28);
+}
+.pcard.serving{gap:7px}
+.pcard.serving .nm{
+  background:var(--ball);border-color:var(--ball);color:#101010;font-weight:700;
+}
+.pcard.serving .po{color:var(--ink)}
+/* kurzer Impuls, wenn der Aufschlag gerade gewechselt hat */
+.pcard.justserved .ini{animation:serveping 1.6s ease-out 2}
+@keyframes serveping{
+  0%{box-shadow:0 0 0 4px var(--ball),0 0 0 4px rgba(255,212,0,.55),0 2px 8px rgba(0,0,0,.28)}
+  70%{box-shadow:0 0 0 4px var(--ball),0 0 0 20px rgba(255,212,0,0),0 2px 8px rgba(0,0,0,.28)}
+  100%{box-shadow:0 0 0 4px var(--ball),0 0 0 20px rgba(255,212,0,0),0 2px 8px rgba(0,0,0,.28)}
+}
+.pcard.off{opacity:0;pointer-events:none}
+
+/* ---------- Punkttasten ---------- */
+.ptbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 12px}
+.ptbtn{
+  position:relative;min-height:clamp(62px,11vh,118px);border:none;border-radius:var(--radius);
+  background:var(--tc);color:var(--tc-on);padding:14px 14px 12px;text-align:left;
+  display:flex;flex-direction:column;justify-content:space-between;gap:6px;
+  font-family:"Barlow Condensed",system-ui,sans-serif;
+}
+.ptbtn .t{font-size:clamp(18px,min(6vw,4vh),27px);font-weight:700;text-transform:uppercase;
+  letter-spacing:.02em;line-height:1;padding-right:38px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ptbtn .s{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  font-size:12px;font-weight:500;line-height:1.3;opacity:.88;letter-spacing:0}
+.ptbtn .plus{position:absolute;right:12px;top:10px;font-size:26px;font-weight:700;opacity:.5}
+.ptbtn .dot{display:inline-block;width:.46em;height:.46em;border-radius:50%;
+  background:var(--ball);vertical-align:.12em;margin-left:.4em;
+  box-shadow:0 0 0 1.5px var(--tc-on)}
+.ptbtn:disabled{opacity:.35}
+.ptbtn:active{filter:brightness(.88)}
+
+.toolrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.toolrow .btn{flex:1 1 auto}
+
+.rotnote{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);
+  z-index:70;background:var(--ink);color:var(--halle);padding:10px 18px;border-radius:3px;
+  font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;
+  box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:calc(100vw - 32px);text-align:center}
+.rotnote.on{opacity:1}
+.rotnote.rot{background:var(--ink);color:var(--ball);font-size:16px;
+  display:flex;align-items:center;gap:9px}
+.rotnote.rot::before{content:"\21BB";font-size:22px;line-height:1}
+
+
+/* ---------- Verlauf ---------- */
+.log{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.log h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:14px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);padding:10px 12px;
+  border-bottom:1px solid var(--line);font-weight:600}
+.log ol{list-style:none;margin:0;padding:0;max-height:230px;overflow-y:auto}
+.log li{display:grid;grid-template-columns:42px 52px 1fr;gap:10px;align-items:baseline;
+  padding:7px 12px;border-bottom:1px solid var(--line);font-size:13px}
+.log li:last-child{border-bottom:none}
+.log .tm{color:var(--muted);font-size:13px;font-weight:600}
+.log .sc{font-size:15px;font-weight:700;color:var(--ink)}
+.log .ev{color:var(--ink-2);font-size:12.5px}
+.log li.empty{display:block;padding:12px;color:var(--muted);font-size:13px;border-bottom:none}
+
+/* ============================================================
+   Spielbildschirm: füllt genau die sichtbare Höhe.
+   Nichts scrollt – zum Punktevergeben darf man nie scrollen müssen.
+   Das Spielfeld bekommt den Platz, der übrig bleibt.
+   ============================================================ */
+#game{
+  max-width:1280px;height:100%;overflow:hidden;
+  display:flex;flex-direction:column;padding:18px 16px 10px;
+}
+#game .gwrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:8px}
+#game .board{flex:0 0 auto;margin:-18px -16px 0}
+#game .courtwrap{flex:1 1 0;min-height:90px}
+#game .panel{flex:0 0 auto;display:flex;flex-direction:column;min-height:0}
+#game .toolrow{flex:0 0 auto;margin-top:8px}
+body.has-update #game{padding-top:54px}
+body.has-update #game .board{margin-top:0}
+
+.ptbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 8px}
+.toolrow{display:flex;gap:8px;margin:0}
+.toolrow .btn{flex:1 1 auto;padding:10px 8px}
+
+/* Der Verlauf steht inline nur, wenn wirklich Platz dafür ist –
+   sonst über den Knopf «Verlauf». */
+.log{display:none;flex-direction:column;min-height:0}
+.log ol{max-height:none;flex:1 1 auto}
+
+@media (orientation:landscape) and (min-width:700px){
+  /* links das Spielfeld über die volle Höhe, rechts Tafel und Punkttasten */
+  #game .gwrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(270px,340px);
+    gap:8px 14px;
+  }
+  #game .gwrap{grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"court board" "court panel" "court tools"}
+  #game .board{grid-area:board;margin:-18px -16px 0 0}
+  #game .courtwrap{grid-area:court}
+  #game .panel{grid-area:panel;min-height:0}
+  #game .toolrow{grid-area:tools;margin-top:0}
+  /* Die Punkttasten nehmen den Rest der Spalte – so kann unten nichts
+     mehr abgeschnitten werden, egal wie flach der Bildschirm ist. */
+  .ptbtns{grid-template-columns:1fr;grid-template-rows:1fr 1fr;
+    flex:1 1 auto;min-height:96px}
+  .ptbtn{min-height:44px;height:100%}
+  .toolrow{flex:0 0 auto}
+}
+@media (orientation:landscape) and (min-width:700px) and (min-height:560px){
+  .log{display:flex}
+  #btnLog{display:none}
+}
+
+/* --- sehr flaches Querformat (Handy quer): alles in der rechten Spalte
+       rückt zusammen, damit das Spielfeld die volle Höhe behält --- */
+@media (orientation:landscape) and (max-height:430px){
+  .board .pts{font-size:clamp(30px,min(16vw,19vh),70px)}
+  .board .tn{font-size:14px}
+  .board .sub{font-size:11px}
+  .board .serve{font-size:12px;margin-top:2px}
+  .board .side{padding:6px 10px}
+  .board .acts{gap:5px;padding-top:5px}
+  .board .acts .tbtn{min-height:32px;font-size:11px;padding:2px 5px}
+  .toolrow .btn{min-height:38px;font-size:14px;padding:6px}
+  #game{padding:8px 10px 6px}
+  #game .board{margin:-8px -10px 0 0}
+  #game .gwrap{gap:6px 10px}
+}
+/* Notfall-Stufe: sehr flaches Querformat (Adressleiste offen, kleines Gerät).
+   Die Werkzeugleiste rutscht unter das Spielfeld, damit die Punkttasten
+   in der rechten Spalte ganz sichtbar bleiben. Der Aufschlag steht
+   weiterhin auf der Punkttaste und am Spieler. */
+@media (orientation:landscape) and (max-height:290px){
+  #game .gwrap{grid-template-areas:"court board" "court panel" "tools panel"}
+  #game .toolrow{align-self:end}
+  .board .serve{display:none}
+  .board .sub{font-size:10px}
+  .board .side{padding:5px 9px}
+  .board .acts{padding-top:4px}
+  .board .acts .tbtn{min-height:28px;font-size:10.5px;padding:2px 5px}
+  .ptbtns{gap:5px;min-height:93px}
+  .toolrow{gap:5px}
+  .toolrow .btn{min-height:34px;font-size:13px}
+  #game{padding:6px 8px 5px}
+  #game .board{margin:-6px -8px 0 0}
+  #game .gwrap{gap:5px 8px}
+}
+
+
+/* --- wenig Höhe: alles Nebensächliche schrumpft, damit das Spielfeld
+       und die Punkttasten ohne Scrollen Platz haben --- */
+@media (max-height:700px){
+  #game{padding:12px 12px 8px}
+  #game .board{margin:-12px -12px 0}
+  #game .gwrap{gap:6px}
+  .board .side{padding:7px 11px}
+  .board .pts{font-size:clamp(38px,min(19vw,10.5vh),104px)}
+  .board .serve{margin-top:3px;font-size:13px}
+  .board .mid{padding:8px 11px}
+  .board .acts .tbtn{min-height:36px;font-size:12.5px}
+  /* Der Untertitel der Punkttaste entfällt – der gelbe Punkt zeigt
+     weiterhin, welche Mannschaft den Aufschlag behält. */
+  .ptbtn .s{display:none}
+  .ptbtn{justify-content:center;gap:0;padding:10px 12px}
+  .ptbtn .plus{top:8px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  #game .board{margin:-12px -12px 0 0}
+}
+
+/* Hochformat: die Anzeigetafel setzt Punktzahl und die beiden Knöpfe
+   nebeneinander statt untereinander. Das macht sie rund 100 px flacher,
+   ohne dass die Punktzahl kleiner werden muss – der Platz geht ans
+   Spielfeld. */
+@media (orientation:portrait){
+  .board .side{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:"tn tn" "pts acts" "sub srv";
+    align-items:center;column-gap:10px;row-gap:1px;
+    padding:7px 12px 8px;
+  }
+  .board .side.b{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"tn tn" "acts pts" "srv sub";
+  }
+  .board .tn{grid-area:tn;font-size:clamp(14px,4.2vw,20px)}
+  .board .pts{grid-area:pts;margin:0;font-size:clamp(40px,min(17vw,9.5vh),96px)}
+  .board .acts{
+    grid-area:acts;flex-direction:column;gap:5px;margin:0;padding:0;
+    align-self:center;max-width:none;
+  }
+  .board .acts .tbtn{min-height:34px;width:100%;min-width:0;overflow:hidden}
+  .board .sub{grid-area:sub;font-size:11.5px}
+  .board .serve{grid-area:srv;margin:0;justify-self:end;font-size:12.5px;gap:5px}
+  .board .serve::before{width:10px;height:10px;box-shadow:0 0 0 1.5px var(--tc-on),0 0 0 3.5px rgba(255,212,0,.22)}
+  .board .side.b .serve{justify-self:start}
+  .board .mid{padding:10px 12px}
+  /* Der gewonnene Platz geht an die Punkttasten – sie sind das
+     meistbenutzte Bedienelement. */
+  .ptbtn{min-height:clamp(72px,16vh,170px)}
+}
+
+/* Querformat: das Spielfeld ist die Hauptsache. Die Anzeigetafel bleibt
+   vollständig ablesbar, tritt aber deutlich zurück. Steht bewusst nach
+   den Höhenstufen, damit diese Werte dort gelten. */
+@media (orientation:landscape) and (min-width:700px){
+  .board .side{padding:6px 10px}
+  .board .pts{font-size:clamp(26px,min(6.4vw,11.5vh),52px);margin:1px 0}
+  .board .tn{font-size:clamp(12.5px,2.4vh,16px)}
+  .board .sub{font-size:10.5px}
+  .board .serve{font-size:12px;margin-top:4px;gap:6px}
+  .board .serve::before{width:11px;height:11px}
+  .board .mid{padding:8px 10px;font-size:11px}
+  .board .mid b{font-size:clamp(17px,3.4vh,26px)}
+  .board .acts{padding-top:5px}
+  .board .acts .tbtn{min-height:36px;font-size:11.5px;padding:2px 6px}
+}
+
+/* ============================================================
+   Dialoge
+   ============================================================ */
+.backdrop{position:fixed;inset:0;z-index:100;background:rgba(8,9,10,.6);
+  display:flex;align-items:flex-end;justify-content:center;padding:0}
+@media (min-width:600px){.backdrop{align-items:center;padding:20px}}
+.sheet{width:100%;max-width:560px;max-height:92vh;overflow-y:auto;background:var(--halle);
+  border-top:5px solid var(--ink);border-radius:0;
+  padding:18px 18px calc(18px + env(safe-area-inset-bottom))}
+@media (min-width:600px){.sheet{border-radius:0;padding-bottom:18px}}
+.sheet h2{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:26px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0;margin-bottom:4px}
+.sheet .dsc{font-size:14px;color:var(--muted);margin:0 0 14px}
+.sheet .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.sheet .acts .btn{flex:1 1 auto;min-width:120px}
+.menu{display:flex;flex-direction:column}
+.menu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
+  min-height:54px;padding:12px 2px;background:none;border:none;border-bottom:1px solid var(--line);
+  text-align:left;font-size:16px;font-weight:600;color:var(--ink);white-space:nowrap}
+.menu button:last-child{border-bottom:none}
+.menu button small{flex:0 1 auto;min-width:0;white-space:normal;font-weight:400;
+  font-size:12.5px;color:var(--muted);text-align:right}
+.menu button:disabled{color:var(--muted);opacity:.55}
+.menu button.danger{color:var(--guest)}
+
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pick h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:14px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+.pick .opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:block;width:100%;text-align:left;min-height:46px;padding:8px 10px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-weight:500}
+.opt small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.opt:disabled{opacity:.4}
+
+.count{font-size:clamp(72px,26vw,120px);font-weight:700;line-height:1;color:var(--ink);
+  text-align:center;margin:6px 0 14px;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--line);border-radius:0;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;background:var(--ink);transition:width .25s linear}
+.flash{animation:fl .35s ease-in-out 4}
+@keyframes fl{50%{color:var(--ball)}}
+
+pre.report{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.5;
+  white-space:pre;overflow:auto;max-height:52vh;color:var(--ink-2);margin:0 0 12px}
+.setsline{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.setsline span{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:19px;font-weight:700;
+  color:var(--ink);background:var(--surface);border:1px solid var(--line);padding:2px 10px}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 8px;background:var(--ink);color:var(--halle)}
+.tag.ok{background:var(--ok);color:#fff}
+.tag.warn{background:var(--ball);color:#101010}
+.banner{border:1px solid var(--line);border-left:5px solid var(--ball);background:var(--surface);
+  border-radius:var(--radius);padding:11px 13px;font-size:14px;margin-bottom:12px}
+
+</style>
+<script>
+/* Läuft vor dem ersten Bild: gespeicherte Darstellung setzen, damit
+   beim Start nicht kurz die falschen Farben aufblitzen. */
+(function(){
+  try{
+    var st=null;
+    try{ st=(window.storage&&window.storage.getItem?window.storage:window.localStorage)
+              .getItem('indiaca.settings.v2'); }catch(e){}
+    if(!st) return;
+    var s=JSON.parse(st), r=document.documentElement;
+    if(s.theme==='light'||s.theme==='dark') r.setAttribute('data-theme',s.theme);
+    if(s.palette&&s.palette!=='halle') r.setAttribute('data-palette',s.palette);
+    var c=s.colors||{};
+    if(c.home){ r.style.setProperty('--home',c.home);
+                r.style.setProperty('--home-on',c.homeOn||'#FFFFFF'); }
+    if(c.guest){ r.style.setProperty('--guest',c.guest);
+                 r.style.setProperty('--guest-on',c.guestOn||'#FFFFFF'); }
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+
+<div class="updatebar" id="updatebar" hidden>
+  <span>Neue Version verfügbar</span>
+  <button class="btn" id="btnReload" type="button">Neu laden</button>
+</div>
+
+<!-- ========================= SETUP ========================= -->
+<main class="screen" id="setup">
+  <div class="apphead">
+    <h1>Indiaca Matchblatt</h1>
+    <span class="ver mono" id="verLabel"></span>
+  </div>
+
+  <div id="storeWarn" class="banner" hidden>
+    Speichern nicht möglich – Stand bitte zusätzlich auf Papier führen.
+  </div>
+
+  <div class="card teamcard" id="teamcard0" style="--tc:var(--home);--tc-on:var(--home-on)">
+    <h2>Heimmannschaft</h2>
+    <div class="field"><label class="lbl" for="tn0">Mannschaftsname</label>
+      <input type="text" id="tn0" placeholder="Heim" autocomplete="off"></div>
+    <div class="divider">Startaufstellung</div>
+    <ul class="plist" id="pl0"></ul>
+    <div class="row"><button class="btn sm" type="button" data-add="0">+ Ersatzspieler</button></div>
+    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer</p>
+  </div>
+
+  <div class="card teamcard" id="teamcard1" style="--tc:var(--guest);--tc-on:var(--guest-on)">
+    <h2>Gastmannschaft</h2>
+    <div class="field"><label class="lbl" for="tn1">Mannschaftsname</label>
+      <input type="text" id="tn1" placeholder="Gast" autocomplete="off"></div>
+    <div class="divider">Startaufstellung</div>
+    <ul class="plist" id="pl1"></ul>
+    <div class="row"><button class="btn sm" type="button" data-add="1">+ Ersatzspieler</button></div>
+    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer</p>
+  </div>
+
+  <div class="card">
+    <h2>Modus</h2>
+    <div class="grid2">
+      <div class="field"><label class="lbl" for="cfgCount">Feldspieler</label>
+        <select id="cfgCount"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select></div>
+      <div class="field"><label class="lbl" for="cfgTarget">Satz bis</label>
+        <select id="cfgTarget"><option>15</option><option>21</option><option selected>25</option></select></div>
+      <div class="field"><label class="lbl" for="cfgWin">Gewinnsätze</label>
+        <select id="cfgWin"><option>1</option><option selected>2</option><option>3</option></select></div>
+      <div class="field"><label class="lbl" for="cfgDec">Entscheidungssatz bis</label>
+        <select id="cfgDec"><option selected>15</option><option>21</option><option>25</option></select></div>
+      <div class="field"><label class="lbl" for="cfgTo">Auszeitdauer</label>
+        <select id="cfgTo"><option value="10">10 s</option><option value="30" selected>30 s</option><option value="60">60 s</option></select></div>
+      <div class="field"><label class="lbl" for="cfgMaxTo">Auszeiten je Team und Satz</label>
+        <select id="cfgMaxTo"><option value="0">unbegrenzt</option><option value="1" selected>1</option><option value="2">2</option></select></div>
+      <div class="field"><label class="lbl" for="cfgMaxSub">Auswechslungen je Team und Satz</label>
+        <select id="cfgMaxSub"><option value="0" selected>unbegrenzt</option><option value="3">3</option><option value="6">6</option></select></div>
+      <div class="field"><label class="lbl" for="cfgFirst">Erster Aufschlag</label>
+        <select id="cfgFirst"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Darstellung</h2>
+    <div class="grid2">
+      <div class="field"><label class="lbl" for="vwTheme">Helligkeit</label>
+        <select id="vwTheme">
+          <option value="system">Wie das Gerät</option>
+          <option value="light">Hell</option>
+          <option value="dark">Dunkel</option>
+        </select></div>
+      <div class="field"><label class="lbl" for="vwPalette">Farbwelt</label>
+        <select id="vwPalette">
+          <option value="halle">Halle</option>
+          <option value="tafel">Anzeigetafel</option>
+          <option value="papier">Papier</option>
+        </select></div>
+      <div class="field"><label class="lbl" for="vwHome">Farbe Heim</label>
+        <input type="color" id="vwHome"></div>
+      <div class="field"><label class="lbl" for="vwGuest">Farbe Gast</label>
+        <input type="color" id="vwGuest"></div>
+    </div>
+    <div class="row"><button class="btn sm" id="vwReset" type="button">Farben der Farbwelt verwenden</button></div>
+    <p class="hint" style="margin:8px 0 0">Gilt für dieses Gerät und bleibt gespeichert. Eigene Teamfarben gelten in hell und dunkel gleich.</p>
+  </div>
+
+  <div class="card">
+    <details class="meta" id="metaBox">
+      <summary>Angaben zum Spiel (optional)</summary>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field"><label class="lbl" for="mCompetition">Wettbewerb</label><input type="text" id="mCompetition" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mCategory">Kategorie</label><input type="text" id="mCategory" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mVenue">Austragungsort</label><input type="text" id="mVenue" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mReferee">Schiedsrichter</label><input type="text" id="mReferee" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mScorer">Schreiber</label><input type="text" id="mScorer" autocomplete="off"></div>
+      </div>
+      <div class="field"><label class="lbl" for="mNote">Bemerkung</label><textarea id="mNote"></textarea></div>
+    </details>
+  </div>
+
+  <p class="err" id="setupErr" hidden></p>
+  <button class="btn primary wide" id="btnStart" type="button" style="min-height:56px;font-size:16px">Spiel starten</button>
+  <div class="row" style="margin-top:10px">
+    <button class="btn sm" id="btnArchive" type="button">Archiv</button>
+  </div>
+</main>
+
+<!-- ========================= GAME ========================= -->
+<main class="screen" id="game" hidden>
+  <div class="gwrap">
+      <div class="board" id="board">
+        <div class="side a" id="sideA">
+          <div class="tn" id="tnA">Heim</div>
+          <div class="pts" id="ptsA">0</div>
+          <div class="sub" id="setsA">0 Sätze</div>
+          <div class="serve" id="srvA" hidden>Aufschlag</div>
+          <div class="acts" id="actA"></div>
+        </div>
+        <div class="mid">
+          <span>Satz</span><b id="setNo">1</b>
+          <span id="targetLbl">bis 25</span>
+        </div>
+        <div class="side b" id="sideB">
+          <div class="tn" id="tnB">Gast</div>
+          <div class="pts" id="ptsB">0</div>
+          <div class="sub" id="setsB">0 Sätze</div>
+          <div class="serve" id="srvB" hidden>Aufschlag</div>
+          <div class="acts" id="actB"></div>
+        </div>
+      </div>
+      <div class="courtwrap" id="courtwrap">
+      <div class="court" id="court" aria-label="Spielfeld">
+        <div class="attackline" style="top:31%"></div>
+        <div class="attackline" style="top:69%"></div>
+        <div class="net"></div>
+        <div class="netlbl">NETZ</div>
+        <svg class="rotfx" id="rotfx" viewBox="0 0 100 120" aria-hidden="true" focusable="false">
+          <defs>
+            <marker id="rotarrow" viewBox="0 0 10 10" refX="7.5" refY="5"
+                    markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse">
+              <path d="M0,1.4 L9.5,5 L0,8.6 z" fill="var(--ink)"></path>
+            </marker>
+          </defs>
+          <g id="rotpaths"></g>
+        </svg>
+      </div>
+      </div>
+
+      <div class="panel">
+        <div class="ptbtns" id="ptbtns"></div>
+        <div class="log">
+          <h3>Verlauf – aktueller Satz</h3>
+          <ol id="logList"></ol>
+        </div>
+      </div>
+      <div class="toolrow">
+        <button class="btn" id="btnUndo" type="button">Rückgängig</button>
+        <button class="btn" id="btnLog" type="button">Verlauf</button>
+        <button class="btn" id="btnTools" type="button">Werkzeuge</button>
+      </div>
+  </div>
+</main>
+
+<div class="rotnote" id="rotnote" role="status" aria-live="polite"></div>
+<div aria-live="polite" class="sr" id="live" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></div>
+<div id="dlgRoot"></div>
+
+<script>
+'use strict';
+/* Indiaca Matchblatt – Referenzimplementierung, Fassung 2.0 */
+(function () {
+
+/* ============================================================
+   Konstanten
+   ============================================================ */
+var APP = '2.0.1';
+var SCHEMA = 2;
+var K_MATCH = 'indiaca.match.v2';
+var K_SET   = 'indiaca.settings.v2';
+var K_ARCH  = 'indiaca.archive.v2';
+var POSN = ['I','II','III','IV','V','VI'];
+var POS = {
+  4: [[26,13],[22,37],[78,37],[74,13]],
+  5: [[25,13],[17,36],[50,40],[83,36],[75,13]],
+  6: [[25,13],[17,36],[50,40],[83,36],[75,13],[50,12]]
+};
+var SNAP = ['points','setsWon','sets','serving','firstServer','topTeam','setNo',
+            'setStartedAt','sideSwapped','lineup','subs','setSubs','timeouts',
+            'log','finished','result'];
+var RESULT_LABEL = {
+  regulaer:'Regulär', forfait:'Rückzug (Forfait)',
+  abbruch:'Abbruch', unvollstaendig:'Unvollständige Mannschaft'
+};
+
+/* ============================================================
+   Kleinkram
+   ============================================================ */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function pad(n){ return (n<10?'0':'')+n; }
+function iso(){ return new Date().toISOString(); }
+function fmtTime(s){ if(!s) return '–'; var d=new Date(s); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function fmtDate(s){ if(!s) return '–'; var d=new Date(s); return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear(); }
+function fmtDur(a,b){
+  if(!a||!b) return '–';
+  var m = Math.max(0, Math.round((new Date(b)-new Date(a))/60000));
+  return m>=60 ? Math.floor(m/60)+' h '+pad(m%60)+' min' : m+' min';
+}
+function initials(n){
+  var p=String(n).trim().split(/\s+/);
+  return (p.length>1 ? p[0][0]+p[p.length-1][0] : String(n).slice(0,2)).toUpperCase();
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function tc(t){ return t===0 ? 'var(--home)' : 'var(--guest)'; }
+function tcOn(t){ return t===0 ? 'var(--home-on)' : 'var(--guest-on)'; }
+function paintTeam(el, t){
+  if (!el) return;
+  el.style.setProperty('--tc', tc(t));
+  el.style.setProperty('--tc-on', tcOn(t));
+}
+
+/* ============================================================
+   Speicher
+   ============================================================ */
+var store = {
+  ok: true,
+  warned: false,
+  raw: (function(){
+    try {
+      if (window.storage && typeof window.storage.getItem === 'function') return window.storage;
+      return window.localStorage;
+    } catch(e){ return null; }
+  })(),
+  get: function(k){
+    try { var v = this.raw && this.raw.getItem(k); return v ? JSON.parse(v) : null; }
+    catch(e){ return null; }
+  },
+  set: function(k,v){
+    try { this.raw.setItem(k, JSON.stringify(v)); return true; }
+    catch(e){ this.fail(); return false; }
+  },
+  del: function(k){ try { this.raw.removeItem(k); } catch(e){} },
+  fail: function(){
+    this.ok = false;
+    if (this.warned) return;
+    this.warned = true;
+    var w = $('storeWarn'); if (w) w.hidden = false;
+    toast('Speichern nicht möglich – Stand bitte zusätzlich auf Papier führen', 6000);
+  }
+};
+
+/* ============================================================
+   Darstellung: Helligkeit, Farbwelt, eigene Teamfarben
+   ============================================================ */
+var PALETTES = [
+  { id:'halle',  name:'Halle' },
+  { id:'tafel',  name:'Anzeigetafel' },
+  { id:'papier', name:'Papier' }
+];
+var view = { theme:'system', palette:'halle', home:'', guest:'' };
+
+function cssVar(n){
+  return (getComputedStyle(document.documentElement).getPropertyValue(n) || '').trim();
+}
+/* Schriftfarbe, die auf einer beliebigen Teamfarbe lesbar bleibt. */
+function bestOn(hex){
+  var h = String(hex||'').replace('#','');
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return '#FFFFFF';
+  var c = [0,2,4].map(function(i){
+    var v = parseInt(h.substr(i,2),16)/255;
+    return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+  });
+  var L = 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2];
+  return L > 0.42 ? '#0B0C0E' : '#FFFFFF';
+}
+function applyView(){
+  var r = document.documentElement, i;
+  if (view.theme === 'light' || view.theme === 'dark') r.setAttribute('data-theme', view.theme);
+  else r.removeAttribute('data-theme');
+  if (view.palette && view.palette !== 'halle') r.setAttribute('data-palette', view.palette);
+  else r.removeAttribute('data-palette');
+
+  var props = ['--home','--home-on','--guest','--guest-on'];
+  for (i=0;i<props.length;i++) r.style.removeProperty(props[i]);
+  if (view.home){  r.style.setProperty('--home',  view.home);
+                   r.style.setProperty('--home-on',  bestOn(view.home)); }
+  if (view.guest){ r.style.setProperty('--guest', view.guest);
+                   r.style.setProperty('--guest-on', bestOn(view.guest)); }
+
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', cssVar('--home') || '#0A46E4');
+  syncViewInputs();
+  if (S && !$('game').hidden) render();
+}
+function saveView(){
+  var s = store.get(K_SET) || {};
+  s.theme = view.theme;
+  s.palette = view.palette;
+  s.colors = {
+    home:  view.home,  homeOn:  view.home  ? bestOn(view.home)  : '',
+    guest: view.guest, guestOn: view.guest ? bestOn(view.guest) : ''
+  };
+  store.set(K_SET, s);
+}
+function loadView(){
+  var s = store.get(K_SET) || {};
+  if (s.theme) view.theme = s.theme;
+  if (s.palette) view.palette = s.palette;
+  if (s.colors){ view.home = s.colors.home || ''; view.guest = s.colors.guest || ''; }
+  applyView();
+}
+/* Die Bedienelemente gibt es zweimal: in der Erfassung (vw…) und im
+   Werkzeugmenü (dv…). Beide zeigen denselben Zustand. */
+function syncViewInputs(){
+  ['vw','dv'].forEach(function(p){
+    var th = $(p+'Theme'), pa = $(p+'Palette'), ho = $(p+'Home'), gu = $(p+'Guest');
+    if (th) th.value = view.theme;
+    if (pa) pa.value = view.palette;
+    if (ho) ho.value = view.home  || cssVar('--home')  || '#0A46E4';
+    if (gu) gu.value = view.guest || cssVar('--guest') || '#CE1F14';
+  });
+}
+function viewPanelHTML(p){
+  var opts = '';
+  for (var i=0;i<PALETTES.length;i++)
+    opts += '<option value="'+PALETTES[i].id+'">'+esc(PALETTES[i].name)+'</option>';
+  return '<div class="grid2">' +
+    '<div class="field"><label class="lbl" for="'+p+'Theme">Helligkeit</label>' +
+      '<select id="'+p+'Theme"><option value="system">Wie das Gerät</option>' +
+      '<option value="light">Hell</option><option value="dark">Dunkel</option></select></div>' +
+    '<div class="field"><label class="lbl" for="'+p+'Palette">Farbwelt</label>' +
+      '<select id="'+p+'Palette">'+opts+'</select></div>' +
+    '<div class="field"><label class="lbl" for="'+p+'Home">Farbe Heim</label>' +
+      '<input type="color" id="'+p+'Home"></div>' +
+    '<div class="field"><label class="lbl" for="'+p+'Guest">Farbe Gast</label>' +
+      '<input type="color" id="'+p+'Guest"></div></div>' +
+    '<div class="row"><button class="btn sm" id="'+p+'Reset" type="button">' +
+      'Farben der Farbwelt verwenden</button></div>';
+}
+/* Ein Ereignis für beide Fassungen: greift über die Kennungen. */
+function onViewInput(e){
+  var el = e.target, id = el.id || '';
+  if (!/^(vw|dv)(Theme|Palette|Home|Guest)$/.test(id)) return;
+  var what = id.slice(2);
+  if (what === 'Theme')   view.theme = el.value;
+  if (what === 'Palette') view.palette = el.value;
+  if (what === 'Home')    view.home = el.value;
+  if (what === 'Guest')   view.guest = el.value;
+  applyView(); saveView();
+}
+function onViewReset(id){
+  if (!/^(vw|dv)Reset$/.test(id)) return false;
+  view.home = ''; view.guest = '';
+  applyView(); saveView();
+  return true;
+}
+
+/* ============================================================
+   Zustand
+   ============================================================ */
+var S = null;          // Spielzustand
+var UNDO = [];         // Rückgängig-Stack (JSON-Strings)
+var cards = [[],[]];   // Spielerkarten auf dem Feld
+var dlgOpen = false;
+var lastTap = { t:-1, ts:0 };
+var saveTimer = null;
+var wakeLock = null;
+var toTimer = null;
+var audioCtx = null;
+
+/* ============================================================
+   Rückgängig
+   ============================================================ */
+function snapshot(){
+  var o = {}; for (var i=0;i<SNAP.length;i++) o[SNAP[i]] = S[SNAP[i]];
+  UNDO.push(JSON.stringify(o));
+  if (UNDO.length > 200) UNDO.shift();
+}
+function undo(){
+  if (!S || S.locked || !UNDO.length) return;
+  var o = JSON.parse(UNDO.pop());
+  for (var i=0;i<SNAP.length;i++) S[SNAP[i]] = o[SNAP[i]];
+  clearRotation();
+  closeDlg();
+  render();
+  saveNow();
+  if (!S.finished) requestWake();
+  toast('Rückgängig');
+}
+
+/* ============================================================
+   Regellogik
+   ============================================================ */
+function isDecider(){
+  return S.winSets > 1 && (S.setsWon[0] + S.setsWon[1]) === (S.winSets*2 - 2);
+}
+function targetNow(){ return isDecider() ? S.deciderTarget : S.target; }
+function bench(t){
+  var out=[], L=S.lineup[t];
+  for (var i=0;i<S.teams[t].players.length;i++) if (L.indexOf(i)<0) out.push(i);
+  return out;
+}
+function pushLog(kind, t, txt){
+  S.log.push({ ts: iso(), a: S.points[0], b: S.points[1], t: t, kind: kind, txt: txt||'' });
+}
+function rotate(t){
+  var L = S.lineup[t];
+  S.lineup[t] = L.slice(1).concat([L[0]]);
+}
+
+function addPoint(t, kind){
+  kind = kind || 'pt';
+  if (!S || S.finished || S.locked) return;
+  if (dlgOpen && kind === 'pt') return;
+  var now = Date.now();
+  if (kind === 'pt' && lastTap.t === t && (now - lastTap.ts) < 300) return;
+  lastTap = { t:t, ts:now };
+  clearRotation();   // Pfeile des vorigen Ballwechsels verwerfen
+
+  snapshot();
+  S.points[t]++;
+  var rotated = false;
+  if (S.serving !== t){
+    S.serving = t; rotate(t); rotated = true;
+    if (kind !== 'pen') kind = 'rot';
+  }
+  pushLog(kind, t, '');
+
+  var tg = targetNow(), opp = 1 - t;
+  if (S.points[t] >= tg && (S.points[t] - S.points[opp]) >= 2){
+    finishSet(t);
+  } else {
+    var half = Math.ceil(tg/2);
+    if (isDecider() && !S.sideSwapped && S.points[t] === half && S.points[opp] < half){
+      S.topTeam = 1 - S.topTeam;
+      S.sideSwapped = true;
+      toast('Seitenwechsel');
+    }
+    render();
+    if (rotated){
+      showRotation(t);
+      pingServer(t);
+      announce(S.teams[t].name + ' rotiert, Aufschlag ' + S.teams[t].name);
+    }
+  }
+  save();
+  announce(S.teams[0].name+' '+S.points[0]+', '+S.teams[1].name+' '+S.points[1]);
+}
+
+function finishSet(w){
+  S.sets.push({
+    pts: S.points.slice(), startedAt: S.setStartedAt, endedAt: iso(),
+    timeouts: S.timeouts.slice(), subs: S.setSubs.slice(),
+    log: clone(S.log), no: S.setNo
+  });
+  S.setsWon[w]++;
+  var pts = S.points.slice();
+
+  if (S.setsWon[w] >= S.winSets){
+    pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
+    S.sets[S.sets.length-1].log = clone(S.log);
+    finishMatch('regulaer', w, '');
+    return;
+  }
+  pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
+  S.sets[S.sets.length-1].log = clone(S.log);
+
+  var no = S.setNo;
+  S.points = [0,0];
+  S.setNo++;
+  S.log = [];
+  S.timeouts = [0,0];
+  S.setSubs = [0,0];
+  S.sideSwapped = false;
+  S.setStartedAt = iso();
+  S.firstServer = 1 - S.firstServer;
+  S.serving = S.firstServer;
+  S.topTeam = 1 - S.topTeam;
+  clearRotation();
+  render();
+  dlgSetBreak(w, no, pts);
+}
+
+function finishMatch(type, winner, note){
+  S.finished = true;
+  S.result = { type:type, winner:(winner===null||winner===undefined?null:winner), note:note||'', endedAt: iso() };
+  pushLog('end', winner===null||winner===undefined?0:winner, RESULT_LABEL[type]||type);
+  releaseWake();
+  archivePut();
+  render();
+  saveNow();
+  dlgEnd();
+}
+
+/* ============================================================
+   Darstellung
+   ============================================================ */
+function render(){
+  if (!S || $('game').hidden) return;
+  renderBoard(); fitCourt(); renderCourt(); renderBench(); renderButtons(); renderLog();
+}
+
+/* Das Spielfeld füllt den Platz, der nach Tafel, Bank und Tasten übrig
+   bleibt – in beiden Ausrichtungen und auch dann, wenn Android die
+   Adressleiste ein- oder ausblendet. Seitenverhältnis bleibt 5:6. */
+function fitCourt(){
+  var wrap = $('courtwrap'), c = $('court');
+  if (!wrap || !c || $('game').hidden) return;
+  var w = wrap.clientWidth, h = wrap.clientHeight;
+  if (!w || !h) return;
+  var cw = Math.floor(Math.min(w, h * 5/6));
+  if (cw < 60) return;
+  c.style.width  = cw + 'px';
+  c.style.height = Math.round(cw * 6/5) + 'px';
+}
+
+function renderBoard(){
+  var top = S.topTeam, bot = 1 - top;
+  var map = [['A', top], ['B', bot]];
+  for (var i=0;i<2;i++){
+    var s = map[i][0], t = map[i][1];
+    paintTeam($('side'+s), t);
+    $('tn'+s).textContent = S.teams[t].name;
+    $('pts'+s).textContent = S.points[t];
+    $('sets'+s).textContent = S.setsWon[t] + (S.setsWon[t]===1 ? ' Satz' : ' Sätze');
+    $('srv'+s).hidden = (S.serving !== t);
+    paintTeam($('srv'+s), t);
+  }
+  $('setNo').textContent = S.setNo;
+  $('targetLbl').textContent = 'bis ' + targetNow() + (isDecider() ? ' · Entscheidung' : '');
+  $('ptsA').setAttribute('aria-live','polite');
+  $('ptsB').setAttribute('aria-live','polite');
+}
+
+function buildCourt(){
+  var c = $('court');
+  var old = c.querySelectorAll('.pcard');
+  for (var i=0;i<old.length;i++) old[i].parentNode.removeChild(old[i]);
+  cards = [[],[]];
+  for (var t=0;t<2;t++){
+    for (var p=0;p<S.teams[t].players.length;p++){
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'pcard off';
+      paintTeam(el, t);
+      el.innerHTML = '<span class="ini"></span><span class="nm"></span><span class="po"></span>';
+      el.dataset.team = t; el.dataset.player = p;
+      el.addEventListener('click', onCardClick);
+      c.appendChild(el);
+      cards[t].push(el);
+    }
+  }
+}
+function onCardClick(e){
+  var t = +e.currentTarget.dataset.team;
+  if (S.finished || S.locked || dlgOpen) return;
+  dlgSub(t, S.lineup[t].indexOf(+e.currentTarget.dataset.player));
+}
+
+/* Position eines Aufstellungsplatzes in Prozent des Feldes.
+   Eine Quelle für Spielerkarten und Rotationspfeile. */
+function slotPos(team, slot){
+  var isTop = (team === S.topTeam);
+  var x = POS[S.count][slot][0], y = POS[S.count][slot][1];
+  if (!isTop){ x = 100 - x; y = 100 - y; }
+  if (slot === 0) y += (isTop ? -5 : 5);   // Aufschläger hinter die Grundlinie
+  return [x, y];
+}
+
+function renderCourt(){
+  var courtH = $('court').clientHeight || 1;
+  for (var t=0;t<2;t++){
+    var L = S.lineup[t], i;
+    for (i=0;i<cards[t].length;i++) cards[t][i].classList.add('off');
+    for (var slot=0; slot<L.length; slot++){
+      var pi = L[slot], el = cards[t][pi];
+      if (!el) continue;
+      var wasOff = el.classList.contains('off');
+      var p = slotPos(t, slot);
+      if (wasOff){ el.style.transition = 'none'; }
+      el.querySelector('.ini').textContent = initials(S.teams[t].players[pi]);
+      el.querySelector('.nm').textContent  = S.teams[t].players[pi];
+      el.querySelector('.po').textContent  = POSN[slot];
+      // Erst den Aufschläger kennzeichnen, dann messen: seine Karte ist
+      // grösser, sonst fällt der Sicherheitsabstand zu klein aus.
+      el.classList.toggle('serving', slot === 0 && S.serving === t);
+      el.classList.remove('off');
+      // Karte samt Namensschild muss im Feld bleiben – der nötige Rand
+      // hängt von der Kartenhöhe und der aktuellen Feldgrösse ab.
+      var pad = ((el.offsetHeight / 2) + 3) / courtH * 100;
+      var y = Math.max(pad, Math.min(100 - pad, p[1]));
+      el.style.left = p[0] + '%';
+      el.style.top  = y + '%';
+      if (wasOff){ void el.offsetWidth; el.style.transition = ''; }
+    }
+  }
+}
+
+/* ---- Rotationspfeile ----------------------------------------
+   Zeigt im Moment des Aufschlagwechsels, wohin die Mannschaft
+   rückt: II→I, III→II, … , I→ hinterste Position.
+   Das Feld ist 5:6, deshalb bildet der viewBox 0 0 100 120 die
+   Prozentwerte unverzerrt ab (x = x%, y = y% * 1.2).
+------------------------------------------------------------- */
+var rotTimer = null, rotFade = null;
+function showRotation(t){
+  var svg = $('rotfx'), g = $('rotpaths');
+  if (!svg || !g) return;
+  clearTimeout(rotTimer); clearTimeout(rotFade);
+
+  var n = S.count, pts = [], i;
+  for (i=0;i<n;i++){
+    var el = cards[t][S.lineup[t][i]];
+    var p = slotPos(t, i);
+    var ch = $('court').clientHeight || 1;
+    var pad = el ? (((el.offsetHeight/2) + 3) / ch * 100) : 9;
+    pts.push([p[0], Math.max(pad, Math.min(100 - pad, p[1])) * 1.2]);
+  }
+
+  var cx = 0, cy = 0;
+  for (i=0;i<n;i++){ cx += pts[i][0]; cy += pts[i][1]; }
+  cx /= n; cy /= n;
+
+  var d = '';
+  var paths = [];
+  for (i=0;i<n;i++){
+    var a = pts[i], b = pts[(i - 1 + n) % n];   // Spieler auf Platz i rückt auf Platz i-1
+    var vx = b[0] - a[0], vy = b[1] - a[1];
+    var len = Math.sqrt(vx*vx + vy*vy) || 1;
+    var ux = vx/len, uy = vy/len;
+    var trim = Math.min(9, len * 0.34);         // Enden freilassen, Kreise nicht überdecken
+    var ax = a[0] + ux*trim, ay = a[1] + uy*trim;
+    var bx = b[0] - ux*trim, by = b[1] - uy*trim;
+    var mx = (ax+bx)/2, my = (ay+by)/2;
+    var px = -uy, py = ux;                       // Senkrechte
+    if ((mx - cx)*px + (my - cy)*py < 0){ px = -px; py = -py; }  // nach aussen wölben
+    var bulge = Math.min(9, len * 0.16);
+    paths.push('M'+ax.toFixed(1)+' '+ay.toFixed(1) +
+               ' Q'+(mx+px*bulge).toFixed(1)+' '+(my+py*bulge).toFixed(1) +
+               ' '+bx.toFixed(1)+' '+by.toFixed(1));
+  }
+
+  var html = '';
+  for (i=0;i<paths.length;i++) html += '<path class="halo" d="'+paths[i]+'"></path>';
+  for (i=0;i<paths.length;i++) html += '<path class="arc" d="'+paths[i]+'"></path>';
+  // Kein Textetikett auf dem Feld: die Pfeile und die Teamfarbe sagen bereits,
+  // welche Mannschaft rotiert. Für Screenreader übernimmt das announce().
+  g.innerHTML = html;
+  svg.classList.remove('fade');
+
+  var arcs = g.querySelectorAll('.arc, .halo');
+  for (i=0;i<arcs.length;i++){
+    var el = arcs[i], L = 0;
+    try { L = el.getTotalLength(); } catch(e){ L = 0; }
+    if (!L) continue;
+    el.style.strokeDasharray = L;
+    el.style.strokeDashoffset = L;
+    el.style.transition = 'none';
+  }
+  void g.offsetWidth;
+  for (i=0;i<arcs.length;i++){
+    arcs[i].style.transition = 'stroke-dashoffset .45s ease-out';
+    arcs[i].style.strokeDashoffset = 0;
+  }
+
+  rotTimer = setTimeout(function(){
+    svg.classList.add('fade');
+    rotFade = setTimeout(function(){ g.innerHTML = ''; svg.classList.remove('fade'); }, 400);
+  }, 1900);
+}
+function clearRotation(){
+  var svg = $('rotfx'), g = $('rotpaths');
+  clearTimeout(rotTimer); clearTimeout(rotFade);
+  if (g) g.innerHTML = '';
+  if (svg) svg.classList.remove('fade');
+}
+
+/* kurzer Impuls am neuen Aufschläger */
+var pingTimer = null;
+function pingServer(t){
+  clearTimeout(pingTimer);
+  var all = document.querySelectorAll('.pcard.justserved');
+  for (var i=0;i<all.length;i++) all[i].classList.remove('justserved');
+  var el = cards[t] && cards[t][S.lineup[t][0]];
+  if (!el) return;
+  void el.offsetWidth;
+  el.classList.add('justserved');
+  pingTimer = setTimeout(function(){ el.classList.remove('justserved'); }, 3400);
+}
+
+/* Wechsel und Auszeit stehen im Teamblock der Anzeigetafel –
+   je Mannschaft dort, wo auch ihr Stand steht. */
+function renderBench(){
+  var top = S.topTeam, order = [top, 1-top], ids = ['actA','actB'];
+  for (var i=0;i<2;i++){
+    var t = order[i], box = $(ids[i]);
+    if (!box) continue;
+    var b = bench(t);
+    var toTxt  = S.maxTimeouts>0 ? (S.timeouts[t]+'/'+S.maxTimeouts) : String(S.timeouts[t]);
+    var subTxt = S.maxSubs>0 ? (S.setSubs[t]+'/'+S.maxSubs) : String(S.setSubs[t]);
+    var toBlocked  = S.maxTimeouts>0 && S.timeouts[t] >= S.maxTimeouts;
+    var subBlocked = (S.maxSubs>0 && S.setSubs[t] >= S.maxSubs) || b.length===0;
+    var dis = S.finished || S.locked || dlgOpen;
+    box.innerHTML =
+      '<button class="tbtn" type="button" data-sub="'+t+'"'+((subBlocked||dis)?' disabled':'') +
+        ' title="Auswechseln" aria-label="Auswechseln '+subTxt+'">' +
+        '<span class="lg">Wechsel</span><span class="sh">W</span>' +
+        '<span class="n">'+subTxt+'</span></button>' +
+      '<button class="tbtn" type="button" data-to="'+t+'"'+((toBlocked||dis)?' disabled':'') +
+        ' title="Auszeit" aria-label="Auszeit '+toTxt+'">' +
+        '<span class="lg">Auszeit</span><span class="sh">AZ</span>' +
+        '<span class="n">'+toTxt+'</span></button>';
+  }
+  fitActs();
+}
+
+/* Passen «Wechsel» und «Auszeit» nebeneinander in den Teamblock?
+   Wenn nicht, wird auf «W» und «AZ» gekürzt – gemessen statt geraten. */
+function fitActs(){
+  var board = $('board'); if (!board) return;
+  var boxes = board.querySelectorAll('.acts');
+  var btns  = board.querySelectorAll('.acts .tbtn');
+  function over(){
+    var i;
+    // Läuft die Knopfreihe aus dem Teamblock?
+    for (i=0;i<boxes.length;i++){
+      if (boxes[i].scrollWidth > boxes[i].clientWidth + 1) return true;
+    }
+    // Oder die Beschriftung aus dem Knopf? (Im Hochformat stehen die
+    // Knöpfe untereinander, dann läuft nur der Text über.)
+    for (i=0;i<btns.length;i++){
+      if (btns[i].scrollWidth > btns[i].clientWidth + 1) return true;
+    }
+    return false;
+  }
+  board.classList.remove('tight','short');
+  if (!over()) return;
+  board.classList.add('tight');          // erst enger setzen
+  if (!over()) return;
+  board.classList.add('short');          // dann abkürzen
+}
+
+function renderButtons(){
+  var top = S.topTeam, order = [top, 1-top];
+  var dis = S.finished || S.locked || dlgOpen;
+  var h = '';
+  for (var i=0;i<2;i++){
+    var t = order[i];
+    var sub = (S.serving === t) ? 'Eigener Aufschlag · keine Rotation'
+                                : 'Aufschlagwechsel · Rotation';
+    h += '<button class="ptbtn" type="button" data-pt="'+t+'" style="--tc:'+tc(t)+';--tc-on:'+tcOn(t)+'"'+(dis?' disabled':'')+'>' +
+         '<span class="plus" aria-hidden="true">+1</span>' +
+         '<span class="t">'+esc(S.teams[t].name) +
+         (S.serving === t ? '<i class="dot" aria-hidden="true"></i>' : '') + '</span>' +
+         '<span class="s">'+sub+'</span>' +
+         '</button>';
+  }
+  $('ptbtns').innerHTML = h;
+  $('btnUndo').disabled = !UNDO.length || S.locked;
+}
+
+function logText(e){
+  var n = S.teams[e.t] ? S.teams[e.t].name : '';
+  switch(e.kind){
+    case 'pt':  return n + ' – Punkt';
+    case 'rot': return n + ' – Punkt, Aufschlagwechsel und Rotation';
+    case 'pen': return 'Strafpunkt für ' + n + (e.txt ? ' ('+e.txt+')' : '');
+    case 'sub': return n + ' – Wechsel: ' + e.txt;
+    case 'to':  return n + ' – Auszeit';
+    case 'cor': return 'Korrektur: ' + e.txt;
+    case 'set': return 'Satzende – ' + e.txt + ' an ' + n;
+    case 'end': return 'Spielende' + (e.txt ? ' – ' + e.txt : '');
+  }
+  return e.kind;
+}
+function logListHTML(){
+  var L = S.log, h = '';
+  for (var i=L.length-1; i>=0; i--){
+    h += '<li><span class="tm">'+fmtTime(L[i].ts)+'</span>' +
+         '<span class="sc">'+L[i].a+':'+L[i].b+'</span>' +
+         '<span class="ev">'+esc(logText(L[i]))+'</span></li>';
+  }
+  return h || '<li class="empty">Noch kein Ereignis in diesem Satz.</li>';
+}
+function renderLog(){ $('logList').innerHTML = logListHTML(); }
+
+var toastTimer = null;
+function toast(msg, ms, kind){
+  var n = $('rotnote');
+  n.textContent = msg;
+  n.classList.toggle('rot', kind === 'rot');
+  n.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ n.classList.remove('on'); }, ms || 1800);
+}
+function announce(msg){ $('live').textContent = msg; }
+
+/* ============================================================
+   Dialoge
+   ============================================================ */
+function dlg(html, opts){
+  opts = opts || {};
+  closeDlg(true);
+  var bd = document.createElement('div');
+  bd.className = 'backdrop';
+  bd.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">' + html + '</div>';
+  $('dlgRoot').appendChild(bd);
+  dlgOpen = true;
+  bd.dataset.esc = opts.esc === false ? '0' : '1';
+  if (opts.esc !== false){
+    bd.addEventListener('click', function(e){ if (e.target === bd) closeDlg(); });
+  }
+  if (S && !$('game').hidden){ renderButtons(); renderBench(); }
+  var f = bd.querySelector('input,select,textarea,button');
+  if (f && window.matchMedia && window.matchMedia('(min-width:600px)').matches) { try{ f.focus(); }catch(e){} }
+  return bd;
+}
+function closeDlg(silent){
+  if (toTimer){ clearInterval(toTimer); toTimer = null; }
+  $('dlgRoot').innerHTML = '';
+  dlgOpen = false;
+  if (!silent && S && !$('game').hidden) render();
+}
+function escapable(){
+  var bd = $('dlgRoot').firstChild;
+  return bd && bd.dataset.esc === '1';
+}
+function confirmDlg(title, text, okLabel, onOk, danger){
+  var bd = dlg(
+    '<h2>'+esc(title)+'</h2><p class="dsc">'+esc(text)+'</p>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn '+(danger?'danger':'primary')+'" data-x="yes">'+esc(okLabel)+'</button></div>');
+  bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
+  bd.querySelector('[data-x=yes]').onclick = function(){ closeDlg(); onOk(); };
+}
+
+/* ---------- Werkzeugmenü ---------- */
+function dlgTools(){
+  var canEdit = !S.locked && !S.finished;
+  var bd = dlg(
+    '<h2>Werkzeuge</h2><p class="dsc">Satz '+S.setNo+' · Stand '+S.points[0]+':'+S.points[1]+'</p>' +
+    '<div class="menu">' +
+      '<button data-x="undo"'+(!UNDO.length||S.locked?' disabled':'')+'>Rückgängig<small>letzte Aktion zurücknehmen</small></button>' +
+      '<button data-x="pen"'+(canEdit?'':' disabled')+'>Strafpunkt<small>Punkt und Aufschlag an den Gegner</small></button>' +
+      '<button data-x="cor"'+(S.locked?' disabled':'')+'>Korrektur<small>Stand, Aufschlag und Aufstellung setzen</small></button>' +
+      '<button data-x="rep">Spielbericht<small>ansehen, kopieren, sichern, teilen</small></button>' +
+      '<button data-x="view">Darstellung<small>Helligkeit, Farbwelt, Teamfarben</small></button>' +
+      '<button data-x="abo" class="danger"'+(canEdit?'':' disabled')+'>Spiel abbrechen<small>Rückzug, Verletzung, unvollständig</small></button>' +
+      '<button data-x="new" class="danger">Neues Spiel<small>aktuelles Spiel ins Archiv</small></button>' +
+    '</div>' +
+    '<div class="acts"><button class="btn" data-x="close">Schliessen</button></div>');
+  var map = {
+    undo: function(){ closeDlg(); undo(); },
+    pen:  function(){ dlgPenalty(); },
+    cor:  function(){ dlgCorrect(); },
+    rep:  function(){ dlgReport(); },
+    view: function(){ dlgView(); },
+    abo:  function(){ dlgAbort(); },
+    'new':function(){ confirmDlg('Neues Spiel','Das aktuelle Spiel wird ins Archiv gelegt und die Erfassung beginnt von vorne.','Neues Spiel', newMatch, true); },
+    close:function(){ closeDlg(); }
+  };
+  bd.addEventListener('click', function(e){
+    var b = e.target.closest('[data-x]'); if (!b || b.disabled) return;
+    map[b.dataset.x]();
+  });
+}
+
+/* ---------- Auswechslung ---------- */
+function dlgSub(t, presetSlot){
+  var b = bench(t);
+  if (S.maxSubs>0 && S.setSubs[t] >= S.maxSubs){
+    return confirmDlg('Auswechslungen aufgebraucht',
+      S.teams[t].name+' hat in diesem Satz bereits '+S.maxSubs+' Auswechslungen verbraucht.','Verstanden', function(){}, false);
+  }
+  if (!b.length){
+    return confirmDlg('Keine Ersatzspieler', S.teams[t].name+' hat keine Spieler auf der Bank.','Verstanden', function(){}, false);
+  }
+  var selSlot = (presetSlot>=0 ? presetSlot : -1), selBench = -1;
+  var bd = dlg('<h2>Auswechslung – '+esc(S.teams[t].name)+'</h2>' +
+    '<p class="dsc">Der neue Spieler übernimmt dieselbe Position.</p>' +
+    '<div class="pick"><div><h3>Vom Feld</h3><div class="opts" id="colF"></div></div>' +
+    '<div><h3>Von der Bank</h3><div class="opts" id="colB"></div></div></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn primary" data-x="ok" disabled>Wechseln</button></div>');
+
+  function paint(){
+    var hf='', hb='', i;
+    for (i=0;i<S.lineup[t].length;i++){
+      hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'">' +
+            esc(S.teams[t].players[S.lineup[t][i]]) + '<small>Position '+POSN[i]+'</small></button>';
+    }
+    for (i=0;i<b.length;i++){
+      hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'">' +
+            esc(S.teams[t].players[b[i]]) + '<small>Ersatz</small></button>';
+    }
+    bd.querySelector('#colF').innerHTML = hf;
+    bd.querySelector('#colB').innerHTML = hb;
+    bd.querySelector('[data-x=ok]').disabled = !(selSlot>=0 && selBench>=0);
+  }
+  paint();
+  bd.addEventListener('click', function(e){
+    var f = e.target.closest('[data-f]'), bb = e.target.closest('[data-b]');
+    if (f){ selSlot = +f.dataset.f; paint(); return; }
+    if (bb){ selBench = +bb.dataset.b; paint(); return; }
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no') return closeDlg();
+    doSub(t, selSlot, selBench); closeDlg();
+  });
+}
+function doSub(t, slot, pi){
+  snapshot();
+  var out = S.lineup[t][slot];
+  S.lineup[t][slot] = pi;
+  S.setSubs[t]++; S.subs[t]++;
+  pushLog('sub', t, S.teams[t].players[pi] + ' für ' + S.teams[t].players[out] + ' (Position ' + POSN[slot] + ')');
+  render(); save();
+  toast('Wechsel: ' + S.teams[t].players[pi]);
+}
+
+/* ---------- Auszeit ---------- */
+function dlgTimeout(t){
+  if (S.maxTimeouts>0 && S.timeouts[t] >= S.maxTimeouts) return;
+  snapshot();
+  S.timeouts[t]++;
+  pushLog('to', t, '');
+  save();
+  var left = S.toLen, total = S.toLen;
+  var bd = dlg('<h2>Auszeit – '+esc(S.teams[t].name)+'</h2>' +
+    '<p class="dsc">Stand '+S.points[0]+':'+S.points[1]+' · Satz '+S.setNo+'</p>' +
+    '<div class="count" id="toCount">'+left+'</div>' +
+    '<div class="bar"><i id="toBar" style="width:100%"></i></div>' +
+    '<p class="hint" id="toHint">Punkteingabe ist während der Auszeit gesperrt.</p>' +
+    '<div class="acts"><button class="btn primary" data-x="go">Weiterspielen</button></div>', {esc:false});
+  bd.querySelector('[data-x=go]').onclick = function(){ closeDlg(); };
+  toTimer = setInterval(function(){
+    left--;
+    var c = bd.querySelector('#toCount'), b2 = bd.querySelector('#toBar');
+    if (!c){ clearInterval(toTimer); toTimer=null; return; }
+    c.textContent = Math.max(0,left);
+    b2.style.width = Math.max(0, (left/total)*100) + '%';
+    if (left <= 0){
+      clearInterval(toTimer); toTimer = null;
+      signal();
+      c.classList.add('flash');
+      bd.querySelector('#toHint').textContent = 'Auszeit beendet.';
+    }
+  }, 1000);
+  render();
+}
+
+/* ---------- Strafpunkt ---------- */
+function dlgPenalty(){
+  var bd = dlg('<h2>Strafpunkt</h2>' +
+    '<p class="dsc">Die bestrafte Mannschaft verliert Punkt und Aufschlag an den Gegner.</p>' +
+    '<div class="field"><span class="lbl">Bestrafte Mannschaft</span><div class="opts">' +
+      '<button class="opt" type="button" data-t="0" aria-pressed="false">'+esc(S.teams[0].name)+'<small>Punkt geht an '+esc(S.teams[1].name)+'</small></button>' +
+      '<button class="opt" type="button" data-t="1" aria-pressed="false">'+esc(S.teams[1].name)+'<small>Punkt geht an '+esc(S.teams[0].name)+'</small></button>' +
+    '</div></div>' +
+    '<div class="field"><label class="lbl" for="penR">Grund (optional)</label><input type="text" id="penR" autocomplete="off"></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn primary" data-x="ok" disabled>Strafpunkt erteilen</button></div>');
+  var sel = -1;
+  bd.addEventListener('click', function(e){
+    var o = e.target.closest('[data-t]');
+    if (o){
+      sel = +o.dataset.t;
+      var all = bd.querySelectorAll('[data-t]');
+      for (var i=0;i<all.length;i++) all[i].setAttribute('aria-pressed', String(+all[i].dataset.t === sel));
+      bd.querySelector('[data-x=ok]').disabled = false;
+      return;
+    }
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no') return closeDlg();
+    var reason = bd.querySelector('#penR').value.trim();
+    closeDlg();
+    penaltyPoint(sel, reason);
+  });
+}
+function penaltyPoint(against, reason){
+  var to = 1 - against;
+  addPoint(to, 'pen');
+  // Grund nachtragen
+  for (var i=S.log.length-1;i>=0;i--){
+    if (S.log[i].kind === 'pen'){ S.log[i].txt = reason || ''; break; }
+  }
+  if (S.sets.length && S.sets[S.sets.length-1].log){
+    var lg = S.sets[S.sets.length-1].log;
+    for (var j=lg.length-1;j>=0;j--){ if (lg[j].kind==='pen' && !lg[j].txt){ lg[j].txt = reason||''; break; } }
+  }
+  render(); save();
+}
+
+/* ---------- Aufstellungs-Editor ---------- */
+function lineupEditorHTML(){
+  var h = '<div class="grid2">';
+  for (var t=0;t<2;t++){
+    h += '<div><h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;color:'+tc(t)+'">'+esc(S.teams[t].name)+'</h3>';
+    for (var p=0;p<S.count;p++){
+      h += '<div class="field"><label class="lbl" for="le'+t+'_'+p+'">Position '+POSN[p]+'</label><select id="le'+t+'_'+p+'">';
+      for (var i=0;i<S.teams[t].players.length;i++){
+        h += '<option value="'+i+'"'+(S.lineup[t][p]===i?' selected':'')+'>'+esc(S.teams[t].players[i])+'</option>';
+      }
+      h += '</select></div>';
+    }
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+function readLineupEditor(bd){
+  var out = [[],[]];
+  for (var t=0;t<2;t++){
+    for (var p=0;p<S.count;p++){
+      var s = bd.querySelector('#le'+t+'_'+p);
+      if (!s) return null;
+      out[t].push(+s.value);
+    }
+    var seen = {};
+    for (var i=0;i<out[t].length;i++){
+      if (seen[out[t][i]]) return { error: S.teams[t].name + ': ein Spieler ist doppelt aufgestellt.' };
+      seen[out[t][i]] = 1;
+    }
+  }
+  return { lineup: out };
+}
+
+/* ---------- Korrektur ---------- */
+function dlgCorrect(){
+  var bd = dlg('<h2>Korrektur</h2>' +
+    '<p class="dsc">Stand, Aufschlagrecht und Aufstellung werden direkt gesetzt – ohne Rotation und ohne Satzprüfung.</p>' +
+    '<div class="grid2">' +
+      '<div class="field"><label class="lbl" for="cA">'+esc(S.teams[0].name)+'</label><input type="number" id="cA" min="0" max="199" value="'+S.points[0]+'" inputmode="numeric"></div>' +
+      '<div class="field"><label class="lbl" for="cB">'+esc(S.teams[1].name)+'</label><input type="number" id="cB" min="0" max="199" value="'+S.points[1]+'" inputmode="numeric"></div>' +
+    '</div>' +
+    '<div class="field"><label class="lbl" for="cS">Aufschlagrecht</label><select id="cS">' +
+      '<option value="0"'+(S.serving===0?' selected':'')+'>'+esc(S.teams[0].name)+'</option>' +
+      '<option value="1"'+(S.serving===1?' selected':'')+'>'+esc(S.teams[1].name)+'</option></select></div>' +
+    '<details style="margin:6px 0 4px"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);padding:6px 0">Aufstellung anpassen</summary>' +
+      '<div style="margin-top:10px">'+lineupEditorHTML()+'</div></details>' +
+    '<p class="err" id="cErr" hidden></p>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn primary" data-x="ok">Übernehmen</button></div>');
+
+  bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
+  bd.querySelector('[data-x=ok]').onclick = function(){
+    var a = Math.max(0, Math.min(199, parseInt(bd.querySelector('#cA').value,10) || 0));
+    var b = Math.max(0, Math.min(199, parseInt(bd.querySelector('#cB').value,10) || 0));
+    var sv = +bd.querySelector('#cS').value;
+    var r = readLineupEditor(bd);
+    if (r && r.error){ var e = bd.querySelector('#cErr'); e.textContent = r.error; e.hidden = false; return; }
+    var oldTxt = S.points[0]+':'+S.points[1]+' / Aufschlag '+S.teams[S.serving].name;
+    snapshot();
+    S.points = [a,b];
+    S.serving = sv;
+    if (r && r.lineup) S.lineup = r.lineup;
+    pushLog('cor', sv, 'von '+oldTxt+' auf '+a+':'+b+' / Aufschlag '+S.teams[sv].name);
+    closeDlg(); render(); save();
+    toast('Korrektur übernommen');
+  };
+}
+
+/* ---------- Satzpause ---------- */
+function dlgSetBreak(w, no, pts){
+  var bd = dlg('<h2>Satz '+no+' – '+esc(S.teams[w].name)+'</h2>' +
+    '<p class="dsc">Satzresultat '+pts[0]+':'+pts[1]+'</p>' +
+    '<div class="setsline">'+setsLineHTML()+'</div>' +
+    '<div class="banner" style="border-left-color:var(--home)">' +
+      'Seiten gewechselt · Satz '+S.setNo+' bis '+targetNow()+(isDecider()?' (Entscheidungssatz)':'')+' · Anspiel: <b>'+esc(S.teams[S.firstServer].name)+'</b>' +
+    '</div>' +
+    '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);padding:6px 0">Aufstellung anpassen</summary>' +
+      '<div style="margin-top:10px">'+lineupEditorHTML()+'</div>' +
+      '<p class="hint">Übernommen aus dem letzten Satz. Änderungen gelten ab dem Anspiel.</p></details>' +
+    '<p class="err" id="sErr" hidden></p>' +
+    '<div class="acts"><button class="btn" data-x="rep">Bericht</button>' +
+    '<button class="btn primary" data-x="ok">Weiter</button></div>', {esc:false});
+  bd.querySelector('[data-x=rep]').onclick = function(){ dlgReport(); };
+  bd.querySelector('[data-x=ok]').onclick = function(){
+    var r = readLineupEditor(bd);
+    if (r && r.error){ var e = bd.querySelector('#sErr'); e.textContent = r.error; e.hidden = false; return; }
+    if (r && r.lineup) S.lineup = r.lineup;
+    closeDlg(); render(); save();
+  };
+}
+function setsLineHTML(){
+  var h = '';
+  for (var i=0;i<S.sets.length;i++){
+    h += '<span>'+S.sets[i].pts[0]+':'+S.sets[i].pts[1]+(S.sets[i].aborted?' *':'')+'</span>';
+  }
+  return h || '<span>–</span>';
+}
+
+/* ---------- Abbruch ---------- */
+function dlgAbort(){
+  var bd = dlg('<h2>Spiel abbrechen</h2>' +
+    '<p class="dsc">Das Spiel wird beendet und im Bericht mit der gewählten Ergebnisart ausgewiesen.</p>' +
+    '<div class="field"><label class="lbl" for="abT">Grund</label><select id="abT">' +
+      '<option value="forfait">Rückzug (Forfait)</option>' +
+      '<option value="abbruch">Abbruch (Verletzung, Schiedsrichter)</option>' +
+      '<option value="unvollstaendig">Unvollständige Mannschaft</option></select></div>' +
+    '<div class="field"><label class="lbl" for="abW">Sieger (optional)</label><select id="abW">' +
+      '<option value="-1">kein Sieger</option>' +
+      '<option value="0">'+esc(S.teams[0].name)+'</option>' +
+      '<option value="1">'+esc(S.teams[1].name)+'</option></select></div>' +
+    '<div class="field"><label class="lbl" for="abN">Bemerkung</label><textarea id="abN"></textarea></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Zurück</button>' +
+    '<button class="btn danger" data-x="ok">Spiel abbrechen</button></div>');
+  bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
+  bd.querySelector('[data-x=ok]').onclick = function(){
+    var type = bd.querySelector('#abT').value;
+    var wv = +bd.querySelector('#abW').value;
+    var note = bd.querySelector('#abN').value.trim();
+    snapshot();
+    if (S.points[0] || S.points[1]){
+      S.sets.push({ pts:S.points.slice(), startedAt:S.setStartedAt, endedAt:iso(),
+                    timeouts:S.timeouts.slice(), subs:S.setSubs.slice(),
+                    log:clone(S.log), no:S.setNo, aborted:true });
+    }
+    closeDlg();
+    finishMatch(type, wv<0?null:wv, note);
+  };
+}
+
+/* ---------- Schlussdialog ---------- */
+function dlgEnd(){
+  var r = S.result || {};
+  var win = (r.winner===0||r.winner===1) ? S.teams[r.winner].name : '–';
+  var h = '<h2>Spiel beendet</h2>' +
+    '<p class="dsc">'+esc(RESULT_LABEL[r.type]||r.type)+(r.note?' · '+esc(r.note):'')+'</p>' +
+    '<div class="setsline">'+setsLineHTML()+'</div>' +
+    '<p style="margin:0 0 14px"><span class="tag ok">Sieger</span> <b style="color:var(--ink)">'+esc(win)+'</b> ' +
+      '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
+
+  if (S.locked){
+    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern bestätigt – das Spiel ist gesperrt.<br>' +
+         esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
+         esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')</div>';
+  } else {
+    h += '<div class="divider">Bestätigung der Mannschaftsführer</div>';
+    for (var t=0;t<2;t++){
+      var c = S.confirmed[t];
+      h += '<div class="field"><label class="lbl" for="cf'+t+'">'+esc(S.teams[t].name)+'</label>';
+      if (c){
+        h += '<p style="margin:0"><span class="tag ok">bestätigt</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
+      } else {
+        h += '<div class="row"><input type="text" id="cf'+t+'" style="flex:1;min-width:140px" ' +
+             'value="'+esc(capName(t))+'" placeholder="Name Mannschaftsführer" autocomplete="off">' +
+             '<button class="btn" type="button" data-cf="'+t+'">Bestätigen</button></div>';
+      }
+      h += '</div>';
+    }
+  }
+  h += '<div class="acts">' +
+       '<button class="btn" data-x="rep">Bericht</button>' +
+       (S.locked ? '' : '<button class="btn" data-x="undo"'+(!UNDO.length?' disabled':'')+'>Rückgängig</button>') +
+       '<button class="btn primary" data-x="new">Neues Spiel</button></div>';
+
+  var bd = dlg(h, {esc:true});
+  bd.addEventListener('click', function(e){
+    var cf = e.target.closest('[data-cf]');
+    if (cf){
+      var t = +cf.dataset.cf;
+      var nm = bd.querySelector('#cf'+t).value.trim() || S.teams[t].name;
+      S.confirmed[t] = { name: nm, at: iso() };
+      if (S.confirmed[0] && S.confirmed[1]) S.locked = true;
+      archivePut(); saveNow();
+      dlgEnd();
+      return;
+    }
+    var x = e.target.closest('[data-x]'); if (!x || x.disabled) return;
+    if (x.dataset.x === 'rep') return dlgReport();
+    if (x.dataset.x === 'undo'){ closeDlg(); undo(); return; }
+    if (x.dataset.x === 'new'){
+      confirmDlg('Neues Spiel','Das Spiel wandert ins Archiv und die Erfassung beginnt von vorne.','Neues Spiel', newMatch, false);
+    }
+  });
+}
+function capName(t){
+  var c = S.teams[t].captain;
+  return (c>=0 && S.teams[t].players[c]) ? S.teams[t].players[c] : '';
+}
+
+/* ---------- Darstellung ---------- */
+function dlgView(){
+  var bd = dlg('<h2>Darstellung</h2>' +
+    '<p class="dsc">Gilt für dieses Gerät und bleibt gespeichert.</p>' +
+    viewPanelHTML('dv') +
+    '<p class="hint" style="margin:10px 0 0">Eigene Teamfarben gelten in hell und dunkel gleich. ' +
+    'Die Schriftfarbe darauf wählt die App selbst, damit sie lesbar bleibt.</p>' +
+    '<div class="acts"><button class="btn primary" data-x="close">Schliessen</button></div>');
+  syncViewInputs();
+  bd.querySelector('[data-x=close]').onclick = function(){ closeDlg(); };
+}
+
+/* ---------- Verlauf ---------- */
+function dlgLog(){
+  var bd = dlg('<h2>Verlauf</h2>' +
+    '<p class="dsc">Satz ' + S.setNo + ' · Stand ' + S.points[0] + ':' + S.points[1] + '</p>' +
+    '<div class="log" style="display:block"><ol id="logList2"></ol></div>' +
+    '<div class="acts"><button class="btn primary" data-x="close">Schliessen</button></div>');
+  bd.querySelector('#logList2').innerHTML = logListHTML();
+  bd.querySelector('#logList2').style.maxHeight = '52vh';
+  bd.querySelector('[data-x=close]').onclick = function(){ closeDlg(); };
+}
+
+/* ---------- Bericht ---------- */
+function reportText(st){
+  var s = st || S, L = [];
+  function line(k,v){ L.push(pad2(k,22) + v); }
+  function pad2(x,n){ x = String(x); while (x.length<n) x += ' '; return x; }
+  var m = s.meta || {};
+  L.push('INDIACA – MATCHBLATT');
+  L.push('='.repeat(64));
+  line('Wettbewerb', m.competition || '–');
+  line('Kategorie', m.category || '–');
+  line('Austragungsort', m.venue || '–');
+  line('Datum', fmtDate(s.started));
+  line('Beginn', fmtTime(s.started));
+  line('Ende', s.result ? fmtTime(s.result.endedAt) : '–');
+  line('Dauer', s.result ? fmtDur(s.started, s.result.endedAt) : '–');
+  line('Schiedsrichter', m.referee || '–');
+  line('Schreiber', m.scorer || '–');
+  line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' · '+s.winSets+
+       ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
+  if (m.note) line('Bemerkung', m.note);
+  L.push('');
+
+  for (var t=0;t<2;t++){
+    L.push((t===0?'HEIM':'GAST') + ': ' + s.teams[t].name);
+    L.push('-'.repeat(64));
+    var fieldIdx = s.lineup[t], i;
+    for (i=0;i<fieldIdx.length;i++){
+      L.push('  ' + pad2(POSN[i], 5) + s.teams[t].players[fieldIdx[i]] +
+             (s.teams[t].captain === fieldIdx[i] ? '  (C)' : ''));
+    }
+    var b = [];
+    for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0)
+      b.push(s.teams[t].players[i] + (s.teams[t].captain===i ? ' (C)' : ''));
+    L.push('  ' + pad2('Bank', 5) + (b.length ? b.join(', ') : '–'));
+    L.push('');
+  }
+
+  L.push('SATZRESULTATE');
+  L.push('-'.repeat(64));
+  L.push('  Satz  Resultat   Beginn  Ende    Dauer      AZ (H:G)  WE (H:G)');
+  for (var k=0;k<s.sets.length;k++){
+    var st2 = s.sets[k];
+    L.push('  ' + pad2(st2.no || (k+1), 6) +
+           pad2(st2.pts[0]+':'+st2.pts[1] + (st2.aborted?' *':''), 11) +
+           pad2(fmtTime(st2.startedAt), 8) + pad2(fmtTime(st2.endedAt), 8) +
+           pad2(fmtDur(st2.startedAt, st2.endedAt), 11) +
+           pad2(st2.timeouts[0]+':'+st2.timeouts[1], 10) +
+           (st2.subs[0]+':'+st2.subs[1]));
+  }
+  if (!s.finished){
+    L.push('  ' + pad2(s.setNo, 6) + pad2(s.points[0]+':'+s.points[1], 11) +
+           pad2(fmtTime(s.setStartedAt), 8) + pad2('läuft', 8));
+  }
+  if (s.sets.some(function(x){ return x.aborted; })) L.push('  * Satz beim Abbruch nicht beendet');
+  L.push('');
+
+  L.push('ENDERGEBNIS');
+  L.push('-'.repeat(64));
+  line('Sätze', s.setsWon[0] + ' : ' + s.setsWon[1]);
+  if (s.result){
+    line('Ergebnisart', RESULT_LABEL[s.result.type] || s.result.type);
+    line('Sieger', (s.result.winner===0||s.result.winner===1) ? s.teams[s.result.winner].name : '–');
+    if (s.result.note) line('Grund/Bemerkung', s.result.note);
+  } else {
+    line('Status', 'Spiel läuft');
+  }
+  L.push('');
+
+  L.push('VERLAUF');
+  L.push('-'.repeat(64));
+  var all = [];
+  for (var q=0;q<s.sets.length;q++) all = all.concat(s.sets[q].log || []);
+  all = all.concat(s.log || []);
+  var seenTs = {}; var uniq = [];
+  for (var u=0;u<all.length;u++){
+    var key = all[u].ts + '|' + all[u].kind + '|' + all[u].a + '|' + all[u].b;
+    if (seenTs[key]) continue; seenTs[key] = 1; uniq.push(all[u]);
+  }
+  if (!uniq.length) L.push('  (kein Eintrag)');
+  for (var v=0;v<uniq.length;v++){
+    var e = uniq[v];
+    L.push('  ' + fmtTime(e.ts) + '  ' + pad2(e.a+':'+e.b, 8) + logTextFor(s, e));
+  }
+  L.push('');
+
+  L.push('BESTÄTIGUNG');
+  L.push('-'.repeat(64));
+  for (var c=0;c<2;c++){
+    var cf = s.confirmed && s.confirmed[c];
+    L.push('  ' + pad2(s.teams[c].name, 24) +
+           (cf ? cf.name + '   ' + fmtDate(cf.at) + ' ' + fmtTime(cf.at) : '________________________'));
+  }
+  L.push('');
+  L.push('Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'));
+  return L.join('\n');
+}
+function logTextFor(s, e){
+  var save0 = S; S = s; var txt = logText(e); S = save0; return txt;
+}
+
+function dlgReport(){
+  var txt = reportText(S);
+  var bd = dlg('<h2>Spielbericht</h2>' +
+    '<p class="dsc">Papier-Rückfallebene: der Bericht ist jederzeit abrufbar.</p>' +
+    '<pre class="report" id="repTxt">'+esc(txt)+'</pre>' +
+    '<div class="acts"><button class="btn" data-x="copy">Kopieren</button>' +
+    '<button class="btn" data-x="save">Als .txt sichern</button>' +
+    (navigator.share ? '<button class="btn" data-x="share">Teilen</button>' : '') +
+    '<button class="btn primary" data-x="close">Schliessen</button></div>');
+  bd.addEventListener('click', function(e){
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    var name = 'matchblatt_' + fmtDate(S.started).replace(/\./g,'-') + '_' +
+               S.teams[0].name.replace(/\W+/g,'') + '-' + S.teams[1].name.replace(/\W+/g,'') + '.txt';
+    if (x.dataset.x === 'copy'){
+      copyText(txt); toast('Bericht kopiert');
+    } else if (x.dataset.x === 'save'){
+      var blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    } else if (x.dataset.x === 'share'){
+      navigator.share({ title:'Indiaca Matchblatt', text:txt }).catch(function(){});
+    } else if (x.dataset.x === 'close'){
+      closeDlg();
+      if (S.finished && !$('game').hidden) dlgEnd();
+    }
+  });
+}
+function copyText(txt){
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).catch(fallbackCopy);
+  } else fallbackCopy();
+  function fallbackCopy(){
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    ta.remove();
+  }
+}
+
+/* ---------- Archiv ---------- */
+function archivePut(){
+  var arch = store.get(K_ARCH) || [];
+  var rec = {
+    id: S.id, started: S.started, ended: S.result ? S.result.endedAt : null,
+    teams: [S.teams[0].name, S.teams[1].name],
+    setsWon: S.setsWon.slice(),
+    result: S.result, locked: S.locked,
+    report: reportText(S)
+  };
+  var i = arch.findIndex ? arch.findIndex(function(x){ return x.id === S.id; }) : -1;
+  if (i >= 0) arch[i] = rec; else arch.unshift(rec);
+  if (arch.length > 20) arch = arch.slice(0,20);
+  store.set(K_ARCH, arch);
+}
+function dlgArchive(){
+  var arch = store.get(K_ARCH) || [];
+  var h = '<h2>Archiv</h2><p class="dsc">Die letzten 20 abgeschlossenen Spiele auf diesem Gerät.</p>';
+  if (!arch.length){
+    h += '<p class="hint">Noch keine abgeschlossenen Spiele.</p>';
+  } else {
+    h += '<div class="menu">';
+    for (var i=0;i<arch.length;i++){
+      var a = arch[i];
+      h += '<button data-a="'+i+'">'+esc(a.teams[0])+' – '+esc(a.teams[1]) +
+           '<small>'+fmtDate(a.started)+' · '+a.setsWon[0]+':'+a.setsWon[1]+' Sätze' +
+           (a.locked ? ' · bestätigt' : '')+'</small></button>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="acts"><button class="btn primary" data-x="close">Schliessen</button></div>';
+  var bd = dlg(h);
+  bd.addEventListener('click', function(e){
+    var a = e.target.closest('[data-a]');
+    if (a){
+      var rec = arch[+a.dataset.a];
+      var b2 = dlg('<h2>'+esc(rec.teams[0])+' – '+esc(rec.teams[1])+'</h2>' +
+        '<p class="dsc">'+fmtDate(rec.started)+'</p>' +
+        '<pre class="report">'+esc(rec.report)+'</pre>' +
+        '<div class="acts"><button class="btn" data-y="copy">Kopieren</button>' +
+        '<button class="btn primary" data-y="back">Zurück</button></div>');
+      b2.addEventListener('click', function(ev){
+        var y = ev.target.closest('[data-y]'); if (!y) return;
+        if (y.dataset.y === 'copy'){ copyText(rec.report); toast('Bericht kopiert'); }
+        else dlgArchive();
+      });
+      return;
+    }
+    if (e.target.closest('[data-x=close]')) closeDlg();
+  });
+}
+
+/* ============================================================
+   Signal (Ton / Vibration / Blinken)
+   ============================================================ */
+function unlockAudio(){
+  try {
+    if (!audioCtx){
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (C) audioCtx = new C();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e){}
+}
+function signal(){
+  try {
+    unlockAudio();
+    if (audioCtx){
+      var t0 = audioCtx.currentTime;
+      for (var i=0;i<2;i++){
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'square'; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, t0 + i*0.28);
+        g.gain.exponentialRampToValueAtTime(0.22, t0 + i*0.28 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + i*0.28 + 0.20);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t0 + i*0.28); o.stop(t0 + i*0.28 + 0.22);
+      }
+    }
+  } catch(e){}
+  try { if (navigator.vibrate) navigator.vibrate([180,90,180]); } catch(e){}
+}
+
+/* ============================================================
+   Wake Lock
+   ============================================================ */
+function requestWake(){
+  try {
+    if (!('wakeLock' in navigator) || $('game').hidden) return;
+    navigator.wakeLock.request('screen').then(function(w){
+      wakeLock = w;
+      w.addEventListener('release', function(){ wakeLock = null; });
+    }).catch(function(){});
+  } catch(e){}
+}
+function releaseWake(){ try { if (wakeLock) wakeLock.release(); } catch(e){} wakeLock = null; }
+
+/* ============================================================
+   Speichern / Laden
+   ============================================================ */
+function save(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
+function saveNow(){
+  clearTimeout(saveTimer);
+  if (!S) return;
+  store.set(K_MATCH, { schema: SCHEMA, app: APP, S: S, undo: UNDO });
+}
+function saveSettings(){
+  var keep = store.get(K_SET) || {};
+  store.set(K_SET, {
+    schema: SCHEMA,
+    theme: keep.theme, palette: keep.palette, colors: keep.colors,
+    count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets,
+    toLen: S.toLen, maxTimeouts: S.maxTimeouts, maxSubs: S.maxSubs, firstServer: S.firstServer,
+    names: [S.teams[0].name, S.teams[1].name],
+    meta: clone(S.meta)
+  });
+}
+
+/* ============================================================
+   Setup-Bildschirm
+   ============================================================ */
+var P = [[],[]];      // Spielernamen je Team
+var CAP = [0,0];      // Mannschaftsführer (Index in P[t])
+
+function cfg(){
+  return {
+    count: +$('cfgCount').value,
+    target: +$('cfgTarget').value,
+    winSets: +$('cfgWin').value,
+    deciderTarget: +$('cfgDec').value,
+    toLen: +$('cfgTo').value,
+    maxTimeouts: +$('cfgMaxTo').value,
+    maxSubs: +$('cfgMaxSub').value,
+    firstServer: +$('cfgFirst').value
+  };
+}
+function ensurePlayers(){
+  var n = +$('cfgCount').value;
+  for (var t=0;t<2;t++){
+    while (P[t].length < n) P[t].push('');
+    if (CAP[t] >= P[t].length) CAP[t] = 0;
+  }
+}
+function renderSetup(){
+  ensurePlayers();
+  var n = +$('cfgCount').value;
+  for (var t=0;t<2;t++){
+    var h = '', i;
+    for (i=0;i<P[t].length;i++){
+      var isField = i < n;
+      if (i === n) h += '</ul><div class="divider">Ersatzbank</div><ul class="plist">';
+      h += '<li class="'+(isField?'field-slot':'bench-slot')+'">' +
+           '<span class="pos">'+(isField ? POSN[i] : 'E'+(i-n+1))+'</span>' +
+           '<input type="text" data-t="'+t+'" data-i="'+i+'" value="'+esc(P[t][i])+'" ' +
+           'placeholder="Spieler '+(i+1)+'" autocomplete="off">' +
+           '<label class="cap" title="Mannschaftsführer"><input type="radio" name="cap'+t+'" data-capt="'+t+'" data-capi="'+i+'"'+(CAP[t]===i?' checked':'')+'>C</label>' +
+           (isField ? '' : '<button class="del" type="button" data-del="'+t+'" data-deli="'+i+'" aria-label="Entfernen">×</button>') +
+           '</li>';
+    }
+    $('pl'+t).innerHTML = h;
+  }
+}
+function readSetupInputs(){
+  for (var t=0;t<2;t++){
+    var ins = $('pl'+t).querySelectorAll('input[type=text]');
+    for (var i=0;i<ins.length;i++) P[t][+ins[i].dataset.i] = ins[i].value;
+  }
+}
+function loadSettings(){
+  var s = store.get(K_SET);
+  if (!s) { P = [[],[]]; renderSetup(); return; }
+  if (s.count) $('cfgCount').value = s.count;
+  if (s.target) $('cfgTarget').value = s.target;
+  if (s.winSets) $('cfgWin').value = s.winSets;
+  if (s.deciderTarget) $('cfgDec').value = s.deciderTarget;
+  if (s.toLen) $('cfgTo').value = s.toLen;
+  if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
+  if (s.maxSubs !== undefined) $('cfgMaxSub').value = s.maxSubs;
+  if (s.firstServer !== undefined) $('cfgFirst').value = s.firstServer;
+  if (s.names){ $('tn0').value = s.names[0]||''; $('tn1').value = s.names[1]||''; }
+  if (s.meta){
+    $('mCompetition').value = s.meta.competition||'';
+    $('mCategory').value = s.meta.category||'';
+    $('mVenue').value = s.meta.venue||'';
+    $('mReferee').value = s.meta.referee||'';
+    $('mScorer').value = s.meta.scorer||'';
+    $('mNote').value = s.meta.note||'';
+  }
+  renderSetup();
+}
+
+function startMatch(){
+  readSetupInputs();
+  var c = cfg();
+  var teams = [];
+  for (var t=0;t<2;t++){
+    var names = [];
+    for (var i=0;i<P[t].length;i++){
+      var v = String(P[t][i]||'').trim();
+      if (i < c.count) names.push(v || ('Spieler ' + (i+1)));
+      else if (v) names.push(v);
+    }
+    teams.push({
+      name: (t===0 ? ($('tn0').value.trim() || 'Heim') : ($('tn1').value.trim() || 'Gast')),
+      players: names,
+      captain: Math.min(CAP[t], names.length-1)
+    });
+  }
+  var line = [];
+  for (var q=0;q<c.count;q++) line.push(q);
+
+  S = {
+    schema: SCHEMA,
+    id: uuid(),
+    app: APP,
+    count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets,
+    toLen: c.toLen, maxTimeouts: c.maxTimeouts, maxSubs: c.maxSubs,
+    meta: {
+      competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
+      venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
+      scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
+    },
+    teams: teams,
+    lineup: [line.slice(), line.slice()],
+    points: [0,0], setsWon: [0,0], sets: [],
+    serving: c.firstServer, firstServer: c.firstServer, topTeam: 0,
+    setNo: 1, setStartedAt: iso(), sideSwapped: false,
+    subs: [0,0], setSubs: [0,0], timeouts: [0,0],
+    log: [], finished: false, result: null,
+    confirmed: [null,null], locked: false,
+    started: iso()
+  };
+  UNDO = [];
+  saveSettings();
+  enterGame();
+}
+function uuid(){
+  try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch(e){}
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+    var r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+  });
+}
+
+function enterGame(){
+  $('setup').hidden = true;
+  $('game').hidden = false;
+  buildCourt();
+  fitCourt();
+  render();
+  setTimeout(function(){ fitCourt(); renderCourt(); }, 60);
+  saveNow();
+  requestWake();
+  if (S.finished) dlgEnd();
+}
+function newMatch(){
+  if (S && S.finished) archivePut();
+  closeDlg();
+  releaseWake();
+  store.del(K_MATCH);
+  S = null; UNDO = [];
+  $('game').hidden = true;
+  $('setup').hidden = false;
+  window.scrollTo(0,0);
+  loadSettings();
+}
+
+/* ============================================================
+   Wiederherstellung beim Start
+   ============================================================ */
+function bootRestore(){
+  var m = store.get(K_MATCH);
+  if (!m) return false;
+  if (m.schema !== SCHEMA || !m.S){
+    dlg('<h2>Gespeicherter Stand nicht lesbar</h2>' +
+        '<p class="dsc">Der gespeicherte Stand stammt aus einer anderen Speicherfassung (Schema '+
+        esc(m.schema)+'). Er wird nicht verändert und nicht gelöscht.</p>' +
+        '<div class="acts"><button class="btn primary" data-x="ok">Verstanden</button></div>')
+      .querySelector('[data-x=ok]').onclick = function(){ closeDlg(); };
+    return false;
+  }
+  var st = m.S;
+  if (st.locked) return false;
+  var where = st.finished
+    ? 'beendet, noch nicht bestätigt'
+    : 'Stand ' + st.points[0] + ':' + st.points[1] + ', Satz ' + st.setNo;
+  var bd = dlg('<h2>Laufendes Spiel gefunden</h2>' +
+    '<p class="dsc">'+esc(st.teams[0].name)+' – '+esc(st.teams[1].name)+' · '+esc(where)+
+    ' · begonnen '+fmtTime(st.started)+' Uhr</p>' +
+    '<div class="acts"><button class="btn danger" data-x="drop">Verwerfen</button>' +
+    '<button class="btn primary" data-x="go">Fortsetzen</button></div>', {esc:false});
+  bd.querySelector('[data-x=go]').onclick = function(){
+    S = st; UNDO = (m.undo || []);
+    closeDlg(true);
+    enterGame();
+  };
+  bd.querySelector('[data-x=drop]').onclick = function(){
+    confirmDlg('Stand verwerfen','Der gespeicherte Spielstand wird gelöscht.','Verwerfen', function(){
+      store.del(K_MATCH); closeDlg(); loadSettings();
+    }, true);
+  };
+  return true;
+}
+
+/* ============================================================
+   Service Worker / Aktualisierung
+   ============================================================ */
+function initSW(){
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol === 'file:') return;
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    function check(w){
+      if (!w) return;
+      if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(reg);
+      w.addEventListener('statechange', function(){
+        if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(reg);
+      });
+    }
+    check(reg.waiting); check(reg.installing);
+    reg.addEventListener('updatefound', function(){ check(reg.installing); });
+    try { reg.update(); } catch(e){}
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible'){ try { reg.update(); } catch(e){} }
+    });
+  }).catch(function(){});
+
+  /* Bei der Erstinstallation übernimmt der Worker durch clients.claim() die
+     Seite; ein Neuladen wäre dort unnötig und würde mitten im Spiel stören.
+     Neu geladen wird nur, wenn vorher schon ein Worker aktiv war. */
+  var hadController = !!navigator.serviceWorker.controller;
+  var reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if (!hadController || reloading) return;
+    reloading = true;
+    saveNow();
+    location.reload();
+  });
+}
+function showUpdate(reg){
+  document.body.classList.add('has-update');
+  $('updatebar').hidden = false;
+  $('btnReload').onclick = function(){
+    saveNow();
+    var w = reg.waiting || reg.installing;
+    if (w) w.postMessage({ type:'SKIP_WAITING' });
+    setTimeout(function(){ location.reload(); }, 700);
+  };
+}
+
+/* ============================================================
+   Ereignisse
+   ============================================================ */
+function wire(){
+  $('verLabel').textContent = 'v' + APP;
+
+  // Setup
+  document.addEventListener('input', function(e){
+    var i = e.target;
+    if (i.matches && i.matches('#pl0 input[type=text], #pl1 input[type=text]')){
+      P[+i.dataset.t][+i.dataset.i] = i.value;
+    }
+  });
+  document.addEventListener('input', onViewInput);
+  document.addEventListener('change', function(e){
+    var el = e.target;
+    onViewInput(e);
+    if (el.id === 'cfgCount'){ readSetupInputs(); renderSetup(); }
+    if (el.dataset && el.dataset.capt !== undefined){ CAP[+el.dataset.capt] = +el.dataset.capi; }
+    if (el.id === 'cfgWin' || el.id === 'cfgDec'){ /* nichts */ }
+  });
+  document.addEventListener('click', function(e){
+    var vr = e.target.closest('#vwReset, #dvReset');
+    if (vr){ onViewReset(vr.id); return; }
+    var a = e.target.closest('[data-add]');
+    if (a){ readSetupInputs(); P[+a.dataset.add].push(''); renderSetup(); return; }
+    var d = e.target.closest('[data-del]');
+    if (d){
+      readSetupInputs();
+      var t = +d.dataset.del, i = +d.dataset.deli;
+      P[t].splice(i,1);
+      if (CAP[t] === i) CAP[t] = 0; else if (CAP[t] > i) CAP[t]--;
+      renderSetup(); return;
+    }
+    var pt = e.target.closest('[data-pt]');
+    if (pt && !pt.disabled){ unlockAudio(); addPoint(+pt.dataset.pt, 'pt'); return; }
+    var sb = e.target.closest('[data-sub]');
+    if (sb && !sb.disabled){ dlgSub(+sb.dataset.sub, -1); return; }
+    var to = e.target.closest('[data-to]');
+    if (to && !to.disabled){ unlockAudio(); dlgTimeout(+to.dataset.to); return; }
+  });
+
+  $('btnStart').addEventListener('click', function(){ unlockAudio(); startMatch(); });
+  $('btnArchive').addEventListener('click', dlgArchive);
+  $('btnUndo').addEventListener('click', undo);
+  $('btnLog').addEventListener('click', function(){ if (!dlgOpen) dlgLog(); });
+  $('btnTools').addEventListener('click', dlgTools);
+
+  // Ausrichtung, Fenstergrösse und die Android-Adressleiste
+  var refit = function(){ fitCourt(); renderCourt(); fitActs(); };
+  window.addEventListener('resize', refit);
+  window.addEventListener('orientationchange', function(){
+    setTimeout(refit, 60); setTimeout(refit, 350);
+  });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', refit);
+
+  // Tastatur
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select'){
+      if (e.key === 'Escape' && dlgOpen && escapable()) closeDlg();
+      return;
+    }
+    if (e.key === 'Escape'){ if (dlgOpen && escapable()) closeDlg(); return; }
+    if ($('game').hidden) return;
+    if (e.key === '1'){ e.preventDefault(); unlockAudio(); addPoint(0,'pt'); }
+    else if (e.key === '2'){ e.preventDefault(); unlockAudio(); addPoint(1,'pt'); }
+    else if (e.key === 'u' || e.key === 'U'){ e.preventDefault(); if (!dlgOpen) undo(); }
+  });
+
+  // Speichern / Wake Lock
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'hidden') saveNow();
+    else { requestWake(); }
+  });
+  window.addEventListener('pagehide', saveNow);
+  window.addEventListener('beforeunload', saveNow);
+
+  // Audio bei erster Geste entsperren
+  ['touchstart','pointerdown'].forEach(function(ev){
+    window.addEventListener(ev, function once(){ unlockAudio();
+      window.removeEventListener(ev, once); }, { once:true, passive:true });
+  });
+
+  // Doppeltipp-Zoom
+  var lastTouch = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if (now - lastTouch <= 320) e.preventDefault();
+    lastTouch = now;
+  }, { passive:false });
+}
+
+/* ============================================================
+   Start
+   ============================================================ */
+function boot(){
+  wire();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
+  loadView();
+  loadSettings();
+  bootRestore();
+  initSW();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+
+/* Prüfhaken – nur mit ?debug=1, für den Abnahmedurchlauf */
+if (/[?&]debug=1/.test(location.search)){
+  window.__dbg = {
+    state: function(){ return S ? clone(S) : null; },
+    undoLen: function(){ return UNDO.length; },
+    point: function(t,k){ addPoint(t,k); },
+    undo: undo,
+    penalty: penaltyPoint,
+    report: function(){ return reportText(S); },
+    archive: function(){ return store.get(K_ARCH) || []; },
+    set: function(patch){ Object.keys(patch).forEach(function(k){ S[k]=patch[k]; }); render(); }
+  };
+}
+
+})();
+
+</script>
+</body>
+</html>
