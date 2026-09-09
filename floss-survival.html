@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b3d5c">
+<title>Floß Survival</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #04101a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; touch-action: none; }
+  #app { position: fixed; inset: 0; }
+  canvas#gl { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .panel { pointer-events: auto; }
+
+  /* Top-left stat box */
+  #statBox {
+    position: absolute; top: 10px; left: 10px; width: 210px;
+    background: rgba(10,25,40,0.72); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 8px 10px; backdrop-filter: blur(4px);
+  }
+  .barRow { display: flex; align-items: center; gap: 6px; margin: 3px 0; }
+  .barLabel { width: 20px; font-size: 14px; text-align: center; }
+  .barTrack { flex: 1; height: 12px; border-radius: 6px; background: rgba(0,0,0,0.4); overflow: hidden; border: 1px solid rgba(255,255,255,0.15); }
+  .barFill { height: 100%; border-radius: 6px; transition: width 0.15s linear; }
+  #hpFill { background: linear-gradient(90deg,#2ecc71,#27ae60); }
+  #raftFill { background: linear-gradient(90deg,#f39c12,#e67e22); }
+  #barText { color: #eaf6ff; font-size: 10px; text-align: right; min-width: 42px; }
+
+  #invBtn {
+    margin-top: 6px; width: 100%; padding: 6px 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  #invBtn:active { background: rgba(255,255,255,0.25); }
+
+  /* Top-right resources */
+  #resBox {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(10,25,40,0.72); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 8px 10px; color: #eaf6ff; font-size: 13px; font-weight: 600;
+    display: flex; flex-direction: column; gap: 4px; min-width: 84px;
+  }
+  .resRow { display: flex; justify-content: space-between; gap: 8px; }
+
+  #levelBox {
+    position: absolute; top: 96px; right: 10px;
+    background: rgba(10,25,40,0.55); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 4px 8px; color: #ffd479; font-size: 11px; font-weight: 700; text-align: right;
+  }
+
+  /* Survival timer */
+  #timerBox {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,25,40,0.6); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; padding: 6px 16px; color: #fff; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
+  }
+
+  /* Joystick */
+  #joyBase {
+    position: absolute; left: 26px; bottom: 26px; width: 118px; height: 118px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.25); pointer-events: auto;
+  }
+  #joyKnob {
+    position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin-left: -25px; margin-top: -25px;
+    border-radius: 50%; background: rgba(255,255,255,0.35); border: 2px solid rgba(255,255,255,0.5);
+  }
+
+  /* Quick actions */
+  #quickActions {
+    position: absolute; right: 18px; bottom: 30px; display: flex; flex-direction: column; gap: 10px; align-items: center;
+  }
+  .quickBtn {
+    pointer-events: auto; width: 70px; height: 70px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.35);
+    background: rgba(20,60,90,0.75); color: #fff; font-size: 11px; font-weight: 700; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px; box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  }
+  .quickBtn .ic { font-size: 22px; }
+  .quickBtn:active { background: rgba(40,100,150,0.85); transform: scale(0.95); }
+  .quickBtn:disabled, .quickBtn.disabled { opacity: 0.4; }
+
+  /* Modal */
+  #modalOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center;
+    z-index: 30; pointer-events: auto;
+  }
+  #modalOverlay.open { display: flex; }
+  #modalBox {
+    width: min(94vw, 520px); height: min(84vh, 640px); background: #0e2436; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);
+    display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  #modalTabs { display: flex; background: rgba(0,0,0,0.25); }
+  .tabBtn { flex: 1; padding: 12px 4px; text-align: center; color: #9db8ce; font-size: 13px; font-weight: 700; border-bottom: 3px solid transparent; }
+  .tabBtn.active { color: #fff; border-bottom-color: #ffb703; background: rgba(255,255,255,0.05); }
+  #modalClose {
+    position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.15); color: #fff; font-size: 16px; line-height: 30px; text-align: center; padding: 0;
+  }
+  #modalContent { flex: 1; overflow-y: auto; padding: 12px; color: #eaf6ff; position: relative; }
+  .modalTabPanel { display: none; }
+  .modalTabPanel.active { display: block; }
+
+  .invGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .invSlot { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 6px; text-align: center; }
+  .invSlot .ic { font-size: 26px; }
+  .invSlot .amt { font-size: 15px; font-weight: 700; margin-top: 2px; }
+  .invSlot .lbl { font-size: 10px; color: #9db8ce; margin-top: 1px; }
+
+  .equipCard { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; }
+  .equipCard .ic { font-size: 28px; width: 40px; text-align: center; }
+  .equipCard .info { flex: 1; }
+  .equipCard .name { font-weight: 700; font-size: 13px; }
+  .equipCard .stat { font-size: 11px; color: #9db8ce; }
+
+  .sectionTitle { font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: #7fa8c9; margin: 10px 0 6px; }
+
+  #craftLayout { display: flex; gap: 10px; height: 100%; }
+  #recipeList { flex: 1; min-width: 0; overflow-y: auto; max-height: 100%; }
+  .recipeItem {
+    display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; margin-bottom: 6px;
+    background: rgba(255,255,255,0.04); border: 1px solid transparent;
+  }
+  .recipeItem.selected { border-color: #ffb703; background: rgba(255,183,3,0.12); }
+  .recipeItem.locked { opacity: 0.4; }
+  .recipeItem .ic { font-size: 20px; width: 26px; text-align: center; }
+  .recipeItem .name { font-size: 12px; font-weight: 600; flex: 1; }
+  .recipeItem .owned { font-size: 9px; color: #6fd68a; }
+
+  #recipeDetail {
+    flex: 1; min-width: 0; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; display: flex; flex-direction: column;
+  }
+  #recipeDetail .bigIc { font-size: 40px; text-align: center; }
+  #recipeDetail .rName { font-size: 15px; font-weight: 700; text-align: center; margin-top: 4px; }
+  #recipeDetail .rDesc { font-size: 11px; color: #9db8ce; text-align: center; margin-top: 4px; }
+  .costList { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .costRow { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 6px; border-radius: 6px; }
+  .costRow.ok { color: #6fd68a; background: rgba(111,214,138,0.08); }
+  .costRow.bad { color: #ff7676; background: rgba(255,118,118,0.08); }
+  #craftBtn {
+    margin-top: auto; padding: 10px; border-radius: 8px; border: none; background: #ffb703; color: #1a1a1a;
+    font-weight: 800; font-size: 13px;
+  }
+  #craftBtn:disabled { background: #555; color: #999; }
+  #craftProgressWrap { display: none; margin-top: 8px; }
+  #craftProgressTrack { height: 10px; border-radius: 6px; background: rgba(0,0,0,0.4); overflow: hidden; }
+  #craftProgressFill { height: 100%; width: 0%; background: linear-gradient(90deg,#ffb703,#fb8500); }
+
+  .charStatRow { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+  .charStatRow b { color: #ffd479; }
+
+  /* Game over */
+  #gameOver {
+    position: fixed; inset: 0; background: rgba(2,10,18,0.88); display: none; align-items: center; justify-content: center;
+    flex-direction: column; z-index: 40; pointer-events: auto; color: #fff; text-align: center;
+  }
+  #gameOver.open { display: flex; }
+  #gameOver h1 { font-size: 30px; margin: 0 0 6px; color: #ff7676; }
+  #gameOver p { margin: 4px 0; color: #cfe4f5; font-size: 14px; }
+  #restartBtn { margin-top: 20px; padding: 12px 30px; font-size: 15px; font-weight: 800; border: none; border-radius: 30px; background: #ffb703; color: #1a1a1a; }
+
+  #toast {
+    position: absolute; top: 46px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff;
+    padding: 6px 14px; border-radius: 8px; font-size: 12px; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="gl"></canvas>
+
+  <div id="hud">
+    <div id="statBox" class="panel">
+      <div class="barRow"><span class="barLabel">❤️</span><div class="barTrack"><div class="barFill" id="hpFill" style="width:100%"></div></div></div>
+      <div class="barRow"><span class="barLabel">🛟</span><div class="barTrack"><div class="barFill" id="raftFill" style="width:100%"></div></div></div>
+      <button id="invBtn">🎒 Inventar</button>
+    </div>
+
+    <div id="resBox" class="panel">
+      <div class="resRow"><span>🪵 Holz</span><span id="woodCount">0</span></div>
+      <div class="resRow"><span>🧵 Seil</span><span id="ropeCount">0</span></div>
+      <div class="resRow"><span>⚙️ Schrott</span><span id="scrapCount">0</span></div>
+    </div>
+    <div id="levelBox">Level 1</div>
+
+    <div id="timerBox">⏱ 00:00</div>
+    <div id="toast"></div>
+
+    <div id="joyBase" class="panel"><div id="joyKnob"></div></div>
+
+    <div id="quickActions">
+      <button class="quickBtn" id="buildBtn"><span class="ic">🔨</span><span>Bauen<br>(5🪵)</span></button>
+    </div>
+  </div>
+
+  <div id="modalOverlay">
+    <div id="modalBox" style="position:relative;">
+      <button id="modalClose">✕</button>
+      <div id="modalTabs">
+        <div class="tabBtn active" data-tab="inv">Inventar</div>
+        <div class="tabBtn" data-tab="craft">Herstellen</div>
+        <div class="tabBtn" data-tab="char">Charakter</div>
+      </div>
+      <div id="modalContent">
+        <div class="modalTabPanel active" id="tab-inv">
+          <div class="sectionTitle">Rohstoffe</div>
+          <div class="invGrid">
+            <div class="invSlot"><div class="ic">🪵</div><div class="amt" id="invWood">0</div><div class="lbl">Holz</div></div>
+            <div class="invSlot"><div class="ic">🧵</div><div class="amt" id="invRope">0</div><div class="lbl">Seil</div></div>
+            <div class="invSlot"><div class="ic">⚙️</div><div class="amt" id="invScrap">0</div><div class="lbl">Schrott</div></div>
+          </div>
+          <div class="sectionTitle">Ausgerüstet</div>
+          <div class="equipCard"><div class="ic">🔱</div><div class="info"><div class="name" id="eqWeaponName">Speer</div><div class="stat" id="eqWeaponStat">Schaden 10 · Reichweite 3.2</div></div></div>
+          <div class="equipCard"><div class="ic">🎽</div><div class="info"><div class="name" id="eqArmorName">Stoffweste</div><div class="stat" id="eqArmorStat">Rüstung 0</div></div></div>
+        </div>
+
+        <div class="modalTabPanel" id="tab-craft">
+          <div id="craftLayout">
+            <div id="recipeList"></div>
+            <div id="recipeDetail">
+              <div style="color:#7fa8c9;font-size:12px;text-align:center;margin-top:30px;">Wähle ein Rezept</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modalTabPanel" id="tab-char">
+          <div class="charStatRow"><span>Level</span><b id="chLevel">1</b></div>
+          <div class="charStatRow"><span>HP</span><b id="chHp">100 / 100</b></div>
+          <div class="charStatRow"><span>Angriff</span><b id="chAtk">10</b></div>
+          <div class="charStatRow"><span>Verteidigung</span><b id="chDef">0</b></div>
+          <div class="charStatRow"><span>Reichweite</span><b id="chRange">3.2</b></div>
+          <div class="charStatRow"><span>Holz / Seil / Schrott</span><b id="chRes">0 / 0 / 0</b></div>
+          <div class="charStatRow"><span>Überlebenszeit</span><b id="chTime">00:00</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameOver">
+    <h1>Game Over</h1>
+    <p id="goStats"></p>
+    <button id="restartBtn">Neu starten</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+   KONSTANTEN
+--------------------------------------------------------------------- */
+const TILE = 3;
+const RAFT_Y = 0.4;
+const TILE_MAX_HP = 100;
+const WATER_DAMAGE_PER_SEC = 5;
+const RAFT_REGEN_PER_SEC = 3;
+const PICKUP_RANGE = 3.4;
+const BUILD_COST = 5;
+const MOVE_SPEED = 6.2;
+const MAX_ENEMIES = 16;
+const MAX_FLOATERS = 14;
+
+const WEAPON_TIERS = [
+  { id:'speer', name:'Speer', ic:'🔱', dmg:10, range:3.2, desc:'Einfacher Holzspeer.', cost:null },
+  { id:'eisenspeer', name:'Eisenspeer', ic:'🗡️', dmg:18, range:3.6, desc:'Verstärkt mit Eisenspitze.', cost:{wood:10,scrap:5} },
+  { id:'kriegsaxt', name:'Kriegsaxt', ic:'🪓', dmg:28, range:3.2, desc:'Schwere Axt für harte Schläge.', cost:{wood:15,rope:10,scrap:10} },
+  { id:'harpune', name:'Harpune', ic:'🔱', dmg:42, range:5.2, desc:'Reichweitenstarke Harpune.', cost:{scrap:25,rope:15} },
+];
+const ARMOR_TIERS = [
+  { id:'stoff', name:'Stoffweste', ic:'🎽', armor:0, desc:'Einfache Kleidung.', cost:null, color:0xd8c9a3 },
+  { id:'leder', name:'Lederrüstung', ic:'🦺', armor:5, desc:'Gegerbtes Leder schützt vor Bissen.', cost:{wood:5,rope:15}, color:0x8a5a34 },
+  { id:'metall', name:'Metallrüstung', ic:'🛡️', armor:12, desc:'Schrottplatten als Panzerung.', cost:{scrap:20,rope:10}, color:0x8f97a3 },
+  { id:'kriegs', name:'Kriegsrüstung', ic:'⚔️', armor:20, desc:'Massive Rüstung für erfahrene Überlebende.', cost:{scrap:35,rope:20,wood:10}, color:0x3d3d46 },
+];
+const BUILD_RECIPES = [
+  { id:'tile', name:'Floß-Kachel', ic:'🟫', desc:'Erweitert das Floß um ein Feld.', cost:{wood:BUILD_COST}, kind:'tile', duration:2.5 },
+  { id:'repair', name:'Reparatur-Kit', ic:'🧰', desc:'Repariert die am stärksten beschädigte Kachel.', cost:{wood:8,scrap:3}, kind:'repair', duration:3 },
+];
+
+/* ---------------------------------------------------------------------
+   STATE
+--------------------------------------------------------------------- */
+let state;
+function freshState(){
+  return {
+    player: { x:0, y:0, z:0, hp:100, maxHp:100, weaponTier:0, armorTier:0, atkCooldown:0, facing:0 },
+    res: { wood: 10, rope: 5, scrap: 0 },
+    raft: new Map(),
+    floaters: [],
+    enemies: [],
+    crafting: null,
+    time: 0,
+    level: 1,
+    spawnTimer: 3,
+    floaterTimer: 1,
+    over: false,
+  };
+}
+
+function weaponOf(){ return WEAPON_TIERS[state.player.weaponTier]; }
+function armorOf(){ return ARMOR_TIERS[state.player.armorTier]; }
+function playerDmg(){ return weaponOf().dmg; }
+function playerRange(){ return weaponOf().range; }
+function playerArmor(){ return armorOf().armor; }
+
+/* ---------------------------------------------------------------------
+   THREE SETUP
+--------------------------------------------------------------------- */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const fogColor = 0x8fd0e8;
+scene.fog = new THREE.Fog(fogColor, 30, 110);
+scene.background = new THREE.Color(fogColor);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 500);
+const camOffset = new THREE.Vector3(0, 15, 13);
+const camTarget = new THREE.Vector3();
+const camPos = new THREE.Vector3();
+
+scene.add(new THREE.AmbientLight(0xbfd9ea, 0.75));
+const sun = new THREE.DirectionalLight(0xfff2d0, 0.9);
+sun.position.set(30, 50, 20);
+scene.add(sun);
+
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ---------- Ocean ---------- */
+const oceanGeo = new THREE.PlaneGeometry(400, 400, 90, 90);
+oceanGeo.rotateX(-Math.PI/2);
+const oceanMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime: { value: 0 },
+    uColorDeep: { value: new THREE.Color(0x0a5a86) },
+    uColorShallow: { value: new THREE.Color(0x3fb8d6) },
+    uSunDir: { value: new THREE.Vector3(0.4, 0.8, 0.3).normalize() },
+  },
+  vertexShader: `
+    uniform float uTime;
+    varying float vHeight;
+    varying vec3 vNormalW;
+    void main(){
+      vec3 pos = position;
+      float t = uTime;
+      float h = sin(pos.x*0.28 + t*1.1)*0.13 + sin(pos.z*0.33 - t*1.4)*0.1 + sin((pos.x+pos.z)*0.18 + t*0.7)*0.08;
+      float dhdx = cos(pos.x*0.28 + t*1.1)*0.28*0.13 + cos((pos.x+pos.z)*0.18 + t*0.7)*0.18*0.08;
+      float dhdz = cos(pos.z*0.33 - t*1.4)*(-0.33)*0.1 + cos((pos.x+pos.z)*0.18 + t*0.7)*0.18*0.08;
+      pos.y += h;
+      vHeight = h;
+      vec3 n = normalize(vec3(-dhdx, 1.0, -dhdz));
+      vNormalW = n;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uColorDeep;
+    uniform vec3 uColorShallow;
+    uniform vec3 uSunDir;
+    varying float vHeight;
+    varying vec3 vNormalW;
+    void main(){
+      float diff = clamp(dot(normalize(vNormalW), normalize(uSunDir)), 0.0, 1.0);
+      vec3 base = mix(uColorDeep, uColorShallow, clamp(vHeight*0.9+0.5, 0.0, 1.0));
+      vec3 col = base * (0.55 + 0.55*diff);
+      float spec = pow(diff, 40.0) * 0.5;
+      col += spec;
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `,
+});
+const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+scene.add(ocean);
+
+/* ---------------------------------------------------------------------
+   RAFT
+--------------------------------------------------------------------- */
+const raftGroup = new THREE.Group();
+scene.add(raftGroup);
+const tileGeo = new THREE.BoxGeometry(TILE*0.96, 0.5, TILE*0.96);
+
+function tileKey(gx,gz){ return gx+','+gz; }
+
+function createTile(gx, gz){
+  const mat = new THREE.MeshStandardMaterial({ color: 0xb08050, roughness: 0.9 });
+  const mesh = new THREE.Mesh(tileGeo, mat);
+  mesh.position.set(gx*TILE, RAFT_Y, gz*TILE);
+  raftGroup.add(mesh);
+  const tile = { gx, gz, hp: TILE_MAX_HP, maxHp: TILE_MAX_HP, mesh, mat };
+  state.raft.set(tileKey(gx,gz), tile);
+  return tile;
+}
+
+function removeTile(tile){
+  raftGroup.remove(tile.mesh);
+  tile.mesh.geometry.dispose ? null : null;
+  tile.mat.dispose();
+  state.raft.delete(tileKey(tile.gx, tile.gz));
+}
+
+function initRaft(){
+  for(let gx=-1; gx<=1; gx++){
+    for(let gz=-1; gz<=1; gz++){
+      createTile(gx, gz);
+    }
+  }
+}
+
+function tileAt(gx,gz){ return state.raft.get(tileKey(gx,gz)); }
+
+function isEdgeTile(t){
+  return !tileAt(t.gx+1,t.gz) || !tileAt(t.gx-1,t.gz) || !tileAt(t.gx,t.gz+1) || !tileAt(t.gx,t.gz-1);
+}
+
+function edgeTiles(){
+  const list = [];
+  state.raft.forEach(t => { if(isEdgeTile(t)) list.push(t); });
+  return list;
+}
+
+function findBestBuildSpot(){
+  // BFS neighbor cells of existing tiles that are empty
+  const candidates = new Map();
+  state.raft.forEach(t => {
+    const nbs = [[t.gx+1,t.gz],[t.gx-1,t.gz],[t.gx,t.gz+1],[t.gx,t.gz-1]];
+    nbs.forEach(([nx,nz]) => {
+      if(!tileAt(nx,nz)){
+        const k = tileKey(nx,nz);
+        candidates.set(k, {gx:nx, gz:nz});
+      }
+    });
+  });
+  let best = null, bestDist = Infinity;
+  candidates.forEach(c => {
+    const dx = c.gx*TILE - state.player.x, dz = c.gz*TILE - state.player.z;
+    const d = dx*dx+dz*dz;
+    if(d < bestDist){ bestDist = d; best = c; }
+  });
+  return best;
+}
+
+function updateTileVisual(t){
+  const frac = Math.max(0, t.hp / t.maxHp);
+  const base = new THREE.Color(0xb08050);
+  const dark = new THREE.Color(0x2c1c10);
+  const c = base.clone().lerp(dark, 1-frac);
+  t.mat.color.copy(c);
+}
+
+function playerOnRaft(){
+  const gx = Math.round(state.player.x / TILE);
+  const gz = Math.round(state.player.z / TILE);
+  const t = tileAt(gx,gz);
+  if(!t) return null;
+  const dx = Math.abs(state.player.x - gx*TILE);
+  const dz = Math.abs(state.player.z - gz*TILE);
+  if(dx < TILE*0.55 && dz < TILE*0.55) return t;
+  return null;
+}
+
+/* ---------------------------------------------------------------------
+   PLAYER MODEL
+--------------------------------------------------------------------- */
+const playerGroup = new THREE.Group();
+scene.add(playerGroup);
+
+const skinMat = new THREE.MeshStandardMaterial({ color: 0xe8b98a, roughness: 0.8 });
+const hairMat = new THREE.MeshStandardMaterial({ color: 0x4a2e1a, roughness: 0.9 });
+const shoeMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.8 });
+let overallMat = new THREE.MeshStandardMaterial({ color: ARMOR_TIERS[0].color, roughness: 0.85 });
+
+const rightArmGroup = new THREE.Group();
+const leftArmGroup = new THREE.Group();
+const leftLegGroup = new THREE.Group();
+const rightLegGroup = new THREE.Group();
+let weaponMesh = null;
+
+function buildPlayerModel(){
+  while(playerGroup.children.length) playerGroup.remove(playerGroup.children[0]);
+
+  // Torso (overall)
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.9, 0.5), overallMat);
+  torso.position.y = 1.15;
+  playerGroup.add(torso);
+
+  // Shirt (visible above overall bib)
+  const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.55), new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:0.9}));
+  shirt.position.y = 1.62;
+  playerGroup.add(shirt);
+
+  // Straps
+  [-0.28, 0.28].forEach(sx => {
+    const strap = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.55,0.12), overallMat);
+    strap.position.set(sx, 1.7, 0.1);
+    strap.rotation.x = -0.15;
+    playerGroup.add(strap);
+  });
+
+  // Head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 16), skinMat);
+  head.position.y = 2.15;
+  playerGroup.add(head);
+
+  // Hair cap
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 12, 0, Math.PI*2, 0, Math.PI*0.55), hairMat);
+  hairCap.position.y = 2.22;
+  playerGroup.add(hairCap);
+
+  // Braids (Zöpfe)
+  [-0.3, 0.3].forEach(sx => {
+    const braid = new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.05,0.55,8), hairMat);
+    braid.position.set(sx, 1.95, -0.15);
+    braid.rotation.x = 0.3;
+    playerGroup.add(braid);
+  });
+
+  // Arms
+  leftArmGroup.position.set(-0.55, 1.65, 0);
+  rightArmGroup.position.set(0.55, 1.65, 0);
+  [leftArmGroup, rightArmGroup].forEach(g => { while(g.children.length) g.remove(g.children[0]); });
+  const armGeo = new THREE.CylinderGeometry(0.13,0.13,0.7,8);
+  const leftArm = new THREE.Mesh(armGeo, skinMat);
+  leftArm.position.y = -0.35;
+  leftArmGroup.add(leftArm);
+  const rightArm = new THREE.Mesh(armGeo, skinMat);
+  rightArm.position.y = -0.35;
+  rightArmGroup.add(rightArm);
+  playerGroup.add(leftArmGroup, rightArmGroup);
+
+  // Legs
+  leftLegGroup.position.set(-0.22, 1.0, 0);
+  rightLegGroup.position.set(0.22, 1.0, 0);
+  [leftLegGroup, rightLegGroup].forEach(g => { while(g.children.length) g.remove(g.children[0]); });
+  const legGeo = new THREE.CylinderGeometry(0.16,0.16,0.75,8);
+  const leftLeg = new THREE.Mesh(legGeo, overallMat);
+  leftLeg.position.y = -0.38;
+  leftLegGroup.add(leftLeg);
+  const rightLeg = new THREE.Mesh(legGeo, overallMat);
+  rightLeg.position.y = -0.38;
+  rightLegGroup.add(rightLeg);
+
+  const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.18,0.34), shoeMat);
+  leftShoe.position.y = -0.78;
+  leftLegGroup.add(leftShoe);
+  const rightShoe = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.18,0.34), shoeMat);
+  rightShoe.position.y = -0.78;
+  rightLegGroup.add(rightShoe);
+
+  playerGroup.add(leftLegGroup, rightLegGroup);
+
+  updateWeaponModel();
+}
+
+function updateWeaponModel(){
+  if(weaponMesh){ rightArmGroup.remove(weaponMesh); }
+  const w = weaponOf();
+  const g = new THREE.Group();
+  if(w.id === 'kriegsaxt'){
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.9,6), new THREE.MeshStandardMaterial({color:0x5a3a20}));
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.32,0.3,0.06), new THREE.MeshStandardMaterial({color:0xaab0b8, metalness:0.6, roughness:0.4}));
+    blade.position.set(0.15, 0.4, 0);
+    g.add(shaft, blade);
+  } else if(w.id === 'harpune'){
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,1.1,6), new THREE.MeshStandardMaterial({color:0x666666, metalness:0.5}));
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.09,0.35,8), new THREE.MeshStandardMaterial({color:0xdddddd, metalness:0.7, roughness:0.3}));
+    tip.position.y = 0.7;
+    g.add(shaft, tip);
+  } else if(w.id === 'eisenspeer'){
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,1.0,6), new THREE.MeshStandardMaterial({color:0x7a5230}));
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.08,0.3,8), new THREE.MeshStandardMaterial({color:0xb5bcc4, metalness:0.6}));
+    tip.position.y = 0.62;
+    g.add(shaft, tip);
+  } else {
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.9,6), new THREE.MeshStandardMaterial({color:0x8b5a2b}));
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.07,0.25,8), new THREE.MeshStandardMaterial({color:0xc9c2b4}));
+    tip.position.y = 0.55;
+    g.add(shaft, tip);
+  }
+  g.rotation.z = Math.PI*0.15;
+  g.position.set(0.05, -0.15, 0.15);
+  weaponMesh = g;
+  rightArmGroup.add(weaponMesh);
+}
+
+function updateArmorModel(){
+  const a = armorOf();
+  overallMat.color.set(a.color);
+  overallMat.metalness = a.id === 'metall' ? 0.5 : 0;
+  overallMat.roughness = a.id === 'metall' ? 0.4 : 0.85;
+}
+
+/* ---------------------------------------------------------------------
+   FLOATERS (Treibgut)
+--------------------------------------------------------------------- */
+const FLOATER_TYPES = [
+  { type:'wood', ic:'🪵', weight:5, color:0x8b5a2b },
+  { type:'rope', ic:'🧵', weight:2, color:0xd9c48a },
+  { type:'scrap', ic:'⚙️', weight:2, color:0x8f97a3 },
+];
+
+function makeFloaterMesh(type){
+  let mesh;
+  if(type === 'wood'){
+    mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,1.1,8), new THREE.MeshStandardMaterial({color:0x8b5a2b, roughness:0.9}));
+    mesh.rotation.z = Math.PI/2;
+  } else if(type === 'rope'){
+    mesh = new THREE.Mesh(new THREE.TorusGeometry(0.28,0.09,8,16), new THREE.MeshStandardMaterial({color:0xd9c48a, roughness:0.8}));
+    mesh.rotation.x = Math.PI/2;
+  } else {
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.3,0.4), new THREE.MeshStandardMaterial({color:0x8f97a3, metalness:0.5, roughness:0.5}));
+  }
+  return mesh;
+}
+
+function spawnFloater(){
+  if(state.floaters.length >= MAX_FLOATERS) return;
+  const roll = Math.random() * 9;
+  let type = 'wood';
+  if(roll > 5 && roll <= 7) type = 'rope';
+  else if(roll > 7) type = 'scrap';
+  const ang = Math.random()*Math.PI*2;
+  const dist = 10 + Math.random()*16;
+  const x = state.player.x + Math.cos(ang)*dist;
+  const z = state.player.z + Math.sin(ang)*dist;
+  const mesh = makeFloaterMesh(type);
+  mesh.position.set(x, 0.3, z);
+  scene.add(mesh);
+  state.floaters.push({ type, x, z, y:0.3, bob: Math.random()*Math.PI*2, vx:(Math.random()-0.5)*0.3, vz:(Math.random()-0.5)*0.3, mesh });
+}
+
+function collectFloater(f){
+  state.res[f.type] += (f.type==='wood') ? (3+Math.floor(Math.random()*3)) : (1+Math.floor(Math.random()*2));
+  scene.remove(f.mesh);
+  const idx = state.floaters.indexOf(f);
+  if(idx>=0) state.floaters.splice(idx,1);
+  showToast('+' + (f.type==='wood'?'🪵':f.type==='rope'?'🧵':'⚙️'));
+}
+
+/* ---------------------------------------------------------------------
+   ENEMIES
+--------------------------------------------------------------------- */
+function makeSharkMesh(){
+  const g = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x5b7a8c, roughness: 0.7 });
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 10), bodyMat);
+  body.scale.set(1.8, 0.75, 0.85);
+  g.add(body);
+  const fin = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.55, 4), bodyMat);
+  fin.position.set(0, 0.55, 0);
+  fin.rotation.x = Math.PI;
+  g.add(fin);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.6, 4), bodyMat);
+  tail.position.set(-0.95, 0.1, 0);
+  tail.rotation.z = Math.PI/2;
+  g.add(tail);
+  const eyeGeo = new THREE.SphereGeometry(0.06, 6, 6);
+  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+  [-0.18,0.18].forEach(ez=>{
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
+    eye.position.set(0.85, 0.15, ez*0.55);
+    g.add(eye);
+  });
+  return g;
+}
+
+function makeZombieMesh(){
+  const g = new THREE.Group();
+  const skinM = new THREE.MeshStandardMaterial({ color: 0x6a8f5a, roughness: 0.9 });
+  const clothM = new THREE.MeshStandardMaterial({ color: 0x4a4a3a, roughness: 0.9 });
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.8,0.4), clothM);
+  torso.position.y = 1.05;
+  g.add(torso);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,10,10), skinM);
+  head.position.y = 1.65;
+  g.add(head);
+  [-0.4,0.4].forEach(sx=>{
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.65,6), skinM);
+    arm.position.set(sx, 1.05, 0);
+    arm.rotation.z = sx>0 ? -0.3 : 0.3;
+    g.add(arm);
+  });
+  [-0.16,0.16].forEach(sx=>{
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,0.7,6), clothM);
+    leg.position.set(sx, 0.45, 0);
+    g.add(leg);
+  });
+  return g;
+}
+
+function spawnEnemy(){
+  if(state.enemies.length >= MAX_ENEMIES) return;
+  const type = Math.random() < 0.5 ? 'shark' : 'zombie';
+  const ang = Math.random()*Math.PI*2;
+  const dist = 34 + Math.random()*10;
+  const x = Math.cos(ang)*dist, z = Math.sin(ang)*dist;
+  const lvl = state.level;
+  const mesh = type === 'shark' ? makeSharkMesh() : makeZombieMesh();
+  mesh.position.set(x, type==='shark'?0.15:0, z);
+  scene.add(mesh);
+  const baseHp = type === 'shark' ? 40 : 30;
+  const baseSpeed = type === 'shark' ? 3.4 : 1.9;
+  const baseDmg = type === 'shark' ? 14 : 8;
+  const enemy = {
+    type, x, z, hp: baseHp + (lvl-1)*12, maxHp: baseHp + (lvl-1)*12,
+    speed: baseSpeed + (lvl-1)*0.12, dmg: baseDmg + (lvl-1)*1.5,
+    cooldown: 0, target: null, mesh, flash: 0,
+  };
+  state.enemies.push(enemy);
+}
+
+function killEnemy(e){
+  scene.remove(e.mesh);
+  const idx = state.enemies.indexOf(e);
+  if(idx>=0) state.enemies.splice(idx,1);
+  if(e.type === 'zombie'){
+    state.res.wood += 3 + Math.floor(Math.random()*3);
+    showToast('Zombie besiegt +🪵');
+  } else {
+    state.res.scrap += 2 + Math.floor(Math.random()*3);
+    state.res.rope += 1 + Math.floor(Math.random()*2);
+    showToast('Hai besiegt +⚙️🧵');
+  }
+}
+
+/* ---------------------------------------------------------------------
+   INPUT: JOYSTICK
+--------------------------------------------------------------------- */
+const joyBase = document.getElementById('joyBase');
+const joyKnob = document.getElementById('joyKnob');
+let joyActive = false, joyId = null, joyVec = {x:0,y:0};
+const JOY_MAX = 40;
+
+function joyRect(){ return joyBase.getBoundingClientRect(); }
+
+joyBase.addEventListener('pointerdown', e => {
+  joyActive = true; joyId = e.pointerId;
+  joyBase.setPointerCapture(joyId);
+  updateJoy(e);
+});
+joyBase.addEventListener('pointermove', e => { if(joyActive && e.pointerId === joyId) updateJoy(e); });
+function endJoy(e){
+  if(joyId !== null && e.pointerId !== joyId) return;
+  joyActive = false; joyId = null; joyVec.x = 0; joyVec.y = 0;
+  joyKnob.style.transform = 'translate(0px,0px)';
+}
+joyBase.addEventListener('pointerup', endJoy);
+joyBase.addEventListener('pointercancel', endJoy);
+
+function updateJoy(e){
+  const r = joyRect();
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  let dx = e.clientX - cx, dy = e.clientY - cy;
+  const len = Math.hypot(dx,dy);
+  if(len > JOY_MAX){ dx = dx/len*JOY_MAX; dy = dy/len*JOY_MAX; }
+  joyKnob.style.transform = `translate(${dx}px,${dy}px)`;
+  joyVec.x = dx / JOY_MAX;
+  joyVec.y = dy / JOY_MAX;
+}
+
+/* Keyboard */
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+function getMoveVector(){
+  let mx = joyVec.x, mz = joyVec.y;
+  if(keys['w'] || keys['arrowup']) mz -= 1;
+  if(keys['s'] || keys['arrowdown']) mz += 1;
+  if(keys['a'] || keys['arrowleft']) mx -= 1;
+  if(keys['d'] || keys['arrowright']) mx += 1;
+  const len = Math.hypot(mx,mz);
+  if(len > 1){ mx/=len; mz/=len; }
+  return {x:mx, z:mz, len: Math.min(len,1)};
+}
+
+/* ---------------------------------------------------------------------
+   TAP TO ATTACK / COLLECT (raycast)
+--------------------------------------------------------------------- */
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+
+function findRootIn(obj, list){
+  let o = obj;
+  while(o){
+    if(list.indexOf(o) >= 0) return o;
+    o = o.parent;
+  }
+  return null;
+}
+
+canvas.addEventListener('pointerdown', e => {
+  if(state.over) return;
+  if(document.getElementById('modalOverlay').classList.contains('open')) return;
+  ndc.x = (e.clientX / window.innerWidth) * 2 - 1;
+  ndc.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+
+  const enemyMeshes = state.enemies.map(en => en.mesh);
+  const hitsEnemy = raycaster.intersectObjects(enemyMeshes, true);
+  if(hitsEnemy.length){
+    const root = findRootIn(hitsEnemy[0].object, enemyMeshes);
+    const enemy = state.enemies.find(en => en.mesh === root);
+    if(enemy){ tryAttack(enemy); return; }
+  }
+
+  const floaterMeshes = state.floaters.map(f => f.mesh);
+  const hitsFloat = raycaster.intersectObjects(floaterMeshes, true);
+  if(hitsFloat.length){
+    const root = findRootIn(hitsFloat[0].object, floaterMeshes);
+    const floater = state.floaters.find(f => f.mesh === root);
+    if(floater){
+      const d = Math.hypot(floater.x-state.player.x, floater.z-state.player.z);
+      if(d <= PICKUP_RANGE) collectFloater(floater);
+      else showToast('Zu weit weg');
+    }
+  }
+});
+
+function tryAttack(enemy){
+  if(state.player.atkCooldown > 0) return;
+  const d = Math.hypot(enemy.x-state.player.x, enemy.z-state.player.z);
+  if(d > playerRange()){ showToast('Außer Reichweite'); return; }
+  state.player.atkCooldown = 0.55;
+  enemy.hp -= playerDmg();
+  enemy.flash = 0.15;
+  if(enemy.hp <= 0){ killEnemy(enemy); }
+}
+
+/* ---------------------------------------------------------------------
+   BUILD BUTTON
+--------------------------------------------------------------------- */
+document.getElementById('buildBtn').addEventListener('click', () => {
+  buildTile();
+});
+function buildTile(){
+  if(state.res.wood < BUILD_COST){ showToast('Nicht genug 🪵'); return; }
+  const spot = findBestBuildSpot();
+  if(!spot){ showToast('Kein Platz'); return; }
+  state.res.wood -= BUILD_COST;
+  createTile(spot.gx, spot.gz);
+  showToast('Kachel gebaut');
+}
+
+/* ---------------------------------------------------------------------
+   TOAST
+--------------------------------------------------------------------- */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 1200);
+}
+
+/* ---------------------------------------------------------------------
+   MODAL / CRAFTING UI
+--------------------------------------------------------------------- */
+const modalOverlay = document.getElementById('modalOverlay');
+document.getElementById('invBtn').addEventListener('click', () => openModal('inv'));
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modalOverlay.addEventListener('click', e => { if(e.target === modalOverlay) closeModal(); });
+
+document.querySelectorAll('.tabBtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.modalTabPanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'craft') renderCraftTab();
+    if(btn.dataset.tab === 'char') renderCharTab();
+    if(btn.dataset.tab === 'inv') renderInvTab();
+  });
+});
+
+function openModal(tab){
+  modalOverlay.classList.add('open');
+  document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.modalTabPanel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+tab));
+  renderInvTab(); renderCraftTab(); renderCharTab();
+}
+function closeModal(){ modalOverlay.classList.remove('open'); }
+
+function renderInvTab(){
+  document.getElementById('invWood').textContent = state.res.wood;
+  document.getElementById('invRope').textContent = state.res.rope;
+  document.getElementById('invScrap').textContent = state.res.scrap;
+  const w = weaponOf(), a = armorOf();
+  document.getElementById('eqWeaponName').textContent = w.name;
+  document.getElementById('eqWeaponStat').textContent = `Schaden ${w.dmg} · Reichweite ${w.range}`;
+  document.getElementById('eqArmorName').textContent = a.name;
+  document.getElementById('eqArmorStat').textContent = `Rüstung ${a.armor}`;
+}
+
+let selectedRecipe = null;
+
+function allRecipes(){
+  const list = [];
+  WEAPON_TIERS.forEach((w, i) => {
+    if(i === 0) return;
+    list.push({ cat:'Waffen', kind:'weapon', tierIndex:i, ...w, locked: i > state.player.weaponTier+1, owned: i <= state.player.weaponTier, duration: 4 });
+  });
+  ARMOR_TIERS.forEach((a, i) => {
+    if(i === 0) return;
+    list.push({ cat:'Rüstung', kind:'armor', tierIndex:i, ...a, locked: i > state.player.armorTier+1, owned: i <= state.player.armorTier, duration: 4 });
+  });
+  BUILD_RECIPES.forEach(b => {
+    list.push({ cat:'Bau', kind:b.kind, ...b, locked:false, owned:false });
+  });
+  return list;
+}
+
+function renderCraftTab(){
+  const listEl = document.getElementById('recipeList');
+  listEl.innerHTML = '';
+  const recipes = allRecipes();
+  const cats = ['Waffen','Rüstung','Bau'];
+  cats.forEach(cat => {
+    const header = document.createElement('div');
+    header.className = 'sectionTitle';
+    header.textContent = cat;
+    listEl.appendChild(header);
+    recipes.filter(r=>r.cat===cat).forEach(r => {
+      const item = document.createElement('div');
+      item.className = 'recipeItem' + (r.locked ? ' locked' : '') + (selectedRecipe && selectedRecipe.id===r.id ? ' selected' : '');
+      item.innerHTML = `<span class="ic">${r.ic}</span><span class="name">${r.name}</span>${r.owned ? '<span class="owned">Ausgerüstet</span>' : ''}`;
+      item.addEventListener('click', () => {
+        if(r.locked) { showToast('Vorherige Stufe zuerst herstellen'); return; }
+        selectedRecipe = r;
+        renderCraftTab();
+        renderRecipeDetail(r);
+      });
+      listEl.appendChild(item);
+    });
+  });
+  if(selectedRecipe) renderRecipeDetail(selectedRecipe);
+}
+
+function haveEnough(cost){
+  if(!cost) return true;
+  return Object.keys(cost).every(k => state.res[k] >= cost[k]);
+}
+
+function renderRecipeDetail(r){
+  const el = document.getElementById('recipeDetail');
+  const cost = r.cost || {};
+  const costRows = Object.keys(cost).map(k => {
+    const need = cost[k], have = state.res[k];
+    const ok = have >= need;
+    const ic = k==='wood'?'🪵':k==='rope'?'🧵':'⚙️';
+    const label = k==='wood'?'Holz':k==='rope'?'Seil':'Schrott';
+    return `<div class="costRow ${ok?'ok':'bad'}"><span>${ic} ${label}</span><span>${have} / ${need}</span></div>`;
+  }).join('');
+  const canCraft = haveEnough(cost) && !state.crafting && !r.owned && !r.locked;
+  el.innerHTML = `
+    <div class="bigIc">${r.ic}</div>
+    <div class="rName">${r.name}</div>
+    <div class="rDesc">${r.desc}</div>
+    <div class="costList">${costRows || '<div style="text-align:center;color:#7fa8c9;font-size:11px;">Keine Kosten</div>'}</div>
+    <button id="craftBtn" ${canCraft?'':'disabled'}>${r.owned ? 'Bereits ausgerüstet' : (state.crafting ? 'Wird hergestellt…' : 'Herstellen')}</button>
+    <div id="craftProgressWrap"><div id="craftProgressTrack"><div id="craftProgressFill"></div></div></div>
+  `;
+  const btn = document.getElementById('craftBtn');
+  if(btn && canCraft){
+    btn.addEventListener('click', () => startCraft(r));
+  }
+}
+
+function startCraft(r){
+  if(state.crafting) return;
+  const cost = r.cost || {};
+  if(!haveEnough(cost)) { showToast('Nicht genug Rohstoffe'); return; }
+  Object.keys(cost).forEach(k => state.res[k] -= cost[k]);
+  state.crafting = { recipe: r, duration: r.duration || 3, elapsed: 0 };
+  document.getElementById('craftProgressWrap').style.display = 'block';
+  renderInvTab();
+}
+
+function finishCraft(){
+  const r = state.crafting.recipe;
+  if(r.kind === 'weapon'){
+    state.player.weaponTier = r.tierIndex;
+    updateWeaponModel();
+    showToast('Neue Waffe: ' + r.name);
+  } else if(r.kind === 'armor'){
+    state.player.armorTier = r.tierIndex;
+    updateArmorModel();
+    showToast('Neue Rüstung: ' + r.name);
+  } else if(r.kind === 'tile'){
+    const spot = findBestBuildSpot();
+    if(spot) createTile(spot.gx, spot.gz);
+    showToast('Kachel gebaut');
+  } else if(r.kind === 'repair'){
+    let weakest = null;
+    state.raft.forEach(t => { if(t.hp < t.maxHp && (!weakest || t.hp < weakest.hp)) weakest = t; });
+    if(weakest){ weakest.hp = Math.min(weakest.maxHp, weakest.hp + 60); updateTileVisual(weakest); showToast('Kachel repariert'); }
+    else showToast('Keine Reparatur nötig');
+  }
+  state.crafting = null;
+  document.getElementById('craftProgressWrap').style.display = 'none';
+  if(!modalOverlay.classList.contains('open')) return;
+  renderCraftTab();
+  renderInvTab();
+}
+
+function renderCharTab(){
+  document.getElementById('chLevel').textContent = state.level;
+  document.getElementById('chHp').textContent = `${Math.ceil(state.player.hp)} / ${state.player.maxHp}`;
+  document.getElementById('chAtk').textContent = playerDmg();
+  document.getElementById('chDef').textContent = playerArmor();
+  document.getElementById('chRange').textContent = playerRange();
+  document.getElementById('chRes').textContent = `${state.res.wood} / ${state.res.rope} / ${state.res.scrap}`;
+  document.getElementById('chTime').textContent = formatTime(state.time);
+}
+
+/* ---------------------------------------------------------------------
+   HUD UPDATE
+--------------------------------------------------------------------- */
+function formatTime(t){
+  const m = Math.floor(t/60).toString().padStart(2,'0');
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function updateHud(){
+  document.getElementById('hpFill').style.width = Math.max(0, state.player.hp/state.player.maxHp*100) + '%';
+  let raftHp = 0, raftMax = 0;
+  state.raft.forEach(t => { raftHp += t.hp; raftMax += t.maxHp; });
+  document.getElementById('raftFill').style.width = (raftMax>0 ? raftHp/raftMax*100 : 0) + '%';
+  document.getElementById('woodCount').textContent = state.res.wood;
+  document.getElementById('ropeCount').textContent = state.res.rope;
+  document.getElementById('scrapCount').textContent = state.res.scrap;
+  document.getElementById('levelBox').textContent = 'Level ' + state.level;
+  document.getElementById('timerBox').textContent = '⏱ ' + formatTime(state.time);
+  const buildBtn = document.getElementById('buildBtn');
+  buildBtn.classList.toggle('disabled', state.res.wood < BUILD_COST);
+  if(modalOverlay.classList.contains('open')){
+    const activeTab = document.querySelector('.tabBtn.active').dataset.tab;
+    if(activeTab === 'inv') renderInvTab();
+    if(activeTab === 'char') renderCharTab();
+    if(activeTab === 'craft' && state.crafting){
+      const pct = Math.min(100, state.crafting.elapsed/state.crafting.duration*100);
+      const fill = document.getElementById('craftProgressFill');
+      if(fill) fill.style.width = pct + '%';
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------
+   GAME OVER / RESTART
+--------------------------------------------------------------------- */
+const gameOverEl = document.getElementById('gameOver');
+document.getElementById('restartBtn').addEventListener('click', resetGame);
+
+function triggerGameOver(){
+  state.over = true;
+  document.getElementById('goStats').textContent = `Überlebenszeit: ${formatTime(state.time)} · Level ${state.level}`;
+  gameOverEl.classList.add('open');
+}
+
+function clearScene(){
+  state.raft.forEach(t => { raftGroup.remove(t.mesh); t.mat.dispose(); });
+  state.floaters.forEach(f => scene.remove(f.mesh));
+  state.enemies.forEach(e => scene.remove(e.mesh));
+}
+
+function resetGame(){
+  clearScene();
+  state = freshState();
+  initRaft();
+  state.player.weaponTier = 0; state.player.armorTier = 0;
+  updateWeaponModel(); updateArmorModel();
+  playerGroup.position.set(0,RAFT_Y,0);
+  playerGroup.rotation.y = 0;
+  gameOverEl.classList.remove('open');
+  selectedRecipe = null;
+  closeModal();
+}
+
+/* ---------------------------------------------------------------------
+   MAIN LOOP
+--------------------------------------------------------------------- */
+const clock = new THREE.Clock();
+
+function updatePlayer(dt){
+  const mv = getMoveVector();
+  if(mv.len > 0.02){
+    state.player.x += mv.x * MOVE_SPEED * dt;
+    state.player.z += mv.z * MOVE_SPEED * dt;
+    const targetAngle = Math.atan2(mv.x, mv.z);
+    let cur = state.player.facing;
+    let diff = targetAngle - cur;
+    while(diff > Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+    state.player.facing = cur + diff * Math.min(1, dt*8);
+  }
+  playerGroup.position.set(state.player.x, RAFT_Y, state.player.z);
+  playerGroup.rotation.y = state.player.facing;
+
+  // walk animation
+  const moving = mv.len > 0.05;
+  const t = performance.now()*0.008;
+  const swing = moving ? Math.sin(t)*0.5 : 0;
+  leftArmGroup.rotation.x = swing;
+  rightArmGroup.rotation.x = -swing*0.6;
+  leftLegGroup.rotation.x = -swing;
+  rightLegGroup.rotation.x = swing;
+
+  const onTile = playerOnRaft();
+  if(onTile){
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + RAFT_REGEN_PER_SEC*dt);
+  } else {
+    state.player.hp -= WATER_DAMAGE_PER_SEC*dt;
+  }
+  if(state.player.atkCooldown > 0) state.player.atkCooldown -= dt;
+
+  if(state.player.hp <= 0 && !state.over){
+    triggerGameOver();
+  }
+}
+
+function updateCamera(dt){
+  camTarget.set(state.player.x, 1.2, state.player.z);
+  camPos.set(state.player.x + camOffset.x, camOffset.y, state.player.z + camOffset.z);
+  camera.position.lerp(camPos, Math.min(1, dt*4));
+  const lookAt = new THREE.Vector3().copy(camera.position).sub(camOffset);
+  camera.lookAt(state.player.x, 1.2, state.player.z);
+}
+
+function updateFloaters(dt){
+  state.floaters.forEach(f => {
+    f.bob += dt*2;
+    f.x += f.vx*dt;
+    f.z += f.vz*dt;
+    f.mesh.position.set(f.x, 0.25 + Math.sin(f.bob)*0.08, f.z);
+    f.mesh.rotation.y += dt*0.3;
+  });
+}
+
+function nearestEdgeTile(x,z){
+  let best = null, bestD = Infinity;
+  state.raft.forEach(t => {
+    if(!isEdgeTile(t)) return;
+    const dx = t.gx*TILE-x, dz = t.gz*TILE-z;
+    const d = dx*dx+dz*dz;
+    if(d < bestD){ bestD = d; best = t; }
+  });
+  return best;
+}
+
+function updateEnemies(dt){
+  state.enemies.forEach(e => {
+    if(e.flash > 0){
+      e.flash -= dt;
+      e.mesh.traverse(o=>{ if(o.material) o.material.emissive = new THREE.Color(e.flash>0?0x883333:0x000000); });
+    }
+    if(e.cooldown > 0) e.cooldown -= dt;
+
+    if(e.type === 'shark'){
+      const target = nearestEdgeTile(e.x, e.z);
+      if(!target){ return; }
+      const tx = target.gx*TILE, tz = target.gz*TILE;
+      const dx = tx-e.x, dz = tz-e.z;
+      const d = Math.hypot(dx,dz);
+      if(d > 2.2){
+        e.x += dx/d*e.speed*dt;
+        e.z += dz/d*e.speed*dt;
+        e.mesh.rotation.y = Math.atan2(dx,dz);
+      } else if(e.cooldown <= 0){
+        target.hp -= e.dmg;
+        updateTileVisual(target);
+        e.cooldown = 1.0;
+        if(target.hp <= 0){ removeTile(target); }
+      }
+      e.mesh.position.set(e.x, 0.15 + Math.sin(performance.now()*0.003+e.x)*0.08, e.z);
+    } else {
+      const dx = state.player.x-e.x, dz = state.player.z-e.z;
+      const d = Math.hypot(dx,dz);
+      if(d > 1.6){
+        e.x += dx/d*e.speed*dt;
+        e.z += dz/d*e.speed*dt;
+        e.mesh.rotation.y = Math.atan2(dx,dz);
+      } else if(e.cooldown <= 0){
+        const dmg = Math.max(1, e.dmg - playerArmor());
+        state.player.hp -= dmg;
+        e.cooldown = 1.1;
+        showToast('Zombie greift an! -' + dmg);
+        if(state.player.hp <= 0 && !state.over) triggerGameOver();
+      }
+      e.mesh.position.set(e.x, 0, e.z);
+    }
+  });
+
+  if(state.raft.size === 0 && !state.over){
+    triggerGameOver();
+  }
+}
+
+function updateCrafting(dt){
+  if(state.crafting){
+    state.crafting.elapsed += dt;
+    if(state.crafting.elapsed >= state.crafting.duration){
+      finishCraft();
+    }
+  }
+}
+
+function updateDifficulty(dt){
+  state.time += dt;
+  state.level = 1 + Math.floor(state.time/30);
+
+  state.spawnTimer -= dt;
+  const interval = Math.max(2.2, 7 - state.level*0.4);
+  if(state.spawnTimer <= 0){
+    spawnEnemy();
+    state.spawnTimer = interval + Math.random()*1.5;
+  }
+
+  state.floaterTimer -= dt;
+  if(state.floaterTimer <= 0){
+    spawnFloater();
+    state.floaterTimer = 2 + Math.random()*2.5;
+  }
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, clock.getDelta());
+  oceanMat.uniforms.uTime.value += dt;
+  ocean.position.set(state.player.x, 0, state.player.z);
+
+  if(!state.over){
+    updatePlayer(dt);
+    updateEnemies(dt);
+    updateFloaters(dt);
+    updateCrafting(dt);
+    updateDifficulty(dt);
+  }
+  updateCamera(dt);
+  updateHud();
+  renderer.render(scene, camera);
+}
+
+/* ---------------------------------------------------------------------
+   INIT
+--------------------------------------------------------------------- */
+state = freshState();
+initRaft();
+buildPlayerModel();
+animate();
+
+})();
+</script>
+</body>
+</html>
