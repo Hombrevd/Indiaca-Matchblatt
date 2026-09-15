@@ -381,6 +381,16 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 }
 .pcard.off{opacity:0;pointer-events:none}
 
+/* Querformat: das Feld dreht sich um 90°, damit die beiden Hälften
+   nebeneinander stehen – genau so, wie der Schreiber courtside neben
+   dem Netz sitzend die Mannschaften sieht. fitCourt() vertauscht dafür
+   nur Breite/Höhe der (weiterhin 5:6 grossen) Box; alles Geometrische
+   (Positionen, Rotationspfeile) dreht als Bild einfach mit – nur Text
+   wird gegengedreht, damit er lesbar bleibt. */
+.court.quer{transform:rotate(90deg)}
+.court.quer .pcard{transform:translate(-50%,-50%) rotate(-90deg)}
+.court.quer .netlbl{transform:rotate(-90deg)}
+
 /* ---------- Punkttasten ---------- */
 .ptbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 12px}
 .ptbtn{
@@ -600,6 +610,16 @@ body.has-update #game .board{margin-top:0}
 .sheet .dsc{font-size:14px;color:var(--muted);margin:0 0 14px}
 .sheet .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
 .sheet .acts .btn{flex:1 1 auto;min-width:120px}
+
+/* ---------- Unterschrift der Mannschaftsführer ---------- */
+.sigwrap{position:relative;margin-top:8px}
+.sigpad{display:block;width:100%;height:120px;border:1px dashed var(--line);border-radius:8px;
+  background:#fff;touch-action:none;cursor:crosshair}
+.sigclear{position:absolute;top:6px;right:6px;font-size:11px;padding:3px 8px;border-radius:5px;
+  border:1px solid var(--line);background:rgba(255,255,255,.85);color:#333}
+.sighint{font-size:11.5px;color:var(--muted);margin:4px 0 0}
+.sigimg{display:block;max-width:220px;max-height:90px;margin-top:6px;
+  border:1px solid var(--line);border-radius:6px;background:#fff}
 .menu{display:flex;flex-direction:column}
 .menu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
   min-height:54px;padding:12px 2px;background:none;border:none;border-bottom:1px solid var(--line);
@@ -719,6 +739,12 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <select id="cfgMaxSub"><option value="0" selected>unbegrenzt</option><option value="3">3</option><option value="6">6</option></select></div>
       <div class="field"><label class="lbl" for="cfgFirst">Erster Aufschlag</label>
         <select id="cfgFirst"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
+      <div class="field"><label class="lbl" for="cfgSide">Startseite (Seite A)</label>
+        <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
+    </div>
+    <div class="row" style="margin-top:4px;align-items:center;gap:10px">
+      <button class="btn sm" id="btnToss" type="button">🎲 Auslosen</button>
+      <span class="hint" id="tossHint" style="margin:0">Bestimmt Aufschlag und Startseite von Hand oder per Los.</span>
     </div>
   </div>
 
@@ -1166,16 +1192,32 @@ function render(){
 
 /* Das Spielfeld füllt den Platz, der nach Tafel, Bank und Tasten übrig
    bleibt – in beiden Ausrichtungen und auch dann, wenn Android die
-   Adressleiste ein- oder ausblendet. Seitenverhältnis bleibt 5:6. */
+   Adressleiste ein- oder ausblendet. Seitenverhältnis bleibt 5:6.
+   Im Querformat des Geräts wird das Feld zusätzlich um 90° gedreht
+   (siehe .court.quer), damit beide Hälften nebeneinander stehen statt
+   übereinander – so bleibt die DOM-Box immer 5:6 gross, nur Breite und
+   Höhe tauschen die Rollen, bevor die Drehung sie wieder zurücktauscht. */
+function isLandscapeCourt(){
+  try { return window.matchMedia('(orientation:landscape)').matches; } catch(e){ return false; }
+}
 function fitCourt(){
   var wrap = $('courtwrap'), c = $('court');
   if (!wrap || !c || $('game').hidden) return;
   var w = wrap.clientWidth, h = wrap.clientHeight;
   if (!w || !h) return;
-  var cw = Math.floor(Math.min(w, h * 5/6));
-  if (cw < 60) return;
-  c.style.width  = cw + 'px';
-  c.style.height = Math.round(cw * 6/5) + 'px';
+  var quer = isLandscapeCourt();
+  c.classList.toggle('quer', quer);
+  if (quer){
+    var vw = Math.floor(Math.min(w, h * 6/5));
+    if (vw < 60) return;
+    c.style.width  = Math.round(vw * 5/6) + 'px';
+    c.style.height = vw + 'px';
+  } else {
+    var cw = Math.floor(Math.min(w, h * 5/6));
+    if (cw < 60) return;
+    c.style.width  = cw + 'px';
+    c.style.height = Math.round(cw * 6/5) + 'px';
+  }
 }
 
 function renderBoard(){
@@ -1232,6 +1274,7 @@ function slotPos(team, slot){
 }
 
 function renderCourt(){
+  if (!S || $('game').hidden) return;
   var courtH = $('court').clientHeight || 1;
   for (var t=0;t<2;t++){
     var L = S.lineup[t], i;
@@ -1794,20 +1837,27 @@ function dlgEnd(){
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
-    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern bestätigt – das Spiel ist gesperrt.<br>' +
+    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern unterzeichnet – das Spiel ist gesperrt.<br>' +
          esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
          esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')</div>';
+    for (var s=0;s<2;s++){
+      if (S.confirmed[s].sig) h += '<img class="sigimg" src="'+S.confirmed[s].sig+'" alt="Unterschrift '+esc(S.confirmed[s].name)+'">';
+    }
   } else {
-    h += '<div class="divider">Bestätigung der Mannschaftsführer</div>';
+    h += '<div class="divider">Unterschrift der Mannschaftsführer</div>';
     for (var t=0;t<2;t++){
       var c = S.confirmed[t];
       h += '<div class="field"><label class="lbl" for="cf'+t+'">'+esc(S.teams[t].name)+'</label>';
       if (c){
-        h += '<p style="margin:0"><span class="tag ok">bestätigt</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
+        h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
+        if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
       } else {
         h += '<div class="row"><input type="text" id="cf'+t+'" style="flex:1;min-width:140px" ' +
-             'value="'+esc(capName(t))+'" placeholder="Name Mannschaftsführer" autocomplete="off">' +
-             '<button class="btn" type="button" data-cf="'+t+'">Bestätigen</button></div>';
+             'value="'+esc(capName(t))+'" placeholder="Name Mannschaftsführer" autocomplete="off"></div>' +
+             '<div class="sigwrap"><canvas class="sigpad" id="sig'+t+'"></canvas>' +
+             '<button class="sigclear" type="button" data-clr="'+t+'">Löschen</button></div>' +
+             '<p class="sighint">Mit dem Finger oder der Maus im Feld oben unterschreiben.</p>' +
+             '<div class="row" style="margin-top:6px"><button class="btn" type="button" data-cf="'+t+'">Unterzeichnen</button></div>';
       }
       h += '</div>';
     }
@@ -1818,12 +1868,20 @@ function dlgEnd(){
        '<button class="btn primary" data-x="new">Neues Spiel</button></div>';
 
   var bd = dlg(h, {esc:true});
+  var sigPads = {};
+  for (var it=0;it<2;it++){
+    var cvs = bd.querySelector('#sig'+it);
+    if (cvs) sigPads[it] = initSigPad(cvs);
+  }
   bd.addEventListener('click', function(e){
+    var clr = e.target.closest('[data-clr]');
+    if (clr){ var pad = sigPads[+clr.dataset.clr]; if (pad) pad.clear(); return; }
     var cf = e.target.closest('[data-cf]');
     if (cf){
       var t = +cf.dataset.cf;
       var nm = bd.querySelector('#cf'+t).value.trim() || S.teams[t].name;
-      S.confirmed[t] = { name: nm, at: iso() };
+      var pad2 = sigPads[t];
+      S.confirmed[t] = { name: nm, at: iso(), sig: pad2 ? pad2.dataUrl() : null };
       if (S.confirmed[0] && S.confirmed[1]) S.locked = true;
       archivePut(); saveNow();
       dlgEnd();
@@ -1836,6 +1894,45 @@ function dlgEnd(){
       confirmDlg('Neues Spiel','Das Spiel wandert ins Archiv und die Erfassung beginnt von vorne.','Neues Spiel', newMatch, false);
     }
   });
+}
+
+/* Unterschriften-Pad: zeichnet auf Canvas, Hintergrund immer weiss wie
+   Papier (unabhängig vom Farbschema), damit die Unterschrift überall
+   gleich aussieht. Liefert das Bild nur, wenn tatsächlich etwas
+   gezeichnet wurde – sonst bleibt die Unterschrift leer (optional). */
+function initSigPad(canvas){
+  var ctx = canvas.getContext('2d');
+  var ratio = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  var cw = Math.max(1, Math.round(rect.width)), ch = Math.max(1, Math.round(rect.height));
+  canvas.width = cw * ratio; canvas.height = ch * ratio;
+  ctx.scale(ratio, ratio);
+  ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1a1a1a';
+  var drawing = false, lastX = 0, lastY = 0, hasDrawn = false;
+  function paintBg(){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); }
+  function pos(e){
+    var r = canvas.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top];
+  }
+  canvas.addEventListener('pointerdown', function(e){
+    e.preventDefault(); drawing = true;
+    try { canvas.setPointerCapture(e.pointerId); } catch(err){}
+    var p = pos(e); lastX = p[0]; lastY = p[1];
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if (!drawing) return; e.preventDefault();
+    var p = pos(e);
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p[0],p[1]); ctx.stroke();
+    lastX = p[0]; lastY = p[1]; hasDrawn = true;
+  });
+  canvas.addEventListener('pointerup', function(){ drawing = false; });
+  canvas.addEventListener('pointercancel', function(){ drawing = false; });
+  paintBg();
+  return {
+    clear: function(){ paintBg(); hasDrawn = false; },
+    dataUrl: function(){ return hasDrawn ? canvas.toDataURL('image/png') : null; }
+  };
 }
 function capName(t){
   var c = S.teams[t].captain;
@@ -1950,12 +2047,12 @@ function reportText(st){
   }
   L.push('');
 
-  L.push('BESTÄTIGUNG');
+  L.push('UNTERSCHRIFTEN');
   L.push('-'.repeat(64));
   for (var c=0;c<2;c++){
     var cf = s.confirmed && s.confirmed[c];
     L.push('  ' + pad2(s.teams[c].name, 24) +
-           (cf ? cf.name + '   ' + fmtDate(cf.at) + ' ' + fmtTime(cf.at) : '________________________'));
+           (cf ? cf.name + (cf.sig ? ' [unterschrieben]' : '') + '   ' + fmtDate(cf.at) + ' ' + fmtTime(cf.at) : '________________________'));
   }
   L.push('');
   L.push('Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'));
@@ -2120,6 +2217,7 @@ function saveSettings(){
     theme: keep.theme, palette: keep.palette, colors: keep.colors,
     count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets,
     toLen: S.toLen, maxTimeouts: S.maxTimeouts, maxSubs: S.maxSubs, firstServer: S.firstServer,
+    startSide: S.topTeam,
     names: [S.teams[0].name, S.teams[1].name],
     meta: clone(S.meta)
   });
@@ -2140,8 +2238,18 @@ function cfg(){
     toLen: +$('cfgTo').value,
     maxTimeouts: +$('cfgMaxTo').value,
     maxSubs: +$('cfgMaxSub').value,
-    firstServer: +$('cfgFirst').value
+    firstServer: +$('cfgFirst').value,
+    startSide: +$('cfgSide').value
   };
+}
+function doToss(){
+  var srv = Math.random() < 0.5 ? 0 : 1;
+  var side = Math.random() < 0.5 ? 0 : 1;
+  $('cfgFirst').value = String(srv);
+  $('cfgSide').value = String(side);
+  var srvName = srv===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
+  var sideName = side===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
+  toast('Ausgelost: Aufschlag ' + srvName + ' · Seite A ' + sideName);
 }
 function ensurePlayers(){
   var n = +$('cfgCount').value;
@@ -2186,6 +2294,7 @@ function loadSettings(){
   if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
   if (s.maxSubs !== undefined) $('cfgMaxSub').value = s.maxSubs;
   if (s.firstServer !== undefined) $('cfgFirst').value = s.firstServer;
+  if (s.startSide !== undefined) $('cfgSide').value = s.startSide;
   if (s.names){ $('tn0').value = s.names[0]||''; $('tn1').value = s.names[1]||''; }
   if (s.meta){
     $('mCompetition').value = s.meta.competition||'';
@@ -2232,7 +2341,7 @@ function startMatch(){
     teams: teams,
     lineup: [line.slice(), line.slice()],
     points: [0,0], setsWon: [0,0], sets: [],
-    serving: c.firstServer, firstServer: c.firstServer, topTeam: 0,
+    serving: c.firstServer, firstServer: c.firstServer, topTeam: c.startSide,
     setNo: 1, setStartedAt: iso(), sideSwapped: false,
     subs: [0,0], setSubs: [0,0], timeouts: [0,0],
     log: [], finished: false, result: null,
@@ -2399,6 +2508,7 @@ function wire(){
 
   $('btnStart').addEventListener('click', function(){ unlockAudio(); startMatch(); });
   $('btnArchive').addEventListener('click', dlgArchive);
+  $('btnToss').addEventListener('click', doToss);
   $('btnUndo').addEventListener('click', undo);
   $('btnLog').addEventListener('click', function(){ if (!dlgOpen) dlgLog(); });
   $('btnTools').addEventListener('click', dlgTools);
