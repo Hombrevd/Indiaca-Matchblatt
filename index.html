@@ -706,8 +706,8 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <input type="text" id="tn0" placeholder="Heim" autocomplete="off"></div>
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl0"></ul>
-    <div class="row"><button class="btn sm" type="button" data-add="0">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer</p>
+    <div class="row"><button class="btn sm" type="button" id="addBench0" data-add="0">+ Ersatzspieler</button></div>
+    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card teamcard" id="teamcard1" style="--tc:var(--guest);--tc-on:var(--guest-on)">
@@ -716,8 +716,8 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <input type="text" id="tn1" placeholder="Gast" autocomplete="off"></div>
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl1"></ul>
-    <div class="row"><button class="btn sm" type="button" data-add="1">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer</p>
+    <div class="row"><button class="btn sm" type="button" id="addBench1" data-add="1">+ Ersatzspieler</button></div>
+    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card">
@@ -2251,10 +2251,12 @@ function doToss(){
   var sideName = side===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
   toast('Ausgelost: Aufschlag ' + srvName + ' · Seite A ' + sideName);
 }
+var MAX_BENCH = 5;
 function ensurePlayers(){
   var n = +$('cfgCount').value;
   for (var t=0;t<2;t++){
     while (P[t].length < n) P[t].push('');
+    while (P[t].length > n + MAX_BENCH) P[t].pop();
     if (CAP[t] >= P[t].length) CAP[t] = 0;
   }
 }
@@ -2275,6 +2277,10 @@ function renderSetup(){
            '</li>';
     }
     $('pl'+t).innerHTML = h;
+    var bench = P[t].length - n, atMax = bench >= MAX_BENCH;
+    var addBtn = $('addBench'+t);
+    addBtn.disabled = atMax;
+    addBtn.textContent = atMax ? 'Ersatzbank voll (5/5)' : '+ Ersatzspieler (' + bench + '/' + MAX_BENCH + ')';
   }
 }
 function readSetupInputs(){
@@ -2489,7 +2495,13 @@ function wire(){
     var vr = e.target.closest('#vwReset, #dvReset');
     if (vr){ onViewReset(vr.id); return; }
     var a = e.target.closest('[data-add]');
-    if (a){ readSetupInputs(); P[+a.dataset.add].push(''); renderSetup(); return; }
+    if (a && !a.disabled){
+      readSetupInputs();
+      var t = +a.dataset.add, n = +$('cfgCount').value;
+      if (P[t].length - n < MAX_BENCH) P[t].push('');
+      renderSetup();
+      return;
+    }
     var d = e.target.closest('[data-del]');
     if (d){
       readSetupInputs();
