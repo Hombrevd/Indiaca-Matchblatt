@@ -620,6 +620,27 @@ body.has-update #game .board{margin-top:0}
 .sighint{font-size:11.5px;color:var(--muted);margin:4px 0 0}
 .sigimg{display:block;max-width:220px;max-height:90px;margin-top:6px;
   border:1px solid var(--line);border-radius:6px;background:#fff}
+
+/* ---------- Auslosung: der Indiaca fliegt und landet auf einer Seite ---------- */
+.tossbox{position:relative;display:flex;gap:4px;height:240px;border-radius:8px;overflow:hidden;
+  background:var(--court);border:2px solid var(--line-strong)}
+.tosshalf{flex:1;display:flex;align-items:flex-start;justify-content:center;padding-top:12px;
+  background:var(--tc);color:var(--tc-on);opacity:.72;transition:opacity .3s,box-shadow .3s;
+  font-family:"Barlow Condensed",system-ui,sans-serif;font-size:18px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.02em;text-align:center}
+.tosshalf.win{opacity:1;box-shadow:inset 0 0 0 5px var(--ball)}
+.tosshalf.lose{opacity:.35}
+.tossshuttle{position:absolute;left:50%;bottom:8px;width:88px;height:88px;
+  transform:translate(-50%,0) rotate(0deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+  pointer-events:none}
+.tossshuttle.fly{animation:tossfly 1.7s forwards}
+@keyframes tossfly{
+  0%{transform:translate(-50%,0) rotate(0deg);animation-timing-function:cubic-bezier(.2,.8,.4,1)}
+  45%{transform:translate(calc(-50% + var(--tx) * .45),-165px) rotate(380deg);animation-timing-function:cubic-bezier(.6,0,.9,.6)}
+  100%{transform:translate(calc(-50% + var(--tx)),-4px) rotate(740deg)}
+}
+.tossstep{min-height:52px;margin-top:14px;font-size:15px;line-height:1.4}
+.tossstep .acts{margin-top:10px}
 .menu{display:flex;flex-direction:column}
 .menu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
   min-height:54px;padding:12px 2px;background:none;border:none;border-bottom:1px solid var(--line);
@@ -744,7 +765,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     </div>
     <div class="row" style="margin-top:4px;align-items:center;gap:10px">
       <button class="btn sm" id="btnToss" type="button">🎲 Auslosen</button>
-      <span class="hint" id="tossHint" style="margin:0">Bestimmt Aufschlag und Startseite von Hand oder per Los.</span>
+      <span class="hint" id="tossHint" style="margin:0">Der Wurf entscheidet, wer Aufschlag oder Seite wählt – oder von Hand setzen.</span>
     </div>
   </div>
 
@@ -1981,6 +2002,7 @@ function reportText(st){
   line('Schreiber', m.scorer || '–');
   line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' · '+s.winSets+
        ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
+  line('Auslosung', s.toss || '–');
   if (m.note) line('Bemerkung', m.note);
   L.push('');
 
@@ -2242,14 +2264,69 @@ function cfg(){
     startSide: +$('cfgSide').value
   };
 }
+/* Auslosung wie am Netz: der Indiaca wird geworfen, die Seite, auf der er
+   landet, gewinnt den Wurf. Der Gewinner wählt Aufschlag oder Seite, der
+   Verlierer bekommt den Rest. Das Ergebnis landet im Bericht. */
+var TOSS = null;
+function setupTeamName(t){
+  return t===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
+}
 function doToss(){
-  var srv = Math.random() < 0.5 ? 0 : 1;
-  var side = Math.random() < 0.5 ? 0 : 1;
-  $('cfgFirst').value = String(srv);
-  $('cfgSide').value = String(side);
-  var srvName = srv===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
-  var sideName = side===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
-  toast('Ausgelost: Aufschlag ' + srvName + ' · Seite A ' + sideName);
+  var winner = Math.random() < 0.5 ? 0 : 1, loser = 1 - winner;
+  var bd = dlg('<h2>Auslosung</h2>' +
+    '<p class="dsc">Der Indiaca wird geworfen – die Seite, auf der er landet, gewinnt den Wurf.</p>' +
+    '<div class="tossbox"><div class="tosshalf" id="tossH0">'+esc(setupTeamName(0))+'</div>' +
+    '<div class="tosshalf" id="tossH1">'+esc(setupTeamName(1))+'</div>' +
+    '<img class="tossshuttle" id="tossShuttle" src="indiaca.png" alt=""></div>' +
+    '<div class="tossstep" id="tossStep"></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button></div>', {esc:true});
+  paintTeam(bd.querySelector('#tossH0'), 0);
+  paintTeam(bd.querySelector('#tossH1'), 1);
+  bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
+
+  var box = bd.querySelector('.tossbox'), sh = bd.querySelector('#tossShuttle'), step = bd.querySelector('#tossStep');
+  sh.style.setProperty('--tx', ((winner===0 ? -1 : 1) * box.clientWidth * 0.25) + 'px');
+
+  var landed = false;
+  function onLanded(){
+    if (landed) return; landed = true;
+    bd.querySelector('#tossH'+winner).classList.add('win');
+    bd.querySelector('#tossH'+loser).classList.add('lose');
+    step.innerHTML = '<p style="margin:0"><b>'+esc(setupTeamName(winner))+'</b> gewinnt den Wurf und wählt:</p>' +
+      '<div class="acts"><button class="btn primary" data-c="serve">Aufschlag</button>' +
+      '<button class="btn primary" data-c="side">Seite</button></div>';
+  }
+  sh.addEventListener('animationend', onLanded);
+  requestAnimationFrame(function(){ sh.classList.add('fly'); });
+  setTimeout(onLanded, 2200);
+
+  var choice = null;
+  step.addEventListener('click', function(e){
+    var c = e.target.closest('[data-c]');
+    if (c){
+      choice = c.dataset.c;
+      var chooser = (choice === 'serve') ? loser : winner;
+      step.innerHTML = '<p style="margin:0"><b>'+esc(setupTeamName(winner))+'</b> wählt ' +
+        (choice==='serve' ? 'den Aufschlag' : 'die Seite') + '. <b>'+esc(setupTeamName(chooser))+'</b> ' +
+        (choice==='serve' ? 'wählt die Seite:' : 'bekommt den Aufschlag – '+esc(setupTeamName(winner))+' wählt die Seite:') + '</p>' +
+        '<div class="acts"><button class="btn primary" data-s="A">Seite A</button>' +
+        '<button class="btn primary" data-s="B">Seite B</button></div>';
+      return;
+    }
+    var s = e.target.closest('[data-s]');
+    if (!s) return;
+    var server = (choice === 'serve') ? winner : loser;
+    var sideChooser = (choice === 'serve') ? loser : winner;
+    var sideA = (s.dataset.s === 'A') ? sideChooser : 1 - sideChooser;
+    $('cfgFirst').value = String(server);
+    $('cfgSide').value = String(sideA);
+    TOSS = setupTeamName(winner) + ' gewinnt den Wurf und wählt ' +
+      (choice==='serve' ? 'Aufschlag' : 'Seite ' + s.dataset.s) +
+      ' · Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA);
+    $('tossHint').textContent = TOSS;
+    closeDlg();
+    toast('Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA));
+  });
 }
 var MAX_BENCH = 5;
 function ensurePlayers(){
@@ -2345,6 +2422,7 @@ function startMatch(){
       scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
     },
     teams: teams,
+    toss: TOSS,
     lineup: [line.slice(), line.slice()],
     points: [0,0], setsWon: [0,0], sets: [],
     serving: c.firstServer, firstServer: c.firstServer, topTeam: c.startSide,
@@ -2355,6 +2433,8 @@ function startMatch(){
     started: iso()
   };
   UNDO = [];
+  TOSS = null;
+  $('tossHint').textContent = 'Der Wurf entscheidet, wer Aufschlag oder Seite wählt – oder von Hand setzen.';
   saveSettings();
   enterGame();
 }
