@@ -763,16 +763,13 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <div class="field"><label class="lbl" for="cfgMaxTo">Auszeiten je Team und Satz</label>
         <select id="cfgMaxTo"><option value="0">unbegrenzt</option><option value="1" selected>1</option><option value="2">2</option></select></div>
       <div class="field"><label class="lbl" for="cfgMaxSub">Auswechslungen je Team und Satz</label>
-        <select id="cfgMaxSub"><option value="0" selected>unbegrenzt</option><option value="3">3</option><option value="6">6</option></select></div>
+        <select id="cfgMaxSub"><option value="5" selected>5</option><option value="3">3</option><option value="6">6</option><option value="0">unbegrenzt</option></select></div>
       <div class="field"><label class="lbl" for="cfgFirst">Erster Aufschlag</label>
         <select id="cfgFirst"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
       <div class="field"><label class="lbl" for="cfgSide">Startseite (Seite A)</label>
         <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
     </div>
-    <div class="row" style="margin-top:4px;align-items:center;gap:10px">
-      <button class="btn sm" id="btnToss" type="button">🎲 Auslosen</button>
-      <span class="hint" id="tossHint" style="margin:0">Der Wurf entscheidet, wer Aufschlag oder Seite wählt – oder von Hand setzen.</span>
-    </div>
+    <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
   </div>
 
   <div class="card">
@@ -2277,18 +2274,20 @@ var TOSS = null;
 function setupTeamName(t){
   return t===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
 }
-function doToss(){
+function doToss(onDone){
   var winner = Math.random() < 0.5 ? 0 : 1, loser = 1 - winner;
   var bd = dlg('<h2>Auslosung</h2>' +
-    '<p class="dsc">Der Indiaca wird geworfen – die Seite, auf der er landet, gewinnt den Wurf.</p>' +
+    '<p class="dsc">Der Indiaca wird geworfen – die Seite, auf der er landet, gewinnt den Wurf. Danach startet das Spiel.</p>' +
     '<div class="tossbox"><div class="tosshalf" id="tossH0">'+esc(setupTeamName(0))+'</div>' +
     '<div class="tosshalf" id="tossH1">'+esc(setupTeamName(1))+'</div>' +
     '<img class="tossshuttle" id="tossShuttle" src="indiaca.png" alt=""></div>' +
     '<div class="tossstep" id="tossStep"></div>' +
-    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button></div>', {esc:true});
+    '<div class="acts"><button class="btn" data-x="no">Zurück</button>' +
+    '<button class="btn" data-x="skip">Ohne Auslosung starten</button></div>', {esc:true});
   paintTeam(bd.querySelector('#tossH0'), 0);
   paintTeam(bd.querySelector('#tossH1'), 1);
   bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
+  bd.querySelector('[data-x=skip]').onclick = function(){ TOSS = null; closeDlg(); onDone(); };
 
   var box = bd.querySelector('.tossbox'), sh = bd.querySelector('#tossShuttle'), step = bd.querySelector('#tossStep');
   sh.style.setProperty('--tx', ((winner===0 ? -1 : 1) * box.clientWidth * 0.25) + 'px');
@@ -2329,9 +2328,8 @@ function doToss(){
     TOSS = setupTeamName(winner) + ' gewinnt den Wurf und wählt ' +
       (choice==='serve' ? 'Aufschlag' : 'Seite ' + s.dataset.s) +
       ' · Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA);
-    $('tossHint').textContent = TOSS;
     closeDlg();
-    toast('Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA));
+    onDone();
   });
 }
 var MAX_BENCH = 5;
@@ -2381,7 +2379,8 @@ function loadSettings(){
   if (s.deciderTarget) $('cfgDec').value = s.deciderTarget;
   if (s.toLen) $('cfgTo').value = s.toLen;
   if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
-  if (s.maxSubs !== undefined) $('cfgMaxSub').value = s.maxSubs;
+  // 0 war die alte Vorgabe «unbegrenzt» – gespeicherte Nullen nicht übernehmen, damit die 5 greift
+  if (s.maxSubs) $('cfgMaxSub').value = s.maxSubs;
   if (s.firstServer !== undefined) $('cfgFirst').value = s.firstServer;
   if (s.startSide !== undefined) $('cfgSide').value = s.startSide;
   if (s.names){ $('tn0').value = s.names[0]||''; $('tn1').value = s.names[1]||''; }
@@ -2440,7 +2439,6 @@ function startMatch(){
   };
   UNDO = [];
   TOSS = null;
-  $('tossHint').textContent = 'Der Wurf entscheidet, wer Aufschlag oder Seite wählt – oder von Hand setzen.';
   saveSettings();
   enterGame();
 }
@@ -2604,9 +2602,8 @@ function wire(){
     if (to && !to.disabled){ unlockAudio(); dlgTimeout(+to.dataset.to); return; }
   });
 
-  $('btnStart').addEventListener('click', function(){ unlockAudio(); startMatch(); });
+  $('btnStart').addEventListener('click', function(){ unlockAudio(); doToss(startMatch); });
   $('btnArchive').addEventListener('click', dlgArchive);
-  $('btnToss').addEventListener('click', doToss);
   $('btnUndo').addEventListener('click', undo);
   $('btnLog').addEventListener('click', function(){ if (!dlgOpen) dlgLog(); });
   $('btnTools').addEventListener('click', dlgTools);
