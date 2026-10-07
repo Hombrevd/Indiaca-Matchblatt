@@ -633,11 +633,17 @@ body.has-update #game .board{margin-top:0}
 .tossshuttle{position:absolute;left:50%;bottom:8px;width:88px;height:88px;
   transform:translate(-50%,0) rotate(0deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
   pointer-events:none}
-.tossshuttle.fly{animation:tossfly 1.7s forwards}
+.tossshuttle.fly{animation:tossfly 2.8s forwards}
+/* Wurf, Scheitelpunkt, Aufprall, zwei kleiner werdende Hüpfer, Ruhe –
+   die Drehung läuft durch und wird beim Abprallen langsamer. */
 @keyframes tossfly{
   0%{transform:translate(-50%,0) rotate(0deg);animation-timing-function:cubic-bezier(.2,.8,.4,1)}
-  45%{transform:translate(calc(-50% + var(--tx) * .45),-165px) rotate(380deg);animation-timing-function:cubic-bezier(.6,0,.9,.6)}
-  100%{transform:translate(calc(-50% + var(--tx)),-4px) rotate(740deg)}
+  40%{transform:translate(calc(-50% + var(--tx) * .45),-150px) rotate(640deg);animation-timing-function:cubic-bezier(.6,0,.9,.6)}
+  64%{transform:translate(calc(-50% + var(--tx) * .88),-4px) rotate(1240deg);animation-timing-function:cubic-bezier(.2,.8,.5,1)}
+  77%{transform:translate(calc(-50% + var(--tx) * .96),-58px) rotate(1400deg);animation-timing-function:cubic-bezier(.6,0,.9,.6)}
+  87%{transform:translate(calc(-50% + var(--tx)),-4px) rotate(1500deg);animation-timing-function:cubic-bezier(.2,.8,.5,1)}
+  93%{transform:translate(calc(-50% + var(--tx)),-18px) rotate(1535deg);animation-timing-function:cubic-bezier(.6,0,.9,.6)}
+  100%{transform:translate(calc(-50% + var(--tx)),-4px) rotate(1550deg)}
 }
 .tossstep{min-height:52px;margin-top:14px;font-size:15px;line-height:1.4}
 .tossstep .acts{margin-top:10px}
@@ -2298,7 +2304,7 @@ function doToss(){
   }
   sh.addEventListener('animationend', onLanded);
   requestAnimationFrame(function(){ sh.classList.add('fly'); });
-  setTimeout(onLanded, 2200);
+  setTimeout(onLanded, 3400);
 
   var choice = null;
   step.addEventListener('click', function(e){
