@@ -1,7 +1,7 @@
 /* Indiaca Matchblatt – Service Worker
    WICHTIG: Bei jeder Auslieferung CACHE hochzählen, sonst behalten
    die Geräte die alte Fassung. */
-const CACHE = 'indiaca-v4';
+const CACHE = 'indiaca-v5';
 
 const ASSETS = [
   './',
