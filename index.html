@@ -320,7 +320,7 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
   color:var(--tc-on);font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:700;font-size:14px;padding:0;
   touch-action:none;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}
 .bchip:disabled{opacity:.4;cursor:default}
-.acts .benchrow{display:none}
+.midscore{display:none}
 .bchip.lifted{opacity:.35}
 .dragghost{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%) scale(1.2);opacity:.95;cursor:grabbing}
 .pcard.droptarget .ini{outline:3px dashed var(--ball);outline-offset:3px}
@@ -734,11 +734,13 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   border-radius:var(--radius);padding:11px 13px;font-size:14px;margin-bottom:12px}
 
 /* ============================================================
-   Querformat (Handy und Tablet): Feld oben in voller Breite, darunter
-   unter jeder Hälfte die eigene Mannschaft – Stand, Wechsel, Auszeit,
-   Bank und Punkttaste – in der Mitte Satz und Werkzeuge. Team B (im
-   Hochformat die untere Hälfte) liegt durch die 90°-Drehung links,
-   Team A rechts. Steht zuletzt, damit es alle früheren Stufen überstimmt.
+   Querformat (Handy und Tablet), nach der Skizze des Schreibers:
+   oben je Team eine Kopfzeile (Name, Sätze, Aufschlag, Wechsel, Auszeit)
+   über der eigenen Hälfte, dazwischen die Werkzeuge; in der Mitte das
+   Feld so gross wie möglich mit den Bänken links und rechts; unten die
+   Punkttasten mit dem Stand gross in der Mitte. Team B (im Hochformat
+   die untere Hälfte) liegt durch die 90°-Drehung links, Team A rechts.
+   Steht zuletzt, damit es alle früheren Stufen überstimmt.
    ============================================================ */
 @media (orientation:landscape){
   #game{padding:6px 10px 6px}
@@ -746,68 +748,78 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   #game .gwrap{
     display:grid;
     grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
-    grid-template-rows:minmax(0,1fr) auto auto;
-    grid-template-areas:"court court court" "sideL mid sideR" "ptL tools ptR";
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"headL tools headR" "court court court" "ptL score ptR";
     gap:6px 8px;
   }
   #game .board,#game .panel,.ptbtns{display:contents}
   #game .courtwrap{grid-area:court;min-height:110px}
-  #benchA,#benchB{display:none}
   .log{display:none}
-  #sideB{grid-area:sideL}
-  #sideA{grid-area:sideR}
-  .board .mid{grid-area:mid;border-radius:var(--radius);padding:4px 12px;font-size:10px;gap:0;min-width:150px}
-  .board .mid b{font-size:clamp(18px,4vh,26px)}
+  #sideB{grid-area:headL}
+  #sideA{grid-area:headR}
   #game .toolrow{grid-area:tools;margin:0;gap:6px;align-self:stretch}
-  .toolrow .btn{flex:1 1 0;min-height:0;padding:0 8px;font-size:12px}
+  .toolrow .btn{flex:1 1 0;min-height:0;padding:0 10px;font-size:12px}
+  #btnLog{display:inline-flex}
   .ptbtn[data-side="B"]{grid-area:ptL}
   .ptbtn[data-side="A"]{grid-area:ptR}
   .ptbtn{height:auto;min-height:clamp(50px,9vh,84px);padding:6px 14px;justify-content:center}
   .ptbtn .t{font-size:clamp(16px,3.2vh,24px);padding-right:34px}
   .ptbtn .plus{top:50%;transform:translateY(-50%);font-size:clamp(20px,4vh,30px);right:12px}
   .ptbtn .s{display:none}
-  /* Teamblock unter der eigenen Hälfte: links Team B, rechts Team A */
+  /* Kopfzeile je Team über der eigenen Hälfte */
   .board .side,.board .side.b{
-    display:grid;grid-template-columns:auto minmax(0,1fr);
-    grid-template-areas:"pts tn" "pts sub" "pts srv" "acts acts";
-    align-items:center;column-gap:12px;row-gap:1px;padding:6px 12px 8px;
-    border-radius:var(--radius);text-align:left;
+    display:flex;flex-direction:row;align-items:center;gap:10px;
+    padding:4px 12px;min-height:44px;border-radius:var(--radius);text-align:left;
   }
-  .board .side.a{grid-template-columns:minmax(0,1fr) auto;
-    grid-template-areas:"tn pts" "sub pts" "srv pts" "acts acts";text-align:right}
-  .board .tn{grid-area:tn;font-size:clamp(13px,2.6vh,18px)}
-  .board .pts{grid-area:pts;margin:0;font-size:clamp(34px,12vh,80px);line-height:.9}
-  .board .sub{grid-area:sub;font-size:10.5px}
-  .board .serve{grid-area:srv;margin:0;font-size:11px;gap:5px;justify-self:start;flex-direction:row}
+  /* Rechte Kopfzeile gespiegelt über die Reihenfolge, nicht über
+     row-reverse: so läuft Überlauf nach rechts und fitActs misst ihn. */
+  .board .side.a{flex-direction:row;text-align:right}
+  .board .side.a .acts{order:-2;margin:0 0 0 auto}
+  .board .side.a .serve{order:-1}
+  .board .side.a .sub{order:0}
+  .board .side.a .tn{order:1}
+  .board .pts{display:none}
+  /* Der Name schrumpft erst, wenn fitActs die Knöpfe schon gekürzt hat */
+  .board .tn{font-size:clamp(14px,2.8vh,20px);flex:0 0 auto;min-width:0}
+  .board.short .tn{flex:1 1 auto;min-width:60px}
+  .board.short .serve{font-size:0;gap:0}   /* nur der gelbe Punkt bleibt */
+  .board .sub{font-size:10.5px;white-space:nowrap}
+  .board .serve{margin:0;font-size:11px;gap:5px;flex-direction:row;white-space:nowrap}
   .board .serve::before{width:10px;height:10px}
-  .board .side.a .serve{justify-self:end;flex-direction:row-reverse}
-  .board .acts,.board .side.b .acts{grid-area:acts;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
-    justify-content:flex-start;margin:0;padding-top:6px;max-width:none}
-  .board .side.a .acts{justify-content:flex-end;margin-left:0}
+  .board .side.a .serve{flex-direction:row-reverse}
+  .board .acts,.board .side.b .acts{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 0 auto;padding:0;max-width:none}
   .board .acts .tbtn,.board.tight .acts .tbtn{min-height:32px;font-size:11px;padding:2px 7px;letter-spacing:.02em}
-  .acts .benchrow{display:inline-flex;gap:5px;align-items:center;margin-left:4px}
-  .acts .benchrow .bl{font-size:9px;font-weight:700;letter-spacing:.1em;opacity:.8;text-transform:uppercase}
-  .acts .bchip{width:32px;height:32px;font-size:12px;background:var(--tc-on);color:var(--tc);border:2px dashed var(--tc-on)}
+  /* Mitte unten: Stand gross, darunter Satz und Ziel */
+  .board .mid{
+    grid-area:score;display:grid;grid-template-columns:auto auto auto;
+    grid-template-areas:"score score score" "lbl no tgt";
+    justify-content:center;align-items:center;column-gap:5px;row-gap:2px;
+    padding:4px 16px;font-size:10px;border-radius:var(--radius);min-width:160px;
+  }
+  .midscore{grid-area:score;display:flex;align-items:baseline;justify-content:center;gap:10px;
+    font-size:clamp(30px,9vh,64px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .board .mid .midscore b{display:inline-block;font-size:inherit;border-bottom:4px solid var(--tc);padding:0 2px 2px;min-width:1.2em;text-align:center;line-height:1}
+  .midscore i{font-style:normal;opacity:.45;font-size:.7em}
+  .board .mid > span:first-of-type{grid-area:lbl}
+  .board .mid b#setNo{grid-area:no;display:inline;font-size:12px}
+  .board .mid #targetLbl{grid-area:tgt}
+  /* Bänke seitlich am Feld, bei Platznot in zwei Spalten */
+  .benchbar.v{flex-wrap:wrap;justify-content:center;align-content:center;gap:5px}
+  .bchip{width:32px;height:32px;font-size:12px}
 }
-/* Handy quer: alles im Teamblock in einer Zeile halten, damit das Feld
-   möglichst hoch bleibt. Bei Platznot kürzt fitActs() die Beschriftung
-   (W 0/5, AZ 0/1). */
 @media (orientation:landscape) and (max-height:430px){
   #game{padding:4px 8px 4px}
   #game .gwrap{gap:4px 6px}
-  .board .side,.board .side.b,.board .side.a{padding:3px 8px 4px;row-gap:0;column-gap:8px}
-  .board .pts{font-size:clamp(30px,11vh,46px)}
-  .board .tn{font-size:12.5px}
+  .board .side,.board .side.b,.board .side.a{min-height:36px;padding:2px 8px;gap:8px}
+  .board .tn{font-size:13px}
   .board .sub{font-size:9.5px}
   .board .serve{font-size:10px}
-  .board .acts,.board .side.b .acts,.board .side.a .acts{flex-wrap:nowrap;padding-top:3px;gap:4px;overflow:hidden}
-  .board .acts .tbtn,.board.tight .acts .tbtn{min-height:26px;font-size:10px;padding:1px 5px}
-  .acts .benchrow{gap:4px;margin-left:2px;flex:0 1 auto;min-width:0}
-  .acts .benchrow .bl{display:none}
-  .acts .bchip{width:26px;height:26px;font-size:10.5px}
-  .ptbtn{min-height:44px;padding:4px 12px}
-  .board .mid{min-width:110px;padding:2px 8px}
+  .board .acts .tbtn,.board.tight .acts .tbtn{min-height:28px;font-size:10px;padding:1px 5px}
   .toolrow .btn{font-size:11px;padding:0 6px}
+  .ptbtn{min-height:44px;padding:4px 12px}
+  .board .mid{padding:2px 12px;min-width:130px}
+  .midscore{font-size:clamp(24px,8vh,40px)}
+  .bchip{width:28px;height:28px;font-size:11px}
 }
 </style>
 <script>
@@ -964,6 +976,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
           <div class="acts" id="actA"></div>
         </div>
         <div class="mid">
+          <div class="midscore" id="midscore" aria-hidden="true"><b id="scL">0</b><i>:</i><b id="scR">0</b></div>
           <span>Satz</span><b id="setNo">1</b>
           <span id="targetLbl">bis 25</span>
         </div>
@@ -1022,7 +1035,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.3.0';
+var APP = '2.3.1';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1389,23 +1402,33 @@ function fitCourt(){
   c.classList.toggle('quer', quer);
   var bA = $('benchA'), bB = $('benchB'), gap = 6;
   bA.classList.toggle('v', quer); bB.classList.toggle('v', quer);
-  if (quer){
-    w -= (bA.offsetWidth ? bA.offsetWidth + gap : 0) + (bB.offsetWidth ? bB.offsetWidth + gap : 0);
-  } else {
-    h -= (bA.offsetHeight ? bA.offsetHeight + gap : 0) + (bB.offsetHeight ? bB.offsetHeight + gap : 0);
+  if (!quer){ bA.style.height = ''; bB.style.height = ''; }
+  function reserve(){
+    return quer
+      ? (bA.offsetWidth ? bA.offsetWidth + gap : 0) + (bB.offsetWidth ? bB.offsetWidth + gap : 0)
+      : (bA.offsetHeight ? bA.offsetHeight + gap : 0) + (bB.offsetHeight ? bB.offsetHeight + gap : 0);
   }
-  if (quer){
-    var vw = Math.floor(Math.min(w, h * 6/5));
-    if (vw < 60) return;
-    c.style.width  = Math.round(vw * 5/6) + 'px';
-    c.style.height = vw + 'px';
-  } else {
-    var cw = Math.floor(Math.min(w, h * 5/6));
-    if (cw < 60) return;
-    c.style.width  = cw + 'px';
-    c.style.height = Math.round(cw * 6/5) + 'px';
+  function size(res){
+    if (quer){
+      var vw = Math.floor(Math.min(w - res, h * 6/5));
+      if (vw < 60) return false;
+      c.style.width  = Math.round(vw * 5/6) + 'px';
+      c.style.height = vw + 'px';
+    } else {
+      var cw = Math.floor(Math.min(w, (h - res) * 5/6));
+      if (cw < 60) return false;
+      c.style.width  = cw + 'px';
+      c.style.height = Math.round(cw * 6/5) + 'px';
+    }
+    return true;
   }
+  var r1 = reserve();
+  if (!size(r1)) return;
   placeBench(quer, gap);
+  // Seitliche Bänke dürfen höchstens so hoch sein wie das Feld; brechen
+  // sie dadurch in zwei Spalten um, nochmals mit dem neuen Platzbedarf.
+  var r2 = reserve();
+  if (r2 !== r1){ if (!size(r2)) return; placeBench(quer, gap); }
 }
 /* Bänke an die sichtbare Feldkante legen. Im Querformat ist das Feld um
    90° gedreht: die obere Hälfte (Team A) liegt rechts, Team B links. */
@@ -1414,6 +1437,7 @@ function placeBench(quer, gap){
   var cx = c.offsetLeft + c.offsetWidth/2, cy = c.offsetTop + c.offsetHeight/2;
   var visW = quer ? c.offsetHeight : c.offsetWidth, visH = quer ? c.offsetWidth : c.offsetHeight;
   if (quer){
+    bA.style.height = visH + 'px'; bB.style.height = visH + 'px';
     bB.style.left = (cx - visW/2 - bB.offsetWidth - gap) + 'px';
     bB.style.top  = (cy - bB.offsetHeight/2) + 'px';
     bA.style.left = (cx + visW/2 + gap) + 'px';
@@ -1442,6 +1466,12 @@ function renderBoard(){
   $('targetLbl').textContent = targetLabel();
   $('ptsA').setAttribute('aria-live','polite');
   $('ptsB').setAttribute('aria-live','polite');
+  // Querformat: Stand gross in der Mitte, links die linke Hälfte (Team B)
+  var sl = $('scL'), sr = $('scR');
+  if (sl && sr){
+    sl.textContent = S.points[bot]; sr.textContent = S.points[top];
+    paintTeam(sl, bot); paintTeam(sr, top);
+  }
 }
 
 function buildCourt(){
@@ -1634,7 +1664,6 @@ function renderBench(){
                ' aria-label="Ersatz '+esc(S.teams[t].players[b[k]])+'"'+(dis?' disabled':'')+'>' +
                esc(initials(S.teams[t].players[b[k]])) + '</button>';
     }
-    if (b.length) box.innerHTML += '<span class="benchrow"><span class="bl">Bank</span>'+chips+'</span>';
     var bar = $(i === 0 ? 'benchA' : 'benchB');
     if (bar){
       bar.hidden = !b.length;
@@ -1649,7 +1678,7 @@ function renderBench(){
    Wenn nicht, wird auf «W» und «AZ» gekürzt – gemessen statt geraten. */
 function fitActs(){
   var board = $('board'); if (!board) return;
-  var boxes = board.querySelectorAll('.acts');
+  var boxes = board.querySelectorAll('.acts, .side');
   var btns  = board.querySelectorAll('.acts .tbtn');
   function over(){
     var i;
