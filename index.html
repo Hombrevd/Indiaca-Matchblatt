@@ -276,6 +276,7 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
   box-shadow:0 0 0 1.5px var(--tc-on),0 0 0 4px rgba(255,212,0,.22);
 }
 .board .side.b .serve{flex-direction:row-reverse}
+.board .serve.off{display:none}
 .board .acts{display:flex;flex-wrap:nowrap;gap:6px;margin-top:auto;padding-top:8px;max-width:100%}
 .board .side.b .acts{margin-left:auto}
 .board .acts .tbtn{
@@ -342,7 +343,7 @@ body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 
 /* Rotationspfeile: nur im Moment des Aufschlagwechsels sichtbar */
 .rotfx{
-  position:absolute;inset:0;width:100%;height:100%;z-index:3;
+  position:absolute;inset:0;width:100%;height:100%;z-index:0;
   pointer-events:none;opacity:1;transition:opacity .35s ease-out;
 }
 .rotfx.fade{opacity:0}
@@ -759,7 +760,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   #sideA{grid-area:headR}
   #game .toolrow{grid-area:tools;margin:0;gap:6px;align-self:stretch}
   .toolrow .btn{flex:1 1 0;min-height:0;padding:0 10px;font-size:12px}
-  #btnLog{display:inline-flex}
+  #btnLog{display:inline-block}
   .ptbtn[data-side="B"]{grid-area:ptL}
   .ptbtn[data-side="A"]{grid-area:ptR}
   .ptbtn{height:auto;min-height:clamp(50px,9vh,84px);padding:6px 14px;justify-content:center}
@@ -787,6 +788,9 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   .board .serve{margin:0;font-size:11px;gap:5px;flex-direction:row;white-space:nowrap}
   .board .serve::before{width:10px;height:10px}
   .board .side.a .serve{flex-direction:row-reverse}
+  /* Ohne Aufschlag bleibt der Platz reserviert – die Kopfzeile springt
+     beim Aufschlagwechsel nicht zwischen langen und kurzen Labels. */
+  .board .serve.off{display:inline-flex;visibility:hidden}
   .board .acts,.board .side.b .acts{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 0 auto;padding:0;max-width:none}
   .board .acts .tbtn,.board.tight .acts .tbtn{min-height:32px;font-size:11px;padding:2px 7px;letter-spacing:.02em}
   /* Mitte unten: Stand gross, darunter Satz und Ziel */
@@ -1035,7 +1039,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.3.1';
+var APP = '2.3.2';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1459,7 +1463,8 @@ function renderBoard(){
     $('tn'+s).textContent = S.teams[t].name;
     $('pts'+s).textContent = S.points[t];
     $('sets'+s).textContent = S.setsWon[t] + (S.setsWon[t]===1 ? ' Satz' : ' Sätze');
-    $('srv'+s).hidden = (S.serving !== t);
+    $('srv'+s).hidden = false;
+    $('srv'+s).classList.toggle('off', S.serving !== t);
     paintTeam($('srv'+s), t);
   }
   $('setNo').textContent = S.setNo;
@@ -1551,13 +1556,17 @@ function showRotation(t){
   if (!svg || !g) return;
   clearTimeout(rotTimer); clearTimeout(rotFade);
 
-  var n = S.count, pts = [], i;
+  var n = S.count, pts = [], rads = [], i;
+  var cw = $('court').clientWidth || 1;
   for (i=0;i<n;i++){
     var el = cards[t][S.lineup[t][i]];
     var p = slotPos(t, i);
     var ch = $('court').clientHeight || 1;
     var pad = el ? (((el.offsetHeight/2) + 3) / ch * 100) : 9;
     pts.push([p[0], Math.max(pad, Math.min(100 - pad, p[1])) * 1.2]);
+    // Kreisradius in viewBox-Einheiten (x: 100 = Feldbreite), plus Luft
+    var ini = el ? el.querySelector('.ini') : null;
+    rads.push(ini ? (ini.offsetWidth/2 + 4) / cw * 100 : 9);
   }
 
   var cx = 0, cy = 0;
@@ -1571,9 +1580,10 @@ function showRotation(t){
     var vx = b[0] - a[0], vy = b[1] - a[1];
     var len = Math.sqrt(vx*vx + vy*vy) || 1;
     var ux = vx/len, uy = vy/len;
-    var trim = Math.min(9, len * 0.34);         // Enden freilassen, Kreise nicht überdecken
-    var ax = a[0] + ux*trim, ay = a[1] + uy*trim;
-    var bx = b[0] - ux*trim, by = b[1] - uy*trim;
+    // Enden an den Kreisrändern freilassen, damit Kreise und Namen frei bleiben
+    var trimA = Math.min(len * 0.4, rads[i]), trimB = Math.min(len * 0.4, rads[(i - 1 + n) % n]);
+    var ax = a[0] + ux*trimA, ay = a[1] + uy*trimA;
+    var bx = b[0] - ux*trimB, by = b[1] - uy*trimB;
     var mx = (ax+bx)/2, my = (ay+by)/2;
     var px = -uy, py = ux;                       // Senkrechte
     if ((mx - cx)*px + (my - cy)*py < 0){ px = -px; py = -py; }  // nach aussen wölben
