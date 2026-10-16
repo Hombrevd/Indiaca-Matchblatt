@@ -776,6 +776,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <div class="field"><label class="lbl" for="cfgSide">Startseite (Seite A)</label>
         <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
     </div>
+    <p class="hint" style="margin:6px 0 0">Satzgewinn mit 2 Punkten Vorsprung: bei 24:24 geht es bis 26, bei 25:25 bis 27 usw.</p>
     <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
   </div>
 
@@ -1116,6 +1117,20 @@ function isDecider(){
   return S.winSets > 1 && (S.setsWon[0] + S.setsWon[1]) === (S.winSets*2 - 2);
 }
 function targetNow(){ return isDecider() ? S.deciderTarget : S.target; }
+/* Satzgewinn braucht 2 Punkte Vorsprung. Ab Gleichstand bei Ziel−1
+   (z. B. 24:24) zeigt die Tafel das nächste erreichbare Ziel: 26, bei
+   25:25 dann 27 usw. */
+function inOvertime(){
+  return Math.min(S.points[0], S.points[1]) >= targetNow() - 1;
+}
+function targetShown(){
+  var tg = targetNow();
+  return inOvertime() ? Math.min(S.points[0], S.points[1]) + 2 : tg;
+}
+function targetLabel(){
+  return 'bis ' + targetShown() + (inOvertime() ? ' · Verlängerung' : '') +
+         (isDecider() ? ' · Entscheidung' : '');
+}
 function bench(t){
   var out=[], L=S.lineup[t];
   for (var i=0;i<S.teams[t].players.length;i++) if (L.indexOf(i)<0) out.push(i);
@@ -1151,6 +1166,9 @@ function addPoint(t, kind){
   if (S.points[t] >= tg && (S.points[t] - S.points[opp]) >= 2){
     finishSet(t);
   } else {
+    if (S.points[t] === S.points[opp] && S.points[t] >= tg - 1){
+      toast('Verlängerung – 2 Punkte Vorsprung nötig, Satz bis ' + (S.points[t] + 2));
+    }
     var half = Math.ceil(tg/2);
     if (isDecider() && !S.sideSwapped && S.points[t] === half && S.points[opp] < half){
       S.topTeam = 1 - S.topTeam;
@@ -1264,7 +1282,7 @@ function renderBoard(){
     paintTeam($('srv'+s), t);
   }
   $('setNo').textContent = S.setNo;
-  $('targetLbl').textContent = 'bis ' + targetNow() + (isDecider() ? ' · Entscheidung' : '');
+  $('targetLbl').textContent = targetLabel();
   $('ptsA').setAttribute('aria-live','polite');
   $('ptsB').setAttribute('aria-live','polite');
 }
@@ -2031,7 +2049,7 @@ function reportText(st){
   line('Dauer', s.result ? fmtDur(s.started, s.result.endedAt) : '–');
   line('Schiedsrichter', m.referee || '–');
   line('Schreiber', m.scorer || '–');
-  line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' · '+s.winSets+
+  line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
        ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
   line('Auslosung', s.toss || '–');
   if (m.note) line('Bemerkung', m.note);
@@ -2312,7 +2330,7 @@ function buildMatchPdf(s){
       d.text(cx+labW, cy, d.wrap(r[1], 9.5, colW-labW-10)[0], 9.5);
     });
     y = y0 + 4*13 + 2;
-    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' · '+s.winSets+' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget],
+    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget],
                 ['Auslosung', s.toss||'–']];
     if (m.note) long.push(['Bemerkung', m.note]);
     long.forEach(function(r){
