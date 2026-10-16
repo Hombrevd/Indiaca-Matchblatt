@@ -215,7 +215,15 @@ body.has-update .screen{padding-top:54px}
 .apphead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .apphead h1{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:30px;font-weight:700;
   text-transform:uppercase;letter-spacing:.01em}
-.apphead .ver{font-size:12px;color:var(--muted)}
+.apphead .logos{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+/* Verbandslogos stehen auf einer weissen Platte – so bleiben sie in
+   hell und dunkel und in jeder Farbwelt lesbar. */
+.apphead .fedlogo{height:72px;width:auto;display:block;background:#fff;padding:4px 6px;
+  border-radius:var(--radius);border:1px solid var(--line)}
+@media (max-width:420px){
+  .apphead h1{font-size:26px}
+  .apphead .fedlogo{height:60px}
+}
 
 /* ---------- Erfassung ---------- */
 .teamcard{border-top:5px solid var(--tc)}
@@ -738,7 +746,10 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 <main class="screen" id="setup">
   <div class="apphead">
     <h1>Indiaca Matchblatt</h1>
-    <span class="ver mono" id="verLabel"></span>
+    <div class="logos" aria-label="Verbände">
+      <img class="fedlogo" src="logo-stv.png" alt="Schweizerischer Turnverband STV FSG" width="153" height="160">
+      <img class="fedlogo" src="logo-sotv.png" alt="Solothurner Turnverband SOTV" width="134" height="160">
+    </div>
   </div>
 
   <div id="storeWarn" class="banner" hidden>
@@ -913,7 +924,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.1.0';
+var APP = '2.1.1';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -3086,7 +3097,6 @@ function showUpdate(reg){
    Ereignisse
    ============================================================ */
 function wire(){
-  $('verLabel').textContent = 'v' + APP;
 
   // Setup
   document.addEventListener('input', function(e){

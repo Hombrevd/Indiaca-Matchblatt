@@ -1,13 +1,15 @@
 /* Indiaca Matchblatt – Service Worker
    WICHTIG: Bei jeder Auslieferung CACHE hochzählen, sonst behalten
    die Geräte die alte Fassung. */
-const CACHE = 'indiaca-v5';
+const CACHE = 'indiaca-v6';
 
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './indiaca.png',
+  './logo-stv.png',
+  './logo-sotv.png',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
