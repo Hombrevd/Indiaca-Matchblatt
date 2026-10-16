@@ -8,6 +8,7 @@ const ASSETS = [
   './index.html',
   './manifest.webmanifest',
   './indiaca.png',
+  './logo-stv.png',
   './logo-sotv.png',
   './icon-192.png',
   './icon-512.png',
