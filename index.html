@@ -485,7 +485,14 @@ body.has-update #game .board{margin-top:0}
   .toolrow{flex:0 0 auto}
 }
 @media (orientation:landscape) and (min-width:700px) and (min-height:560px){
-  .log{display:flex}
+  /* Mit sichtbarem Verlauf haben die Punkttasten eine feste Höhe –
+     der Verlauf bekommt nur den Rest der Spalte und scrollt darin.
+     So bleiben die Tasten gleich gross, egal wie lang der Satz ist. */
+  .log{display:flex;flex:1 1 0;min-height:0}
+  .log h3{flex:0 0 auto}
+  .log ol{flex:1 1 0;min-height:0;overflow-y:auto}
+  .ptbtns{flex:0 0 auto;min-height:0}
+  .ptbtn{height:clamp(72px,14vh,140px);min-height:0}
   #btnLog{display:none}
 }
 
@@ -656,6 +663,17 @@ body.has-update #game .board{margin-top:0}
   font-size:12.5px;color:var(--muted);text-align:right}
 .menu button:disabled{color:var(--muted);opacity:.55}
 .menu button.danger{color:var(--guest)}
+.menu.stack button{flex-direction:column;align-items:flex-start;gap:2px;white-space:normal;text-align:left}
+.menu.stack button small{text-align:left}
+.preplist{display:flex;flex-direction:column}
+.preprow{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.preprow:last-child{border-bottom:none}
+.preprow .prepload{flex:1 1 auto;min-width:0;min-height:54px;padding:10px 2px;background:none;border:none;
+  text-align:left;font-size:16px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.preprow .prepload small{font-weight:400;font-size:12.5px;color:var(--muted)}
+.preprow.on .prepload{color:var(--home)}
+.preprow .del{flex:0 0 auto;width:38px;height:38px;min-height:0;padding:0;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:20px;line-height:1}
 
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .pick h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:14px;letter-spacing:.06em;
@@ -727,6 +745,13 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     Speichern nicht möglich – Stand bitte zusätzlich auf Papier führen.
   </div>
 
+  <div class="card" id="prepCard" hidden>
+    <h2>Vorbereitete Spiele</h2>
+    <p class="hint" style="margin:0 0 8px">Antippen lädt Teams, Spieler und Angaben ins Formular. Beim Spielstart wird das Spiel aus dieser Liste entfernt.</p>
+    <div class="preplist" id="prepList"></div>
+    <p class="banner" id="prepLoaded" style="margin:10px 0 0" hidden></p>
+  </div>
+
   <div class="card teamcard" id="teamcard0" style="--tc:var(--home);--tc-on:var(--home-on)">
     <h2>Heimmannschaft</h2>
     <div class="field"><label class="lbl" for="tn0">Mannschaftsname</label>
@@ -769,6 +794,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <div class="field"><label class="lbl" for="cfgSide">Startseite (Seite A)</label>
         <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
     </div>
+    <p class="hint" style="margin:6px 0 0">Satzgewinn mit 2 Punkten Vorsprung: bei 24:24 geht es bis 26, bei 25:25 bis 27 usw.</p>
     <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
   </div>
 
@@ -813,8 +839,10 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   <p class="err" id="setupErr" hidden></p>
   <button class="btn primary wide" id="btnStart" type="button" style="min-height:56px;font-size:16px">Spiel starten</button>
   <div class="row" style="margin-top:10px">
+    <button class="btn sm" id="btnPrepSave" type="button">Als vorbereitetes Spiel speichern</button>
     <button class="btn sm" id="btnArchive" type="button">Archiv</button>
   </div>
+  <p class="hint" style="margin:8px 0 0">Vorbereiten: Formular ausfüllen und speichern statt starten – das Spiel wartet dann zuoberst unter «Vorbereitete Spiele».</p>
 </main>
 
 <!-- ========================= GAME ========================= -->
@@ -885,11 +913,12 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.0.1';
+var APP = '2.1.0';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
 var K_ARCH  = 'indiaca.archive.v2';
+var K_PREP  = 'indiaca.prepared.v1';
 var POSN = ['I','II','III','IV','V','VI'];
 var POS = {
   4: [[26,13],[22,37],[78,37],[74,13]],
@@ -1109,6 +1138,20 @@ function isDecider(){
   return S.winSets > 1 && (S.setsWon[0] + S.setsWon[1]) === (S.winSets*2 - 2);
 }
 function targetNow(){ return isDecider() ? S.deciderTarget : S.target; }
+/* Satzgewinn braucht 2 Punkte Vorsprung. Ab Gleichstand bei Ziel−1
+   (z. B. 24:24) zeigt die Tafel das nächste erreichbare Ziel: 26, bei
+   25:25 dann 27 usw. */
+function inOvertime(){
+  return Math.min(S.points[0], S.points[1]) >= targetNow() - 1;
+}
+function targetShown(){
+  var tg = targetNow();
+  return inOvertime() ? Math.min(S.points[0], S.points[1]) + 2 : tg;
+}
+function targetLabel(){
+  return 'bis ' + targetShown() + (inOvertime() ? ' · Verlängerung' : '') +
+         (isDecider() ? ' · Entscheidung' : '');
+}
 function bench(t){
   var out=[], L=S.lineup[t];
   for (var i=0;i<S.teams[t].players.length;i++) if (L.indexOf(i)<0) out.push(i);
@@ -1144,6 +1187,9 @@ function addPoint(t, kind){
   if (S.points[t] >= tg && (S.points[t] - S.points[opp]) >= 2){
     finishSet(t);
   } else {
+    if (S.points[t] === S.points[opp] && S.points[t] >= tg - 1){
+      toast('Verlängerung – 2 Punkte Vorsprung nötig, Satz bis ' + (S.points[t] + 2));
+    }
     var half = Math.ceil(tg/2);
     if (isDecider() && !S.sideSwapped && S.points[t] === half && S.points[opp] < half){
       S.topTeam = 1 - S.topTeam;
@@ -1257,7 +1303,7 @@ function renderBoard(){
     paintTeam($('srv'+s), t);
   }
   $('setNo').textContent = S.setNo;
-  $('targetLbl').textContent = 'bis ' + targetNow() + (isDecider() ? ' · Entscheidung' : '');
+  $('targetLbl').textContent = targetLabel();
   $('ptsA').setAttribute('aria-live','polite');
   $('ptsB').setAttribute('aria-live','polite');
 }
@@ -1851,7 +1897,8 @@ function dlgAbort(){
 }
 
 /* ---------- Schlussdialog ---------- */
-function dlgEnd(){
+function dlgEnd(keep){
+  keep = keep || {};
   var r = S.result || {};
   var win = (r.winner===0||r.winner===1) ? S.teams[r.winner].name : '–';
   var h = '<h2>Spiel beendet</h2>' +
@@ -1864,61 +1911,76 @@ function dlgEnd(){
     h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern unterzeichnet – das Spiel ist gesperrt.<br>' +
          esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
          esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')</div>';
-    for (var s=0;s<2;s++){
-      if (S.confirmed[s].sig) h += '<img class="sigimg" src="'+S.confirmed[s].sig+'" alt="Unterschrift '+esc(S.confirmed[s].name)+'">';
-    }
-  } else {
-    h += '<div class="divider">Unterschrift der Mannschaftsführer</div>';
-    for (var t=0;t<2;t++){
-      var c = S.confirmed[t];
-      h += '<div class="field"><label class="lbl" for="cf'+t+'">'+esc(S.teams[t].name)+'</label>';
-      if (c){
-        h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
-        if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
-      } else {
-        h += '<div class="row"><input type="text" id="cf'+t+'" style="flex:1;min-width:140px" ' +
-             'value="'+esc(capName(t))+'" placeholder="Name Mannschaftsführer" autocomplete="off"></div>' +
-             '<div class="sigwrap"><canvas class="sigpad" id="sig'+t+'"></canvas>' +
-             '<button class="sigclear" type="button" data-clr="'+t+'">Löschen</button></div>' +
-             '<p class="sighint">Mit dem Finger oder der Maus im Feld oben unterschreiben.</p>' +
-             '<div class="row" style="margin-top:6px"><button class="btn" type="button" data-cf="'+t+'">Unterzeichnen</button></div>';
-      }
-      h += '</div>';
-    }
   }
+  h += '<div class="divider">Unterschriften</div>';
+  SIG_KEYS.forEach(function(k){
+    var c = sigRecord(k);
+    h += '<div class="field"><label class="lbl" for="cf'+k+'">'+esc(sigLabel(k)) +
+         (k==='ref' ? ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span>' : '') + '</label>';
+    if (c){
+      h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
+      if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
+    } else {
+      h += '<div class="row"><input type="text" id="cf'+k+'" style="flex:1;min-width:140px" ' +
+           'value="'+esc(sigDefaultName(k))+'" placeholder="'+(k==='ref'?'Name Schiedsrichter':'Name Mannschaftsführer')+'" autocomplete="off"></div>' +
+           '<div class="sigwrap"><canvas class="sigpad" id="sig'+k+'"></canvas>' +
+           '<button class="sigclear" type="button" data-clr="'+k+'">Löschen</button></div>' +
+           '<p class="sighint">Mit dem Finger oder der Maus im Feld oben unterschreiben.</p>' +
+           '<div class="row" style="margin-top:6px"><button class="btn" type="button" data-cf="'+k+'">Unterzeichnen</button></div>';
+    }
+    h += '</div>';
+  });
   h += '<div class="acts">' +
        '<button class="btn" data-x="rep">Bericht</button>' +
+       '<button class="btn" data-x="pdf">PDF</button>' +
        (S.locked ? '' : '<button class="btn" data-x="undo"'+(!UNDO.length?' disabled':'')+'>Rückgängig</button>') +
        '<button class="btn primary" data-x="new">Neues Spiel</button></div>';
 
   var bd = dlg(h, {esc:true});
-  var sigPads = {};
-  for (var it=0;it<2;it++){
-    var cvs = bd.querySelector('#sig'+it);
-    if (cvs) sigPads[it] = initSigPad(cvs);
+  var pads = {};
+  SIG_KEYS.forEach(function(k){
+    var cvs = bd.querySelector('#sig'+k);
+    if (!cvs) return;
+    pads[k] = initSigPad(cvs);
+    if (keep[k]) pads[k].restore(keep[k]);
+  });
+  // Ungesicherte Zeichnungen der anderen Felder überleben den Neuaufbau des Dialogs.
+  function unsaved(except){
+    var o = {};
+    SIG_KEYS.forEach(function(k){
+      if (k === except || !pads[k]) return;
+      var u = pads[k].dataUrl(); if (u) o[k] = u;
+    });
+    return o;
   }
+  function keyOf(v){ return v === 'ref' ? 'ref' : +v; }
   bd.addEventListener('click', function(e){
     var clr = e.target.closest('[data-clr]');
-    if (clr){ var pad = sigPads[+clr.dataset.clr]; if (pad) pad.clear(); return; }
+    if (clr){ var pad = pads[keyOf(clr.dataset.clr)]; if (pad) pad.clear(); return; }
     var cf = e.target.closest('[data-cf]');
     if (cf){
-      var t = +cf.dataset.cf;
-      var nm = bd.querySelector('#cf'+t).value.trim() || S.teams[t].name;
-      var pad2 = sigPads[t];
-      S.confirmed[t] = { name: nm, at: iso(), sig: pad2 ? pad2.dataUrl() : null };
+      var k = keyOf(cf.dataset.cf);
+      var nm = bd.querySelector('#cf'+k).value.trim() || sigLabel(k);
+      var rec = { name: nm, at: iso(), sig: pads[k] ? pads[k].dataUrl() : null };
+      if (k === 'ref') S.refSig = rec; else S.confirmed[k] = rec;
       if (S.confirmed[0] && S.confirmed[1]) S.locked = true;
       archivePut(); saveNow();
-      dlgEnd();
+      dlgEnd(unsaved(k));
       return;
     }
     var x = e.target.closest('[data-x]'); if (!x || x.disabled) return;
-    if (x.dataset.x === 'rep') return dlgReport();
+    if (x.dataset.x === 'rep') return dlgReport(unsaved(null));
+    if (x.dataset.x === 'pdf') return exportPdf();
     if (x.dataset.x === 'undo'){ closeDlg(); undo(); return; }
     if (x.dataset.x === 'new'){
       confirmDlg('Neues Spiel','Das Spiel wandert ins Archiv und die Erfassung beginnt von vorne.','Neues Spiel', newMatch, false);
     }
   });
 }
+var SIG_KEYS = [0, 1, 'ref'];
+function sigRecord(k){ return k === 'ref' ? (S.refSig || null) : S.confirmed[k]; }
+function sigLabel(k){ return k === 'ref' ? 'Schiedsrichter' : S.teams[k].name; }
+function sigDefaultName(k){ return k === 'ref' ? ((S.meta && S.meta.referee) || '') : capName(k); }
 
 /* Unterschriften-Pad: zeichnet auf Canvas, Hintergrund immer weiss wie
    Papier (unabhängig vom Farbschema), damit die Unterschrift überall
@@ -1955,7 +2017,12 @@ function initSigPad(canvas){
   paintBg();
   return {
     clear: function(){ paintBg(); hasDrawn = false; },
-    dataUrl: function(){ return hasDrawn ? canvas.toDataURL('image/png') : null; }
+    dataUrl: function(){ return hasDrawn ? canvas.toDataURL('image/png') : null; },
+    restore: function(url){
+      var im = new Image();
+      im.onload = function(){ ctx.drawImage(im, 0, 0, cw, ch); hasDrawn = true; };
+      im.src = url;
+    }
   };
 }
 function capName(t){
@@ -2003,7 +2070,7 @@ function reportText(st){
   line('Dauer', s.result ? fmtDur(s.started, s.result.endedAt) : '–');
   line('Schiedsrichter', m.referee || '–');
   line('Schreiber', m.scorer || '–');
-  line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' · '+s.winSets+
+  line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
        ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
   line('Auslosung', s.toss || '–');
   if (m.note) line('Bemerkung', m.note);
@@ -2074,11 +2141,12 @@ function reportText(st){
 
   L.push('UNTERSCHRIFTEN');
   L.push('-'.repeat(64));
-  for (var c=0;c<2;c++){
-    var cf = s.confirmed && s.confirmed[c];
-    L.push('  ' + pad2(s.teams[c].name, 24) +
+  function sigLine(label, cf){
+    L.push('  ' + pad2(label, 24) +
            (cf ? cf.name + (cf.sig ? ' [unterschrieben]' : '') + '   ' + fmtDate(cf.at) + ' ' + fmtTime(cf.at) : '________________________'));
   }
+  for (var c=0;c<2;c++) sigLine(s.teams[c].name, s.confirmed && s.confirmed[c]);
+  sigLine('Schiedsrichter', s.refSig);
   L.push('');
   L.push('Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'));
   return L.join('\n');
@@ -2087,34 +2155,318 @@ function logTextFor(s, e){
   var save0 = S; S = s; var txt = logText(e); S = save0; return txt;
 }
 
-function dlgReport(){
+function dlgReport(keep){
   var txt = reportText(S);
   var bd = dlg('<h2>Spielbericht</h2>' +
     '<p class="dsc">Papier-Rückfallebene: der Bericht ist jederzeit abrufbar.</p>' +
     '<pre class="report" id="repTxt">'+esc(txt)+'</pre>' +
-    '<div class="acts"><button class="btn" data-x="copy">Kopieren</button>' +
+    '<div class="acts"><button class="btn" data-x="pdf">Als PDF sichern</button>' +
+    '<button class="btn" data-x="copy">Kopieren</button>' +
     '<button class="btn" data-x="save">Als .txt sichern</button>' +
     (navigator.share ? '<button class="btn" data-x="share">Teilen</button>' : '') +
     '<button class="btn primary" data-x="close">Schliessen</button></div>');
   bd.addEventListener('click', function(e){
     var x = e.target.closest('[data-x]'); if (!x) return;
-    var name = 'matchblatt_' + fmtDate(S.started).replace(/\./g,'-') + '_' +
-               S.teams[0].name.replace(/\W+/g,'') + '-' + S.teams[1].name.replace(/\W+/g,'') + '.txt';
     if (x.dataset.x === 'copy'){
       copyText(txt); toast('Bericht kopiert');
     } else if (x.dataset.x === 'save'){
-      var blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = name;
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      downloadBlob(new Blob([txt], {type:'text/plain;charset=utf-8'}), reportFileName('txt'));
+    } else if (x.dataset.x === 'pdf'){
+      exportPdf();
     } else if (x.dataset.x === 'share'){
       navigator.share({ title:'Indiaca Matchblatt', text:txt }).catch(function(){});
     } else if (x.dataset.x === 'close'){
       closeDlg();
-      if (S.finished && !$('game').hidden) dlgEnd();
+      if (S.finished && !$('game').hidden) dlgEnd(keep);
     }
   });
+}
+function fileSlug(str){
+  return String(str||'')
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+    .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue').replace(/ß/g,'ss')
+    .replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+function reportFileName(ext){
+  return 'matchblatt_' + fmtDate(S.started).replace(/\./g,'-') + '_' +
+         fileSlug(S.teams[0].name) + '_' + fileSlug(S.teams[1].name) + '.' + ext;
+}
+function downloadBlob(blob, name){
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+/* ============================================================
+   PDF-Export – ohne Bibliothek, läuft offline.
+   Seite 1: das Matchblatt (Resultat, Angaben, Sätze, Aufstellungen,
+   Unterschriften als Bild). Ab Seite 2: der Verlauf als Anhang.
+   Schrift: Helvetica (PDF-Standardschrift, WinAnsi), Bilder als JPEG.
+   ============================================================ */
+var HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+var CP1252 = {8364:128,8218:130,402:131,8222:132,8230:133,8224:134,8225:135,710:136,8240:137,352:138,8249:139,338:140,381:142,8216:145,8217:146,8220:147,8221:148,8226:149,8211:150,8212:151,732:152,8482:153,353:154,8250:155,339:156,382:158,376:159};
+function pdfTextWidth(str, size, bold){
+  var w = 0;
+  for (var i=0;i<str.length;i++){
+    var c = str.charCodeAt(i);
+    if (c >= 32 && c <= 126) w += HELV_W[c-32];
+    else if (c >= 0xC0 && c <= 0xDE) w += 700;
+    else w += 556;
+  }
+  return w/1000*size*(bold?1.04:1);
+}
+function pdfStr(s){
+  var out = '(';
+  for (var i=0;i<s.length;i++){
+    var c = s.charCodeAt(i);
+    if (c > 255 && CP1252[c] !== undefined) c = CP1252[c];
+    if (c === 40 || c === 41 || c === 92) out += '\\' + String.fromCharCode(c);
+    else if (c < 32 || c > 255) out += '?';
+    else if (c > 126) out += '\\' + ('00' + c.toString(8)).slice(-3);
+    else out += String.fromCharCode(c);
+  }
+  return out + ')';
+}
+function pdfDoc(){
+  var W = 595.28, H = 841.89, M = 44;
+  var pages = [], cur = null, images = [];
+  function num(n){ return String(Math.round(n*100)/100); }
+  function latin1(s){ var u = new Uint8Array(s.length); for (var i=0;i<s.length;i++) u[i] = s.charCodeAt(i) & 255; return u; }
+  function page(){ cur = { ops:[], imgs:{} }; pages.push(cur); }
+  function text(x, y, s, size, o){
+    o = o || {};
+    var str = String(s == null ? '' : s), w = pdfTextWidth(str, size, o.bold);
+    if (o.align === 'right') x -= w; else if (o.align === 'center') x -= w/2;
+    cur.ops.push('BT /'+(o.bold?'F2':'F1')+' '+num(size)+' Tf '+num(o.gray||0)+' g '+num(x)+' '+num(H-y)+' Td '+pdfStr(str)+' Tj ET');
+    return w;
+  }
+  function line(x1,y1,x2,y2,w,gray){
+    cur.ops.push(num(gray||0)+' G '+num(w||0.6)+' w '+num(x1)+' '+num(H-y1)+' m '+num(x2)+' '+num(H-y2)+' l S');
+  }
+  function rect(x,y,w,h,fill,stroke){
+    var op = (fill!=null && stroke!=null) ? 'B' : (fill!=null ? 'f' : 'S');
+    cur.ops.push((fill!=null ? num(fill)+' g ' : '') + (stroke!=null ? num(stroke)+' G 0.6 w ' : '') +
+                 num(x)+' '+num(H-y-h)+' '+num(w)+' '+num(h)+' re '+op);
+  }
+  function image(im, x, y, w, h){
+    var id = images.indexOf(im); if (id < 0){ images.push(im); id = images.length-1; }
+    cur.imgs['Im'+id] = id;
+    cur.ops.push('q '+num(w)+' 0 0 '+num(h)+' '+num(x)+' '+num(H-y-h)+' cm /Im'+id+' Do Q');
+  }
+  function wrap(str, size, maxW, bold){
+    var words = String(str == null ? '' : str).split(/\s+/), lines = [], ln = '';
+    for (var i=0;i<words.length;i++){
+      var t = ln ? ln+' '+words[i] : words[i];
+      if (pdfTextWidth(t, size, bold) > maxW && ln){ lines.push(ln); ln = words[i]; } else ln = t;
+    }
+    if (ln) lines.push(ln);
+    return lines.length ? lines : [''];
+  }
+  function build(){
+    var list = [], nImg = images.length, firstPage = 5 + nImg;
+    function obj(n, head, stream){ list[n-1] = { head:head, stream:stream||null }; }
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids ['+pages.map(function(_,i){ return (firstPage+i*2)+' 0 R'; }).join(' ')+'] /Count '+pages.length+' >>');
+    obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+    obj(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+    images.forEach(function(im, i){
+      obj(5+i, '<< /Type /XObject /Subtype /Image /Width '+im.width+' /Height '+im.height+
+               ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+im.bytes.length+' >>', im.bytes);
+    });
+    pages.forEach(function(p, i){
+      var pn = firstPage+i*2, xo = Object.keys(p.imgs).map(function(k){ return '/'+k+' '+(5+p.imgs[k])+' 0 R'; }).join(' ');
+      obj(pn, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+num(W)+' '+num(H)+'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << '+xo+' >> >> /Contents '+(pn+1)+' 0 R >>');
+      var content = latin1(p.ops.join('\n'));
+      obj(pn+1, '<< /Length '+content.length+' >>', content);
+    });
+    var chunks = [], offset = 0, offsets = [];
+    function push(u8){ chunks.push(u8); offset += u8.length; }
+    push(latin1('%PDF-1.4\n%âãÏÓ\n'));
+    list.forEach(function(o, i){
+      offsets[i] = offset;
+      push(latin1((i+1)+' 0 obj\n'+o.head+'\n'));
+      if (o.stream){ push(latin1('stream\n')); push(o.stream); push(latin1('\nendstream\n')); }
+      push(latin1('endobj\n'));
+    });
+    var xref = offset, x = 'xref\n0 '+(list.length+1)+'\n0000000000 65535 f \n';
+    offsets.forEach(function(o){ x += ('0000000000'+o).slice(-10)+' 00000 n \n'; });
+    x += 'trailer\n<< /Size '+(list.length+1)+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF\n';
+    push(latin1(x));
+    var out = new Uint8Array(offset), pos = 0;
+    chunks.forEach(function(c){ out.set(c, pos); pos += c.length; });
+    return out;
+  }
+  return { W:W, H:H, M:M, page:page, text:text, line:line, rect:rect, image:image, wrap:wrap, build:build,
+           count:function(){ return pages.length; }, setPage:function(i){ cur = pages[i]; } };
+}
+/* PNG-Unterschrift (transparent möglich) → JPEG auf Weiss, für /DCTDecode */
+function sigToJpeg(dataUrl){
+  return new Promise(function(res){
+    if (!dataUrl) return res(null);
+    var im = new Image();
+    im.onload = function(){
+      try {
+        var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+        var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0);
+        var bin = atob(c.toDataURL('image/jpeg', 0.85).split(',')[1]), u = new Uint8Array(bin.length);
+        for (var i=0;i<bin.length;i++) u[i] = bin.charCodeAt(i);
+        res({ bytes:u, width:c.width, height:c.height });
+      } catch(e){ res(null); }
+    };
+    im.onerror = function(){ res(null); };
+    im.src = dataUrl;
+  });
+}
+function buildMatchPdf(s){
+  var sigs = [s.confirmed && s.confirmed[0], s.confirmed && s.confirmed[1], s.refSig];
+  return Promise.all(sigs.map(function(c){ return sigToJpeg(c && c.sig); })).then(function(imgs){
+    var d = pdfDoc(), M = d.M, W = d.W, CW = W - 2*M, y = M, m = s.meta || {};
+    function h2(t){ y += 8; d.text(M, y, t.toUpperCase(), 8.5, {bold:true, gray:0.35}); y += 4; d.line(M, y, W-M, y, 0.6, 0.25); y += 13; }
+
+    d.page();
+    d.text(M, y+12, 'INDIACA MATCHBLATT', 16, {bold:true});
+    d.text(W-M, y+12, fmtDate(s.started), 10, {align:'right', gray:0.3});
+    y += 20; d.line(M, y, W-M, y, 1.2); y += 24;
+
+    var winner = (s.result && (s.result.winner===0||s.result.winner===1)) ? s.teams[s.result.winner].name : null;
+    d.text(M, y, s.teams[0].name, 14, {bold:true});
+    d.text(W/2, y+2, s.setsWon[0]+' : '+s.setsWon[1], 24, {bold:true, align:'center'});
+    d.text(W-M, y, s.teams[1].name, 14, {bold:true, align:'right'});
+    y += 14;
+    d.text(M, y, 'Heim', 8, {gray:.45}); d.text(W/2, y, 'Sätze', 8, {gray:.45, align:'center'}); d.text(W-M, y, 'Gast', 8, {gray:.45, align:'right'});
+    y += 16;
+    var resLine = s.result ? ((winner ? 'Sieger: '+winner : 'Kein Sieger') + ' · ' + (RESULT_LABEL[s.result.type]||s.result.type) +
+                              (s.result.note ? ' · '+s.result.note : '')) : 'Spiel läuft';
+    d.text(W/2, y, resLine, 10, {align:'center'});
+    y += 4;
+
+    h2('Angaben zum Spiel');
+    var short = [['Wettbewerb', m.competition||'–'],['Kategorie', m.category||'–'],['Austragungsort', m.venue||'–'],['Schiedsrichter', m.referee||'–'],
+                 ['Beginn', fmtTime(s.started)],['Ende', s.result?fmtTime(s.result.endedAt):'–'],['Dauer', s.result?fmtDur(s.started,s.result.endedAt):'–'],['Schreiber', m.scorer||'–']];
+    var colW = CW/2, labW = 72, y0 = y;
+    short.forEach(function(r, i){
+      var cx = M + (i<4 ? 0 : colW), cy = y0 + (i%4)*13;
+      d.text(cx, cy, r[0], 8, {gray:.45});
+      d.text(cx+labW, cy, d.wrap(r[1], 9.5, colW-labW-10)[0], 9.5);
+    });
+    y = y0 + 4*13 + 2;
+    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget],
+                ['Auslosung', s.toss||'–']];
+    if (m.note) long.push(['Bemerkung', m.note]);
+    long.forEach(function(r){
+      d.text(M, y, r[0], 8, {gray:.45});
+      d.wrap(r[1], 9.5, CW-labW).forEach(function(l, i){ if (i) y += 12; d.text(M+labW, y, l, 9.5); });
+      y += 13;
+    });
+
+    h2('Sätze');
+    var cols = [['Satz',34],['Heim',46],['Gast',46],['Beginn',58],['Ende',58],['Dauer',80],['Auszeiten H:G',92],['Wechsel H:G',92]];
+    d.rect(M, y-9.5, CW, 14, 0.93, null);
+    var x = M; cols.forEach(function(c){ d.text(x+4, y+0.5, c[0], 8, {bold:true}); x += c[1]; });
+    y += 15;
+    function setRow(vals, running){
+      var xx = M;
+      vals.forEach(function(v, i){ d.text(xx+4, y, v, 9.5, {gray: running ? .4 : 0}); xx += cols[i][1]; });
+      d.line(M, y+4, W-M, y+4, 0.4, 0.8); y += 14;
+    }
+    s.sets.forEach(function(st, k){
+      setRow([String(st.no || (k+1)), String(st.pts[0]), String(st.pts[1]) + (st.aborted?' *':''), fmtTime(st.startedAt), fmtTime(st.endedAt),
+              fmtDur(st.startedAt, st.endedAt), st.timeouts[0]+' : '+st.timeouts[1], st.subs[0]+' : '+st.subs[1]]);
+    });
+    if (!s.finished) setRow([String(s.setNo), String(s.points[0]), String(s.points[1]), fmtTime(s.setStartedAt), 'läuft', '', s.timeouts[0]+' : '+s.timeouts[1], s.setSubs[0]+' : '+s.setSubs[1]], true);
+    if (s.sets.some(function(q){ return q.aborted; })){ d.text(M, y, '* Satz beim Abbruch nicht beendet', 7.5, {gray:.45}); y += 10; }
+
+    h2('Aufstellungen');
+    var ys = [y, y];
+    for (var t=0;t<2;t++){
+      var cx = M + t*(colW+6), yy = ys[t], fieldIdx = s.lineup[t], i;
+      d.text(cx, yy, s.teams[t].name, 10, {bold:true}); yy += 13;
+      for (i=0;i<fieldIdx.length;i++){
+        d.text(cx, yy, POSN[i], 8.5, {gray:.45});
+        d.text(cx+22, yy, s.teams[t].players[fieldIdx[i]] + (s.teams[t].captain === fieldIdx[i] ? '  (C)' : ''), 9.5);
+        yy += 12;
+      }
+      var b = [];
+      for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0) b.push(s.teams[t].players[i] + (s.teams[t].captain===i ? ' (C)' : ''));
+      d.text(cx, yy, 'Bank', 8.5, {gray:.45});
+      d.wrap(b.length ? b.join(', ') : '–', 9.5, colW-6-22).forEach(function(l, j){ if (j) yy += 12; d.text(cx+22, yy, l, 9.5); });
+      ys[t] = yy + 12;
+    }
+    y = Math.max(ys[0], ys[1]);
+
+    h2('Unterschriften');
+    var labels = [s.teams[0].name + ' (Mannschaftsführer)', s.teams[1].name + ' (Mannschaftsführer)', 'Schiedsrichter'];
+    var bw = (CW - 2*10)/3, bh = 92;
+    if (y + bh > d.H - M - 24){ d.page(); y = M; }
+    for (var k=0;k<3;k++){
+      var bx = M + k*(bw+10), rec = sigs[k], im = imgs[k];
+      d.rect(bx, y, bw, bh, null, 0.6);
+      d.text(bx+6, y+11, labels[k], 7.5, {gray:.45});
+      if (im){
+        var maxW = bw-12, maxH = 46, sc = Math.min(maxW/im.width, maxH/im.height);
+        d.image(im, bx+6, y+16, im.width*sc, im.height*sc);
+      } else d.line(bx+8, y+62, bx+bw-8, y+62, 0.5, 0.75);
+      if (rec){
+        d.text(bx+6, y+76, rec.name, 9, {bold:true});
+        d.text(bx+6, y+86, 'unterzeichnet ' + fmtDate(rec.at) + ' ' + fmtTime(rec.at), 7.5, {gray:.4});
+      } else d.text(bx+6, y+86, 'nicht unterzeichnet', 7.5, {gray:.55});
+    }
+    y += bh;
+
+    // Verlauf als Anhang, zweispaltig
+    var groups = [], seen = {};
+    function addEntries(label, entries){
+      // gleicher Satz (z. B. laufender Satz nach Abbruch) wird zusammengeführt
+      var last = groups[groups.length-1];
+      var g = (last && last.label === label) ? last : { label:label, items:[] };
+      (entries||[]).forEach(function(e){
+        var key = e.ts+'|'+e.kind+'|'+e.a+'|'+e.b; if (seen[key]) return; seen[key] = 1; g.items.push(e);
+      });
+      if (g.items.length && g !== last) groups.push(g);
+    }
+    s.sets.forEach(function(st, k){ addEntries('Satz '+(st.no||(k+1)), st.log); });
+    addEntries('Satz '+s.setNo, s.log);
+    if (groups.length){
+      d.page(); y = M;
+      d.text(M, y+10, 'Verlauf', 13, {bold:true});
+      d.text(W-M, y+10, s.teams[0].name+' – '+s.teams[1].name+' · '+fmtDate(s.started), 9, {align:'right', gray:.4});
+      y += 18; d.line(M, y, W-M, y, 0.8); y += 14;
+      var vcol = 0, vw = colW-8, vtop = y, lh = 10.5;
+      function vx(){ return M + vcol*(colW+8); }
+      function advance(n){
+        if (y + n*lh > d.H - M - 20){
+          if (vcol === 0){ vcol = 1; y = vtop; } else { d.page(); vcol = 0; y = M; vtop = y; }
+        }
+      }
+      groups.forEach(function(g){
+        advance(2); d.text(vx(), y, g.label, 9, {bold:true}); y += lh + 2;
+        g.items.forEach(function(e){
+          var lines = d.wrap(logTextFor(s, e), 8, vw-66);
+          advance(lines.length);
+          d.text(vx(), y, fmtTime(e.ts), 8, {gray:.45});
+          d.text(vx()+30, y, e.a+':'+e.b, 8, {bold:true});
+          lines.forEach(function(l, i){ d.text(vx()+66, y, l, 8); if (i < lines.length-1) y += lh; });
+          y += lh;
+        });
+        y += 4;
+      });
+    }
+
+    var n = d.count();
+    for (var p=0;p<n;p++){
+      d.setPage(p);
+      d.text(M, d.H-24, 'Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'), 7, {gray:.5});
+      d.text(W-M, d.H-24, 'Seite ' + (p+1) + ' / ' + n, 7, {gray:.5, align:'right'});
+    }
+    return d.build();
+  });
+}
+function exportPdf(){
+  buildMatchPdf(S).then(function(bytes){
+    downloadBlob(new Blob([bytes], {type:'application/pdf'}), reportFileName('pdf'));
+    toast('PDF erstellt');
+  }).catch(function(){ toast('PDF konnte nicht erstellt werden'); });
 }
 function copyText(txt){
   if (navigator.clipboard && navigator.clipboard.writeText){
@@ -2414,6 +2766,162 @@ function loadSettings(){
     $('mNote').value = s.meta.note||'';
   }
   renderSetup();
+  renderPrep();
+}
+
+/* ============================================================
+   Vorbereitete Spiele – das Setup-Formular als Vorlage speichern und
+   später laden. Gedacht für den Spieltag: zu Hause alle Spiele erfassen,
+   in der Halle nur noch wählen und starten.
+   ============================================================ */
+var PREP_ID = null;   // gerade geladene Vorbereitung
+function metaFromForm(){
+  return {
+    competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
+    venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
+    scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
+  };
+}
+function metaToForm(m){
+  m = m || {};
+  $('mCompetition').value = m.competition||'';
+  $('mCategory').value = m.category||'';
+  $('mVenue').value = m.venue||'';
+  $('mReferee').value = m.referee||'';
+  $('mScorer').value = m.scorer||'';
+  $('mNote').value = m.note||'';
+}
+function prepList(){ return store.get(K_PREP) || []; }
+function prepStore(list){ store.set(K_PREP, list); renderPrep(); }
+function prepFind(id){
+  var L = prepList();
+  for (var i=0;i<L.length;i++) if (L[i].id === id) return L[i];
+  return null;
+}
+function prepRemove(id){
+  prepStore(prepList().filter(function(r){ return r.id !== id; }));
+}
+function collectSetup(){
+  readSetupInputs();
+  return {
+    names: [$('tn0').value.trim(), $('tn1').value.trim()],
+    players: clone(P), caps: CAP.slice(),
+    cfg: cfg(), meta: metaFromForm()
+  };
+}
+function applySetup(rec){
+  $('tn0').value = rec.names[0]||''; $('tn1').value = rec.names[1]||'';
+  var c = rec.cfg || {};
+  if (c.count) $('cfgCount').value = c.count;
+  if (c.target) $('cfgTarget').value = c.target;
+  if (c.winSets) $('cfgWin').value = c.winSets;
+  if (c.deciderTarget) $('cfgDec').value = c.deciderTarget;
+  if (c.toLen) $('cfgTo').value = c.toLen;
+  if (c.maxTimeouts !== undefined) $('cfgMaxTo').value = c.maxTimeouts;
+  if (c.maxSubs !== undefined) $('cfgMaxSub').value = c.maxSubs;
+  if (c.firstServer !== undefined) $('cfgFirst').value = c.firstServer;
+  if (c.startSide !== undefined) $('cfgSide').value = c.startSide;
+  P = clone(rec.players || [[],[]]); CAP = (rec.caps || [0,0]).slice();
+  metaToForm(rec.meta);
+  if (rec.meta && (rec.meta.competition || rec.meta.category || rec.meta.venue || rec.meta.referee)) $('metaBox').open = true;
+  renderSetup();
+}
+function clearSetupForm(){
+  $('tn0').value = ''; $('tn1').value = '';
+  P = [[],[]]; CAP = [0,0];
+  metaToForm(null);
+  PREP_ID = null;
+  renderSetup(); renderPrep();
+}
+function prepTitle(r){ return (r.names[0]||'Heim') + ' – ' + (r.names[1]||'Gast'); }
+function prepSub(r){
+  var parts = [];
+  if (r.label) parts.push(r.label);
+  if (r.meta && r.meta.competition) parts.push(r.meta.competition);
+  if (r.meta && r.meta.category) parts.push(r.meta.category);
+  if (r.meta && r.meta.venue) parts.push(r.meta.venue);
+  if (!parts.length) parts.push('angelegt ' + fmtDate(r.createdAt));
+  return parts.join(' · ');
+}
+function renderPrep(){
+  var L = prepList(), card = $('prepCard');
+  if (!card) return;
+  card.hidden = !L.length;
+  if (PREP_ID && !prepFind(PREP_ID)) PREP_ID = null;
+  var h = '';
+  L.forEach(function(r){
+    h += '<div class="preprow'+(r.id===PREP_ID?' on':'')+'">' +
+         '<button class="prepload" type="button" data-prep="'+esc(r.id)+'">'+esc(prepTitle(r)) +
+         '<small>'+esc(prepSub(r))+'</small></button>' +
+         '<button class="del" type="button" data-prepdel="'+esc(r.id)+'" aria-label="Löschen">×</button></div>';
+  });
+  $('prepList').innerHTML = h;
+  var cur = PREP_ID ? prepFind(PREP_ID) : null;
+  $('prepLoaded').hidden = !cur;
+  if (cur) $('prepLoaded').textContent = 'Geladen: ' + prepTitle(cur) + ' – «Spiel starten» beginnt dieses Spiel.';
+}
+function prepLoad(id){
+  var r = prepFind(id); if (!r) return;
+  applySetup(r);
+  PREP_ID = id;
+  renderPrep();
+  window.scrollTo(0,0);
+  toast('Vorbereitetes Spiel geladen');
+}
+function dlgPrepSave(){
+  var cur = PREP_ID ? prepFind(PREP_ID) : null;
+  var bd = dlg('<h2>Spiel vorbereiten</h2>' +
+    '<p class="dsc">Teams, Spieler, Modus und Angaben aus dem Formular werden als anstehendes Spiel gespeichert. Gestartet wird es später über die Liste zuoberst.</p>' +
+    '<div class="field"><label class="lbl" for="prepLabel">Termin oder Bezeichnung (optional)</label>' +
+    '<input type="text" id="prepLabel" placeholder="z. B. Sa 14:00 · Spiel 3" autocomplete="off" value="'+esc(cur ? (cur.label||'') : '')+'"></div>' +
+    '<div class="acts">' +
+      (cur ? '<button class="btn" data-x="upd">Geladenes aktualisieren</button>' : '') +
+      '<button class="btn primary" data-x="new">'+(cur ? 'Als neues Spiel speichern' : 'Speichern')+'</button>' +
+      '<button class="btn" data-x="no">Abbrechen</button>' +
+    '</div>');
+  bd.addEventListener('click', function(e){
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no'){ closeDlg(); return; }
+    var rec = collectSetup();
+    rec.label = bd.querySelector('#prepLabel').value.trim();
+    var L = prepList();
+    if (x.dataset.x === 'upd' && cur){
+      rec.id = cur.id; rec.createdAt = cur.createdAt;
+      L = L.map(function(r){ return r.id === cur.id ? rec : r; });
+    } else {
+      rec.id = uuid(); rec.createdAt = iso();
+      L.push(rec);
+      PREP_ID = rec.id;
+    }
+    prepStore(L);
+    closeDlg();
+    var b2 = dlg('<h2>Gespeichert</h2>' +
+      '<p class="dsc">'+esc(prepTitle(rec))+' steht jetzt unter «Vorbereitete Spiele». Soll das Formular für das nächste Spiel geleert werden? Der Modus bleibt.</p>' +
+      '<div class="acts"><button class="btn" data-y="keep">Behalten</button>' +
+      '<button class="btn primary" data-y="clear">Formular leeren</button></div>');
+    b2.addEventListener('click', function(ev){
+      var y = ev.target.closest('[data-y]'); if (!y) return;
+      closeDlg();
+      if (y.dataset.y === 'clear') clearSetupForm();
+      window.scrollTo(0,0);
+    });
+  });
+}
+/* Beim Öffnen der App ohne laufendes Spiel: vorbereitetes Spiel wählen
+   oder ohne Vorlage beginnen. */
+function dlgPrepChoose(){
+  var L = prepList(); if (!L.length) return;
+  var h = '<h2>Spiel wählen</h2><p class="dsc">'+L.length+(L.length===1?' vorbereitetes Spiel wartet':' vorbereitete Spiele warten')+' auf diesem Gerät.</p><div class="menu stack">';
+  L.forEach(function(r){
+    h += '<button data-p="'+esc(r.id)+'">'+esc(prepTitle(r))+'<small>'+esc(prepSub(r))+'</small></button>';
+  });
+  h += '</div><div class="acts"><button class="btn" data-x="none">Neues Spiel ohne Vorlage</button></div>';
+  var bd = dlg(h, {esc:true});
+  bd.addEventListener('click', function(e){
+    var b = e.target.closest('[data-p]');
+    if (b){ closeDlg(); prepLoad(b.dataset.p); return; }
+    if (e.target.closest('[data-x=none]')) closeDlg();
+  });
 }
 
 function startMatch(){
@@ -2442,11 +2950,7 @@ function startMatch(){
     app: APP,
     count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets,
     toLen: c.toLen, maxTimeouts: c.maxTimeouts, maxSubs: c.maxSubs,
-    meta: {
-      competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
-      venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
-      scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
-    },
+    meta: metaFromForm(),
     teams: teams,
     toss: TOSS,
     lineup: [line.slice(), line.slice()],
@@ -2455,12 +2959,13 @@ function startMatch(){
     setNo: 1, setStartedAt: iso(), sideSwapped: false,
     subs: [0,0], setSubs: [0,0], timeouts: [0,0],
     log: [], finished: false, result: null,
-    confirmed: [null,null], locked: false,
+    confirmed: [null,null], refSig: null, locked: false,
     started: iso()
   };
   UNDO = [];
   TOSS = null;
   saveSettings();
+  if (PREP_ID){ prepRemove(PREP_ID); PREP_ID = null; }
   enterGame();
 }
 function uuid(){
@@ -2490,7 +2995,9 @@ function newMatch(){
   $('game').hidden = true;
   $('setup').hidden = false;
   window.scrollTo(0,0);
+  PREP_ID = null;
   loadSettings();
+  dlgPrepChoose();
 }
 
 /* ============================================================
@@ -2505,7 +3012,7 @@ function bootRestore(){
         esc(m.schema)+'). Er wird nicht verändert und nicht gelöscht.</p>' +
         '<div class="acts"><button class="btn primary" data-x="ok">Verstanden</button></div>')
       .querySelector('[data-x=ok]').onclick = function(){ closeDlg(); };
-    return false;
+    return true;   // Hinweis bleibt stehen, keine weitere Auswahl darüber
   }
   var st = m.S;
   if (st.locked) return false;
@@ -2625,6 +3132,18 @@ function wire(){
 
   $('btnStart').addEventListener('click', function(){ unlockAudio(); doToss(startMatch); });
   $('btnArchive').addEventListener('click', dlgArchive);
+  $('btnPrepSave').addEventListener('click', dlgPrepSave);
+  $('prepList').addEventListener('click', function(e){
+    var d = e.target.closest('[data-prepdel]');
+    if (d){
+      var r = prepFind(d.dataset.prepdel); if (!r) return;
+      confirmDlg('Vorbereitung löschen', prepTitle(r) + ' aus den vorbereiteten Spielen entfernen?', 'Löschen',
+        function(){ if (PREP_ID === r.id) PREP_ID = null; prepRemove(r.id); }, true);
+      return;
+    }
+    var l = e.target.closest('[data-prep]');
+    if (l) prepLoad(l.dataset.prep);
+  });
   $('btnUndo').addEventListener('click', undo);
   $('btnLog').addEventListener('click', function(){ if (!dlgOpen) dlgLog(); });
   $('btnTools').addEventListener('click', dlgTools);
@@ -2683,7 +3202,7 @@ function boot(){
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
   loadView();
   loadSettings();
-  bootRestore();
+  if (!bootRestore()) dlgPrepChoose();
   initSW();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
