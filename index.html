@@ -324,6 +324,8 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 .dragghost{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%) scale(1.2);opacity:.95;cursor:grabbing}
 .pcard.droptarget .ini{outline:3px dashed var(--ball);outline-offset:3px}
 .pcard.over .ini{outline-style:solid;transform:scale(1.12)}
+.pcard.locked{opacity:.45}
+.bchip.paired{border-style:solid;box-shadow:0 0 0 2px var(--ball),0 1px 4px rgba(0,0,0,.25)}
 body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 @media (max-height:520px){ .bchip{width:32px;height:32px;font-size:12px} }
 .court{
@@ -956,7 +958,7 @@ var POS = {
   6: [[25,13],[17,36],[50,40],[83,36],[75,13],[50,12]]
 };
 var SNAP = ['points','setsWon','sets','serving','firstServer','topTeam','setNo',
-            'setStartedAt','sideSwapped','lineup','subs','setSubs','timeouts',
+            'setStartedAt','sideSwapped','lineup','subs','setSubs','subPairs','timeouts',
             'log','finished','result'];
 var RESULT_LABEL = {
   regulaer:'Regulär', forfait:'Rückzug (Forfait)',
@@ -1261,6 +1263,7 @@ function finishSet(w){
   S.log = [];
   S.timeouts = [0,0];
   S.setSubs = [0,0];
+  S.subPairs = [[],[]];
   S.sideSwapped = false;
   S.setStartedAt = iso();
   S.firstServer = 1 - S.firstServer;
@@ -1549,8 +1552,10 @@ function renderBench(){
       bar.hidden = !b.length;
       var hb = '<span class="bl">Bank</span>';
       for (var k=0;k<b.length;k++){
-        hb += '<button class="bchip" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
-              ' title="'+esc(S.teams[t].players[b[k]])+' – auf einen Feldspieler ziehen"' +
+        var qk = openPairFor(t, b[k]);
+        var tip = qk && qk.out === b[k] ? ' – darf nur für '+S.teams[t].players[qk.in]+' zurück' : ' – auf einen Feldspieler ziehen';
+        hb += '<button class="bchip'+(qk ? ' paired' : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
+              ' title="'+esc(S.teams[t].players[b[k]])+esc(tip)+'"' +
               ' aria-label="Ersatz '+esc(S.teams[t].players[b[k]])+'"'+(dis?' disabled':'')+'>' +
               esc(initials(S.teams[t].players[b[k]])) + '</button>';
       }
@@ -1727,22 +1732,31 @@ function dlgSub(t, presetSlot, presetBench){
     '<p class="dsc">Der neue Spieler übernimmt dieselbe Position.</p>' +
     '<div class="pick"><div><h3>Vom Feld</h3><div class="opts" id="colF"></div></div>' +
     '<div><h3>Von der Bank</h3><div class="opts" id="colB"></div></div></div>' +
+    '<p class="err" id="subErr" hidden></p>' +
     '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
     '<button class="btn primary" data-x="ok" disabled>Wechseln</button></div>');
 
   function paint(){
-    var hf='', hb='', i;
+    var hf='', hb='', i, names = S.teams[t].players;
     for (i=0;i<S.lineup[t].length;i++){
-      hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'">' +
-            esc(S.teams[t].players[S.lineup[t][i]]) + '<small>Position '+POSN[i]+'</small></button>';
+      var cur = S.lineup[t][i], q = openPairFor(t, cur);
+      var hint = 'Position '+POSN[i] + (q && q.in === cur ? ' · nur für '+esc(names[q.out]) : '');
+      var blocked = selBench>=0 ? !!subCheck(t, i, selBench) : false;
+      hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'"'+(blocked?' disabled':'')+'>' +
+            esc(names[cur]) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
     }
     for (i=0;i<b.length;i++){
-      hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'">' +
-            esc(S.teams[t].players[b[i]]) + '<small>Ersatz</small></button>';
+      var qb = openPairFor(t, b[i]);
+      var hintB = 'Ersatz' + (qb && qb.out === b[i] ? ' · nur für '+esc(names[qb.in]) : '');
+      var blockedB = selSlot>=0 ? !!subCheck(t, selSlot, b[i]) : false;
+      hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'"'+(blockedB?' disabled':'')+'>' +
+            esc(names[b[i]]) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
     }
     bd.querySelector('#colF').innerHTML = hf;
     bd.querySelector('#colB').innerHTML = hb;
-    bd.querySelector('[data-x=ok]').disabled = !(selSlot>=0 && selBench>=0);
+    var why = (selSlot>=0 && selBench>=0) ? subCheck(t, selSlot, selBench) : '';
+    var errEl = bd.querySelector('#subErr'); errEl.textContent = why; errEl.hidden = !why;
+    bd.querySelector('[data-x=ok]').disabled = !(selSlot>=0 && selBench>=0 && !why);
   }
   paint();
   bd.addEventListener('click', function(e){
@@ -1781,13 +1795,15 @@ function benchPointerMove(e){
     DRAG.chip.classList.add('lifted');
     document.body.classList.add('dragging');
     for (var i=0;i<S.lineup[DRAG.t].length;i++){
-      var c = cards[DRAG.t][S.lineup[DRAG.t][i]]; if (c) c.classList.add('droptarget');
+      var c = cards[DRAG.t][S.lineup[DRAG.t][i]]; if (!c) continue;
+      c.classList.add(subCheck(DRAG.t, i, DRAG.pi) ? 'locked' : 'droptarget');
     }
   }
   DRAG.ghost.style.left = e.clientX + 'px';
   DRAG.ghost.style.top  = e.clientY + 'px';
   var hit = document.elementFromPoint(e.clientX, e.clientY);
   var card = hit && hit.closest ? hit.closest('.pcard.droptarget') : null;
+  DRAG.overLocked = hit && hit.closest ? hit.closest('.pcard.locked') : null;
   if (DRAG.over && DRAG.over !== card) DRAG.over.classList.remove('over');
   if (card) card.classList.add('over');
   DRAG.over = card;
@@ -1799,11 +1815,18 @@ function benchPointerUp(e){
   if (d.ghost && d.ghost.parentNode) d.ghost.parentNode.removeChild(d.ghost);
   d.chip.classList.remove('lifted');
   document.body.classList.remove('dragging');
-  var all = document.querySelectorAll('.pcard.droptarget, .pcard.over');
-  for (var i=0;i<all.length;i++){ all[i].classList.remove('droptarget'); all[i].classList.remove('over'); }
+  var all = document.querySelectorAll('.pcard.droptarget, .pcard.over, .pcard.locked');
+  for (var i=0;i<all.length;i++){ all[i].classList.remove('droptarget'); all[i].classList.remove('over'); all[i].classList.remove('locked'); }
   if (e.type === 'pointercancel') return;
   if (!d.moved){ dlgSub(d.t, -1, d.pi); return; }
-  if (!d.over) return;
+  if (!d.over){
+    if (d.overLocked){
+      var lockedSlot = S.lineup[d.t].indexOf(+d.overLocked.dataset.player);
+      var why = lockedSlot >= 0 ? subCheck(d.t, lockedSlot, d.pi) : '';
+      if (why) confirmDlg('Wechsel nicht erlaubt', why, 'Verstanden', function(){}, false);
+    }
+    return;
+  }
   var outPi = +d.over.dataset.player, slot = S.lineup[d.t].indexOf(outPi);
   if (slot < 0) return;
   if (S.maxSubs>0 && S.setSubs[d.t] >= S.maxSubs){
@@ -1812,14 +1835,41 @@ function benchPointerUp(e){
   }
   doSub(d.t, slot, d.pi);
 }
+/* Wechselpaare eines Satzes: Wurde A durch B ersetzt, darf B nur durch
+   A ersetzt werden, und A darf nur für B zurück. Für andere Ersatzspieler
+   ist diese Position gesperrt, bis A zurück ist. */
+function subPairs(t){
+  if (!S.subPairs) S.subPairs = [[],[]];
+  return S.subPairs[t];
+}
+function openPairFor(t, pi){            // offenes Paar, in dem pi drin- oder draussen ist
+  var P = subPairs(t);
+  for (var i=0;i<P.length;i++) if (!P[i].done && (P[i].in === pi || P[i].out === pi)) return P[i];
+  return null;
+}
+function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
+  var cur = S.lineup[t][slot], names = S.teams[t].players;
+  var qc = openPairFor(t, cur);
+  if (qc && qc.in === cur && qc.out !== pi)
+    return 'Position ' + POSN[slot] + ' ist gesperrt: für ' + names[cur] + ' darf nur ' + names[qc.out] + ' zurück aufs Feld.';
+  var qp = openPairFor(t, pi);
+  if (qp && qp.out === pi && qp.in !== cur)
+    return names[pi] + ' darf nur für ' + names[qp.in] + ' (Position ' + POSN[S.lineup[t].indexOf(qp.in)] + ') wieder eingewechselt werden.';
+  return '';
+}
 function doSub(t, slot, pi){
+  var why = subCheck(t, slot, pi);
+  if (why) return confirmDlg('Wechsel nicht erlaubt', why, 'Verstanden', function(){}, false);
   snapshot();
   var out = S.lineup[t][slot];
   S.lineup[t][slot] = pi;
   S.setSubs[t]++; S.subs[t]++;
-  pushLog('sub', t, S.teams[t].players[pi] + ' für ' + S.teams[t].players[out] + ' (Position ' + POSN[slot] + ')');
+  var q = openPairFor(t, out), back = false;
+  if (q && q.in === out && q.out === pi){ q.done = true; back = true; }
+  else subPairs(t).push({ out: out, in: pi, slot: slot });
+  pushLog('sub', t, S.teams[t].players[pi] + ' für ' + S.teams[t].players[out] + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
   render(); save();
-  toast('Wechsel: ' + S.teams[t].players[pi]);
+  toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + S.teams[t].players[pi]);
 }
 
 /* ---------- Auszeit ---------- */
@@ -3085,7 +3135,7 @@ function startMatch(){
     points: [0,0], setsWon: [0,0], sets: [],
     serving: c.firstServer, firstServer: c.firstServer, topTeam: c.startSide,
     setNo: 1, setStartedAt: iso(), sideSwapped: false,
-    subs: [0,0], setSubs: [0,0], timeouts: [0,0],
+    subs: [0,0], setSubs: [0,0], subPairs: [[],[]], timeouts: [0,0],
     log: [], finished: false, result: null,
     confirmed: [null,null], refSig: null, locked: false,
     started: iso()
