@@ -663,6 +663,17 @@ body.has-update #game .board{margin-top:0}
   font-size:12.5px;color:var(--muted);text-align:right}
 .menu button:disabled{color:var(--muted);opacity:.55}
 .menu button.danger{color:var(--guest)}
+.menu.stack button{flex-direction:column;align-items:flex-start;gap:2px;white-space:normal;text-align:left}
+.menu.stack button small{text-align:left}
+.preplist{display:flex;flex-direction:column}
+.preprow{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.preprow:last-child{border-bottom:none}
+.preprow .prepload{flex:1 1 auto;min-width:0;min-height:54px;padding:10px 2px;background:none;border:none;
+  text-align:left;font-size:16px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.preprow .prepload small{font-weight:400;font-size:12.5px;color:var(--muted)}
+.preprow.on .prepload{color:var(--home)}
+.preprow .del{flex:0 0 auto;width:38px;height:38px;min-height:0;padding:0;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:20px;line-height:1}
 
 .pick{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .pick h3{font-family:"Barlow Condensed",system-ui,sans-serif;font-size:14px;letter-spacing:.06em;
@@ -732,6 +743,13 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 
   <div id="storeWarn" class="banner" hidden>
     Speichern nicht möglich – Stand bitte zusätzlich auf Papier führen.
+  </div>
+
+  <div class="card" id="prepCard" hidden>
+    <h2>Vorbereitete Spiele</h2>
+    <p class="hint" style="margin:0 0 8px">Antippen lädt Teams, Spieler und Angaben ins Formular. Beim Spielstart wird das Spiel aus dieser Liste entfernt.</p>
+    <div class="preplist" id="prepList"></div>
+    <p class="banner" id="prepLoaded" style="margin:10px 0 0" hidden></p>
   </div>
 
   <div class="card teamcard" id="teamcard0" style="--tc:var(--home);--tc-on:var(--home-on)">
@@ -821,8 +839,10 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   <p class="err" id="setupErr" hidden></p>
   <button class="btn primary wide" id="btnStart" type="button" style="min-height:56px;font-size:16px">Spiel starten</button>
   <div class="row" style="margin-top:10px">
+    <button class="btn sm" id="btnPrepSave" type="button">Als vorbereitetes Spiel speichern</button>
     <button class="btn sm" id="btnArchive" type="button">Archiv</button>
   </div>
+  <p class="hint" style="margin:8px 0 0">Vorbereiten: Formular ausfüllen und speichern statt starten – das Spiel wartet dann zuoberst unter «Vorbereitete Spiele».</p>
 </main>
 
 <!-- ========================= GAME ========================= -->
@@ -898,6 +918,7 @@ var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
 var K_ARCH  = 'indiaca.archive.v2';
+var K_PREP  = 'indiaca.prepared.v1';
 var POSN = ['I','II','III','IV','V','VI'];
 var POS = {
   4: [[26,13],[22,37],[78,37],[74,13]],
@@ -2724,6 +2745,162 @@ function loadSettings(){
     $('mNote').value = s.meta.note||'';
   }
   renderSetup();
+  renderPrep();
+}
+
+/* ============================================================
+   Vorbereitete Spiele – das Setup-Formular als Vorlage speichern und
+   später laden. Gedacht für den Spieltag: zu Hause alle Spiele erfassen,
+   in der Halle nur noch wählen und starten.
+   ============================================================ */
+var PREP_ID = null;   // gerade geladene Vorbereitung
+function metaFromForm(){
+  return {
+    competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
+    venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
+    scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
+  };
+}
+function metaToForm(m){
+  m = m || {};
+  $('mCompetition').value = m.competition||'';
+  $('mCategory').value = m.category||'';
+  $('mVenue').value = m.venue||'';
+  $('mReferee').value = m.referee||'';
+  $('mScorer').value = m.scorer||'';
+  $('mNote').value = m.note||'';
+}
+function prepList(){ return store.get(K_PREP) || []; }
+function prepStore(list){ store.set(K_PREP, list); renderPrep(); }
+function prepFind(id){
+  var L = prepList();
+  for (var i=0;i<L.length;i++) if (L[i].id === id) return L[i];
+  return null;
+}
+function prepRemove(id){
+  prepStore(prepList().filter(function(r){ return r.id !== id; }));
+}
+function collectSetup(){
+  readSetupInputs();
+  return {
+    names: [$('tn0').value.trim(), $('tn1').value.trim()],
+    players: clone(P), caps: CAP.slice(),
+    cfg: cfg(), meta: metaFromForm()
+  };
+}
+function applySetup(rec){
+  $('tn0').value = rec.names[0]||''; $('tn1').value = rec.names[1]||'';
+  var c = rec.cfg || {};
+  if (c.count) $('cfgCount').value = c.count;
+  if (c.target) $('cfgTarget').value = c.target;
+  if (c.winSets) $('cfgWin').value = c.winSets;
+  if (c.deciderTarget) $('cfgDec').value = c.deciderTarget;
+  if (c.toLen) $('cfgTo').value = c.toLen;
+  if (c.maxTimeouts !== undefined) $('cfgMaxTo').value = c.maxTimeouts;
+  if (c.maxSubs !== undefined) $('cfgMaxSub').value = c.maxSubs;
+  if (c.firstServer !== undefined) $('cfgFirst').value = c.firstServer;
+  if (c.startSide !== undefined) $('cfgSide').value = c.startSide;
+  P = clone(rec.players || [[],[]]); CAP = (rec.caps || [0,0]).slice();
+  metaToForm(rec.meta);
+  if (rec.meta && (rec.meta.competition || rec.meta.category || rec.meta.venue || rec.meta.referee)) $('metaBox').open = true;
+  renderSetup();
+}
+function clearSetupForm(){
+  $('tn0').value = ''; $('tn1').value = '';
+  P = [[],[]]; CAP = [0,0];
+  metaToForm(null);
+  PREP_ID = null;
+  renderSetup(); renderPrep();
+}
+function prepTitle(r){ return (r.names[0]||'Heim') + ' – ' + (r.names[1]||'Gast'); }
+function prepSub(r){
+  var parts = [];
+  if (r.label) parts.push(r.label);
+  if (r.meta && r.meta.competition) parts.push(r.meta.competition);
+  if (r.meta && r.meta.category) parts.push(r.meta.category);
+  if (r.meta && r.meta.venue) parts.push(r.meta.venue);
+  if (!parts.length) parts.push('angelegt ' + fmtDate(r.createdAt));
+  return parts.join(' · ');
+}
+function renderPrep(){
+  var L = prepList(), card = $('prepCard');
+  if (!card) return;
+  card.hidden = !L.length;
+  if (PREP_ID && !prepFind(PREP_ID)) PREP_ID = null;
+  var h = '';
+  L.forEach(function(r){
+    h += '<div class="preprow'+(r.id===PREP_ID?' on':'')+'">' +
+         '<button class="prepload" type="button" data-prep="'+esc(r.id)+'">'+esc(prepTitle(r)) +
+         '<small>'+esc(prepSub(r))+'</small></button>' +
+         '<button class="del" type="button" data-prepdel="'+esc(r.id)+'" aria-label="Löschen">×</button></div>';
+  });
+  $('prepList').innerHTML = h;
+  var cur = PREP_ID ? prepFind(PREP_ID) : null;
+  $('prepLoaded').hidden = !cur;
+  if (cur) $('prepLoaded').textContent = 'Geladen: ' + prepTitle(cur) + ' – «Spiel starten» beginnt dieses Spiel.';
+}
+function prepLoad(id){
+  var r = prepFind(id); if (!r) return;
+  applySetup(r);
+  PREP_ID = id;
+  renderPrep();
+  window.scrollTo(0,0);
+  toast('Vorbereitetes Spiel geladen');
+}
+function dlgPrepSave(){
+  var cur = PREP_ID ? prepFind(PREP_ID) : null;
+  var bd = dlg('<h2>Spiel vorbereiten</h2>' +
+    '<p class="dsc">Teams, Spieler, Modus und Angaben aus dem Formular werden als anstehendes Spiel gespeichert. Gestartet wird es später über die Liste zuoberst.</p>' +
+    '<div class="field"><label class="lbl" for="prepLabel">Termin oder Bezeichnung (optional)</label>' +
+    '<input type="text" id="prepLabel" placeholder="z. B. Sa 14:00 · Spiel 3" autocomplete="off" value="'+esc(cur ? (cur.label||'') : '')+'"></div>' +
+    '<div class="acts">' +
+      (cur ? '<button class="btn" data-x="upd">Geladenes aktualisieren</button>' : '') +
+      '<button class="btn primary" data-x="new">'+(cur ? 'Als neues Spiel speichern' : 'Speichern')+'</button>' +
+      '<button class="btn" data-x="no">Abbrechen</button>' +
+    '</div>');
+  bd.addEventListener('click', function(e){
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no'){ closeDlg(); return; }
+    var rec = collectSetup();
+    rec.label = bd.querySelector('#prepLabel').value.trim();
+    var L = prepList();
+    if (x.dataset.x === 'upd' && cur){
+      rec.id = cur.id; rec.createdAt = cur.createdAt;
+      L = L.map(function(r){ return r.id === cur.id ? rec : r; });
+    } else {
+      rec.id = uuid(); rec.createdAt = iso();
+      L.push(rec);
+      PREP_ID = rec.id;
+    }
+    prepStore(L);
+    closeDlg();
+    var b2 = dlg('<h2>Gespeichert</h2>' +
+      '<p class="dsc">'+esc(prepTitle(rec))+' steht jetzt unter «Vorbereitete Spiele». Soll das Formular für das nächste Spiel geleert werden? Der Modus bleibt.</p>' +
+      '<div class="acts"><button class="btn" data-y="keep">Behalten</button>' +
+      '<button class="btn primary" data-y="clear">Formular leeren</button></div>');
+    b2.addEventListener('click', function(ev){
+      var y = ev.target.closest('[data-y]'); if (!y) return;
+      closeDlg();
+      if (y.dataset.y === 'clear') clearSetupForm();
+      window.scrollTo(0,0);
+    });
+  });
+}
+/* Beim Öffnen der App ohne laufendes Spiel: vorbereitetes Spiel wählen
+   oder ohne Vorlage beginnen. */
+function dlgPrepChoose(){
+  var L = prepList(); if (!L.length) return;
+  var h = '<h2>Spiel wählen</h2><p class="dsc">'+L.length+(L.length===1?' vorbereitetes Spiel wartet':' vorbereitete Spiele warten')+' auf diesem Gerät.</p><div class="menu stack">';
+  L.forEach(function(r){
+    h += '<button data-p="'+esc(r.id)+'">'+esc(prepTitle(r))+'<small>'+esc(prepSub(r))+'</small></button>';
+  });
+  h += '</div><div class="acts"><button class="btn" data-x="none">Neues Spiel ohne Vorlage</button></div>';
+  var bd = dlg(h, {esc:true});
+  bd.addEventListener('click', function(e){
+    var b = e.target.closest('[data-p]');
+    if (b){ closeDlg(); prepLoad(b.dataset.p); return; }
+    if (e.target.closest('[data-x=none]')) closeDlg();
+  });
 }
 
 function startMatch(){
@@ -2752,11 +2929,7 @@ function startMatch(){
     app: APP,
     count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets,
     toLen: c.toLen, maxTimeouts: c.maxTimeouts, maxSubs: c.maxSubs,
-    meta: {
-      competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
-      venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
-      scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
-    },
+    meta: metaFromForm(),
     teams: teams,
     toss: TOSS,
     lineup: [line.slice(), line.slice()],
@@ -2771,6 +2944,7 @@ function startMatch(){
   UNDO = [];
   TOSS = null;
   saveSettings();
+  if (PREP_ID){ prepRemove(PREP_ID); PREP_ID = null; }
   enterGame();
 }
 function uuid(){
@@ -2800,7 +2974,9 @@ function newMatch(){
   $('game').hidden = true;
   $('setup').hidden = false;
   window.scrollTo(0,0);
+  PREP_ID = null;
   loadSettings();
+  dlgPrepChoose();
 }
 
 /* ============================================================
@@ -2815,7 +2991,7 @@ function bootRestore(){
         esc(m.schema)+'). Er wird nicht verändert und nicht gelöscht.</p>' +
         '<div class="acts"><button class="btn primary" data-x="ok">Verstanden</button></div>')
       .querySelector('[data-x=ok]').onclick = function(){ closeDlg(); };
-    return false;
+    return true;   // Hinweis bleibt stehen, keine weitere Auswahl darüber
   }
   var st = m.S;
   if (st.locked) return false;
@@ -2935,6 +3111,18 @@ function wire(){
 
   $('btnStart').addEventListener('click', function(){ unlockAudio(); doToss(startMatch); });
   $('btnArchive').addEventListener('click', dlgArchive);
+  $('btnPrepSave').addEventListener('click', dlgPrepSave);
+  $('prepList').addEventListener('click', function(e){
+    var d = e.target.closest('[data-prepdel]');
+    if (d){
+      var r = prepFind(d.dataset.prepdel); if (!r) return;
+      confirmDlg('Vorbereitung löschen', prepTitle(r) + ' aus den vorbereiteten Spielen entfernen?', 'Löschen',
+        function(){ if (PREP_ID === r.id) PREP_ID = null; prepRemove(r.id); }, true);
+      return;
+    }
+    var l = e.target.closest('[data-prep]');
+    if (l) prepLoad(l.dataset.prep);
+  });
   $('btnUndo').addEventListener('click', undo);
   $('btnLog').addEventListener('click', function(){ if (!dlgOpen) dlgLog(); });
   $('btnTools').addEventListener('click', dlgTools);
@@ -2993,7 +3181,7 @@ function boot(){
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
   loadView();
   loadSettings();
-  bootRestore();
+  if (!bootRestore()) dlgPrepChoose();
   initSW();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
