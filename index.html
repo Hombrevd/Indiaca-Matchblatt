@@ -414,7 +414,7 @@ body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
    nur Breite/Höhe der (weiterhin 5:6 grossen) Box; alles Geometrische
    (Positionen, Rotationspfeile) dreht als Bild einfach mit – nur Text
    wird gegengedreht, damit er lesbar bleibt. */
-.court.quer{transform:rotate(90deg)}
+.court.quer{transform:rotate(90deg);max-width:none;max-height:none}  /* fitCourt setzt die Masse; die Box ist hochkant, wirkt aber quer */
 .court.quer .pcard{transform:translate(-50%,-50%) rotate(-90deg)}
 .court.quer .netlbl{transform:rotate(-90deg)}
 
@@ -732,6 +732,56 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 .banner{border:1px solid var(--line);border-left:5px solid var(--ball);background:var(--surface);
   border-radius:var(--radius);padding:11px 13px;font-size:14px;margin-bottom:12px}
 
+/* ============================================================
+   Handy quer (wenig Höhe): Tafel als schmales Band oben, Feld gross
+   in der Mitte mit den Bänken links und rechts, Punkttasten und
+   Werkzeuge in einer Reihe unten. Tablets (ab 560 px Höhe) behalten
+   die Spalte rechts. Steht bewusst zuletzt, damit es die Höhenstufen
+   und die Querformat-Spalte überstimmt.
+   ============================================================ */
+@media (orientation:landscape) and (max-height:559px){
+  #game{padding:6px 10px 6px}
+  #game .gwrap{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"board board" "court court" "panel tools";
+    gap:6px 8px;
+  }
+  #game .board{grid-area:board;margin:-6px -10px 0}
+  #game .courtwrap{grid-area:court;min-height:110px}
+  #game .panel{grid-area:panel;min-height:0}
+  #game .toolrow{grid-area:tools;margin:0;align-self:stretch}
+  .log{display:none}
+  /* Tafel: ein flacher Streifen – Punkte links, Name/Sätze/Aufschlag
+     in der Mitte, Wechsel und Auszeit als schmale Säule */
+  .board .side{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"pts tn acts" "pts sub acts" "pts srv acts";
+    align-items:center;column-gap:10px;row-gap:0;padding:4px 10px;
+  }
+  .board .side.b{grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-areas:"acts tn pts" "acts sub pts" "acts srv pts";text-align:right}
+  .board .tn{grid-area:tn;font-size:13px}
+  .board .pts{grid-area:pts;margin:0;font-size:clamp(30px,11vh,52px);line-height:.9}
+  .board .sub{grid-area:sub;font-size:10px}
+  .board .serve{grid-area:srv;margin:0;font-size:10.5px;gap:5px;justify-self:start}
+  .board .serve::before{width:9px;height:9px}
+  .board .side.b .serve{justify-self:end}
+  .board .acts{grid-area:acts;flex-direction:column;gap:3px;margin:0;padding:0;align-self:center}
+  .board .acts .tbtn{min-height:24px;font-size:10px;padding:1px 5px;width:100%}
+  .board .mid{padding:3px 8px;font-size:9.5px;gap:0}
+  .board .mid b{font-size:18px}
+  /* Tasten unten, Werkzeuge daneben */
+  .ptbtns{grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:8px;margin:0;min-height:0;flex:1 1 auto}
+  .ptbtn{height:auto;min-height:52px;padding:6px 12px;justify-content:center}
+  .ptbtn .t{font-size:18px;padding-right:30px}
+  .ptbtn .plus{top:50%;transform:translateY(-50%);font-size:22px;right:10px}
+  .ptbtn .s{display:none}
+  .toolrow{gap:6px}
+  .toolrow .btn{flex:0 0 auto;min-height:52px;padding:0 12px;font-size:13px}
+  .bchip{width:32px;height:32px;font-size:12px}
+}
 </style>
 <script>
 /* Läuft vor dem ersten Bild: gespeicherte Darstellung setzen, damit
