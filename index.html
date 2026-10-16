@@ -2268,8 +2268,8 @@ function cfg(){
   };
 }
 /* Auslosung wie am Netz: der Indiaca wird geworfen, die Seite, auf der er
-   landet, gewinnt den Wurf. Der Gewinner wählt Aufschlag oder Seite, der
-   Verlierer bekommt den Rest. Das Ergebnis landet im Bericht. */
+   landet, gewinnt den Wurf. Der Gewinner wählt Aufschlag, Rückschlag oder
+   Seite, der Verlierer bekommt den Rest. Das Ergebnis landet im Bericht. */
 var TOSS = null;
 function setupTeamName(t){
   return t===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
@@ -2299,37 +2299,58 @@ function doToss(onDone){
     bd.querySelector('#tossH'+loser).classList.add('lose');
     step.innerHTML = '<p style="margin:0"><b>'+esc(setupTeamName(winner))+'</b> gewinnt den Wurf und wählt:</p>' +
       '<div class="acts"><button class="btn primary" data-c="serve">Aufschlag</button>' +
+      '<button class="btn primary" data-c="receive">Rückschlag</button>' +
       '<button class="btn primary" data-c="side">Seite</button></div>';
   }
   sh.addEventListener('animationend', onLanded);
   requestAnimationFrame(function(){ sh.classList.add('fly'); });
   setTimeout(onLanded, 3400);
 
-  var choice = null;
-  step.addEventListener('click', function(e){
-    var c = e.target.closest('[data-c]');
-    if (c){
-      choice = c.dataset.c;
-      var chooser = (choice === 'serve') ? loser : winner;
-      step.innerHTML = '<p style="margin:0"><b>'+esc(setupTeamName(winner))+'</b> wählt ' +
-        (choice==='serve' ? 'den Aufschlag' : 'die Seite') + '. <b>'+esc(setupTeamName(chooser))+'</b> ' +
-        (choice==='serve' ? 'wählt die Seite:' : 'bekommt den Aufschlag – '+esc(setupTeamName(winner))+' wählt die Seite:') + '</p>' +
-        '<div class="acts"><button class="btn primary" data-s="A">Seite A</button>' +
-        '<button class="btn primary" data-s="B">Seite B</button></div>';
-      return;
-    }
-    var s = e.target.closest('[data-s]');
-    if (!s) return;
-    var server = (choice === 'serve') ? winner : loser;
-    var sideChooser = (choice === 'serve') ? loser : winner;
-    var sideA = (s.dataset.s === 'A') ? sideChooser : 1 - sideChooser;
+  // Gewinner wählt Aufschlag, Rückschlag oder Seite; der Verlierer bekommt
+  // die verbleibende Wahl (Seite bzw. Aufschlag/Rückschlag).
+  var server = null, sideA = null, label = '', chooser = winner;
+  function finish(){
     $('cfgFirst').value = String(server);
     $('cfgSide').value = String(sideA);
-    TOSS = setupTeamName(winner) + ' gewinnt den Wurf und wählt ' +
-      (choice==='serve' ? 'Aufschlag' : 'Seite ' + s.dataset.s) +
+    TOSS = setupTeamName(winner) + ' gewinnt den Wurf und wählt ' + label +
       ' · Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA);
     closeDlg();
     onDone();
+  }
+  function askSide(t, lead){
+    chooser = t;
+    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(setupTeamName(t))+'</b> wählt die Seite:</p>' +
+      '<div class="acts"><button class="btn primary" data-s="A">Seite A</button>' +
+      '<button class="btn primary" data-s="B">Seite B</button></div>';
+  }
+  function askServe(t, lead){
+    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(setupTeamName(t))+'</b> wählt:</p>' +
+      '<div class="acts"><button class="btn primary" data-r="serve">Aufschlag</button>' +
+      '<button class="btn primary" data-r="receive">Rückschlag</button></div>';
+  }
+  step.addEventListener('click', function(e){
+    var w = '<b>'+esc(setupTeamName(winner))+'</b>';
+    var c = e.target.closest('[data-c]');
+    if (c){
+      if (c.dataset.c === 'serve'){ label = 'Aufschlag'; server = winner; askSide(loser, w+' wählt den Aufschlag.'); }
+      else if (c.dataset.c === 'receive'){ label = 'Rückschlag'; server = loser; askSide(loser, w+' wählt den Rückschlag.'); }
+      else askSide(winner, '');
+      return;
+    }
+    var s = e.target.closest('[data-s]');
+    if (s){
+      sideA = (s.dataset.s === 'A') ? chooser : 1 - chooser;
+      if (server === null){
+        label = 'Seite ' + s.dataset.s;
+        askServe(loser, w+' wählt Seite '+s.dataset.s+'.');
+      } else finish();
+      return;
+    }
+    var r = e.target.closest('[data-r]');
+    if (r){
+      server = (r.dataset.r === 'serve') ? loser : winner;
+      finish();
+    }
   });
 }
 var MAX_BENCH = 5;
