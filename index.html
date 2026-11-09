@@ -232,6 +232,10 @@ body.has-update .screen{padding-top:54px}
 .plist .pos{flex:0 0 30px;text-align:center;font-size:16px;font-weight:700;color:var(--muted)}
 .plist li.field-slot .pos{color:var(--tc)}
 .plist input{flex:1;min-width:0}
+.plist input.num{flex:0 0 58px;text-align:center;padding-left:4px;padding-right:4px}
+.plist .names{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.plist .names input{width:100%}
+@media (min-width:600px){ .plist .names{flex-direction:row} }
 .plist .cap{flex:0 0 auto;display:flex;align-items:center;gap:4px;font-size:12px;
   font-weight:700;color:var(--muted)}
 .plist .cap input{width:22px;height:22px;min-height:0;flex:0 0 auto;accent-color:var(--tc)}
@@ -409,6 +413,8 @@ body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
   100%{box-shadow:0 0 0 4px var(--ball),0 0 0 20px rgba(255,212,0,0),0 2px 8px rgba(0,0,0,.28)}
 }
 .pcard.off{opacity:0;pointer-events:none}
+/* Namensschilder nur, wenn in den Einstellungen gewünscht */
+body:not(.shownames) .pcard .nm{display:none}
 
 /* Querformat: das Feld dreht sich um 90°, damit die beiden Hälften
    nebeneinander stehen – genau so, wie der Schreiber courtside neben
@@ -416,9 +422,9 @@ body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
    nur Breite/Höhe der (weiterhin 5:6 grossen) Box; alles Geometrische
    (Positionen, Rotationspfeile) dreht als Bild einfach mit – nur Text
    wird gegengedreht, damit er lesbar bleibt. */
-.court.quer{transform:rotate(90deg);max-width:none;max-height:none}  /* fitCourt setzt die Masse; die Box ist hochkant, wirkt aber quer */
-.court.quer .pcard{transform:translate(-50%,-50%) rotate(-90deg)}
-.court.quer .netlbl{transform:rotate(-90deg)}
+.court.quer{transform:rotate(-90deg);max-width:none;max-height:none}  /* fitCourt setzt die Masse; die Box ist hochkant, wirkt aber quer */
+.court.quer .pcard{transform:translate(-50%,-50%) rotate(90deg)}
+.court.quer .netlbl{transform:rotate(90deg)}
 
 /* ---------- Punkttasten ---------- */
 .ptbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 12px}
@@ -739,8 +745,8 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
    oben je Team eine Kopfzeile (Name, Sätze, Aufschlag, Wechsel, Auszeit)
    über der eigenen Hälfte, dazwischen die Werkzeuge; in der Mitte das
    Feld so gross wie möglich mit den Bänken links und rechts; unten die
-   Punkttasten mit dem Stand gross in der Mitte. Team B (im Hochformat
-   die untere Hälfte) liegt durch die 90°-Drehung links, Team A rechts.
+   Punkttasten mit dem Stand gross in der Mitte. Seite A (im Hochformat
+   die obere Hälfte) liegt links vom Schreiber, Seite B rechts.
    Steht zuletzt, damit es alle früheren Stufen überstimmt.
    ============================================================ */
 @media (orientation:landscape){
@@ -756,42 +762,43 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   #game .board,#game .panel,.ptbtns{display:contents}
   #game .courtwrap{grid-area:court;min-height:110px}
   .log{display:none}
-  #sideB{grid-area:headL}
-  #sideA{grid-area:headR}
+  #sideA{grid-area:headL}
+  #sideB{grid-area:headR}
   #game .toolrow{grid-area:tools;margin:0;gap:6px;align-self:stretch}
   .toolrow .btn{flex:1 1 0;min-height:0;padding:0 10px;font-size:12px}
   #btnLog{display:inline-block}
-  .ptbtn[data-side="B"]{grid-area:ptL}
-  .ptbtn[data-side="A"]{grid-area:ptR}
+  .ptbtn[data-side="A"]{grid-area:ptL}
+  .ptbtn[data-side="B"]{grid-area:ptR}
   .ptbtn{height:auto;min-height:clamp(50px,9vh,84px);padding:6px 14px;justify-content:center}
   .ptbtn .t{font-size:clamp(16px,3.2vh,24px);padding-right:34px}
   .ptbtn .plus{top:50%;transform:translateY(-50%);font-size:clamp(20px,4vh,30px);right:12px}
   .ptbtn .s{display:none}
-  /* Kopfzeile je Team über der eigenen Hälfte */
-  .board .side,.board .side.b{
+  /* Kopfzeile je Team über der eigenen Hälfte: Seite A links */
+  .board .side,.board .side.a,.board .side.b{
     display:flex;flex-direction:row;align-items:center;gap:10px;
     padding:4px 12px;min-height:44px;border-radius:var(--radius);text-align:left;
   }
-  /* Rechte Kopfzeile gespiegelt über die Reihenfolge, nicht über
-     row-reverse: so läuft Überlauf nach rechts und fitActs misst ihn. */
-  .board .side.a{flex-direction:row;text-align:right}
-  .board .side.a .acts{order:-2;margin:0 0 0 auto}
-  .board .side.a .serve{order:-1}
-  .board .side.a .sub{order:0}
-  .board .side.a .tn{order:1}
+  /* Rechte Kopfzeile (Seite B) gespiegelt über die Reihenfolge, nicht
+     über row-reverse: so läuft Überlauf nach rechts und fitActs misst ihn. */
+  .board .side.b{text-align:right}
+  .board .side.b .acts{order:-2;margin:0 0 0 auto}
+  .board .side.b .serve{order:-1}
+  .board .side.b .sub{order:0}
+  .board .side.b .tn{order:1}
   .board .pts{display:none}
   /* Der Name schrumpft erst, wenn fitActs die Knöpfe schon gekürzt hat */
   .board .tn{font-size:clamp(14px,2.8vh,20px);flex:0 0 auto;min-width:0}
   .board.short .tn{flex:1 1 auto;min-width:60px}
   .board.short .serve{font-size:0;gap:0}   /* nur der gelbe Punkt bleibt */
   .board .sub{font-size:10.5px;white-space:nowrap}
-  .board .serve{margin:0;font-size:11px;gap:5px;flex-direction:row;white-space:nowrap}
+  .board .serve,.board .side.a .serve{margin:0;font-size:11px;gap:5px;flex-direction:row;white-space:nowrap}
   .board .serve::before{width:10px;height:10px}
-  .board .side.a .serve{flex-direction:row-reverse}
+  .board .side.b .serve{flex-direction:row-reverse}
   /* Ohne Aufschlag bleibt der Platz reserviert – die Kopfzeile springt
      beim Aufschlagwechsel nicht zwischen langen und kurzen Labels. */
   .board .serve.off{display:inline-flex;visibility:hidden}
-  .board .acts,.board .side.b .acts{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 0 auto;padding:0;max-width:none}
+  .board .acts,.board .side.a .acts{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 0 auto;padding:0;max-width:none}
+  .board .side.b .acts{display:flex;flex-wrap:nowrap;gap:6px;padding:0;max-width:none}
   .board .acts .tbtn,.board.tight .acts .tbtn{min-height:32px;font-size:11px;padding:2px 7px;letter-spacing:.02em}
   /* Mitte unten: Stand gross, darunter Satz und Ziel */
   .board .mid{
@@ -882,7 +889,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl0"></ul>
     <div class="row"><button class="btn sm" type="button" id="addBench0" data-add="0">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer · Ersatzbank max. 5</p>
+    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card teamcard" id="teamcard1" style="--tc:var(--guest);--tc-on:var(--guest-on)">
@@ -892,7 +899,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl1"></ul>
     <div class="row"><button class="btn sm" type="button" id="addBench1" data-add="1">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">C = Mannschaftsführer · Ersatzbank max. 5</p>
+    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card">
@@ -1022,7 +1029,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <div class="toolrow">
         <button class="btn" id="btnUndo" type="button">Rückgängig</button>
         <button class="btn" id="btnLog" type="button">Verlauf</button>
-        <button class="btn" id="btnTools" type="button">Werkzeuge</button>
+        <button class="btn" id="btnTools" type="button">Einstellungen</button>
       </div>
   </div>
 </main>
@@ -1039,7 +1046,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.3.2';
+var APP = '2.4.0';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1079,6 +1086,12 @@ function initials(n){
   return (p.length>1 ? p[0][0]+p[p.length-1][0] : String(n).slice(0,2)).toUpperCase();
 }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
+/* Spieler: Anzeigename (Vor- und Nachname), Trikotnummer, Kreisbeschriftung.
+   s = Spielstand (Standard: das laufende Spiel). */
+function pName(t, pi, s){ s = s || S; return s.teams[t].players[pi]; }
+function pNum(t, pi, s){ s = s || S; var N = s.teams[t].numbers; return (N && N[pi] !== undefined && N[pi] !== null) ? String(N[pi]) : ''; }
+function pLabel(t, pi, s){ var n = pNum(t, pi, s); return (n ? n + ' ' : '') + pName(t, pi, s); }
+function pMark(t, pi, s){ return pNum(t, pi, s) || initials(pName(t, pi, s)); }
 function tc(t){ return t===0 ? 'var(--home)' : 'var(--guest)'; }
 function tcOn(t){ return t===0 ? 'var(--home-on)' : 'var(--guest-on)'; }
 function paintTeam(el, t){
@@ -1125,7 +1138,7 @@ var PALETTES = [
   { id:'tafel',  name:'Anzeigetafel' },
   { id:'papier', name:'Papier' }
 ];
-var view = { theme:'system', palette:'halle', home:'', guest:'' };
+var view = { theme:'system', palette:'halle', home:'', guest:'', names:false };
 
 function cssVar(n){
   return (getComputedStyle(document.documentElement).getPropertyValue(n) || '').trim();
@@ -1155,6 +1168,7 @@ function applyView(){
                    r.style.setProperty('--home-on',  bestOn(view.home)); }
   if (view.guest){ r.style.setProperty('--guest', view.guest);
                    r.style.setProperty('--guest-on', bestOn(view.guest)); }
+  document.body.classList.toggle('shownames', !!view.names);
 
   var m = document.querySelector('meta[name="theme-color"]');
   if (m) m.setAttribute('content', cssVar('--home') || '#0A46E4');
@@ -1165,6 +1179,7 @@ function saveView(){
   var s = store.get(K_SET) || {};
   s.theme = view.theme;
   s.palette = view.palette;
+  s.names = !!view.names;
   s.colors = {
     home:  view.home,  homeOn:  view.home  ? bestOn(view.home)  : '',
     guest: view.guest, guestOn: view.guest ? bestOn(view.guest) : ''
@@ -1175,6 +1190,7 @@ function loadView(){
   var s = store.get(K_SET) || {};
   if (s.theme) view.theme = s.theme;
   if (s.palette) view.palette = s.palette;
+  view.names = !!s.names;
   if (s.colors){ view.home = s.colors.home || ''; view.guest = s.colors.guest || ''; }
   applyView();
 }
@@ -1435,17 +1451,18 @@ function fitCourt(){
   if (r2 !== r1){ if (!size(r2)) return; placeBench(quer, gap); }
 }
 /* Bänke an die sichtbare Feldkante legen. Im Querformat ist das Feld um
-   90° gedreht: die obere Hälfte (Team A) liegt rechts, Team B links. */
+   90° gegen den Uhrzeigersinn gedreht: Seite A (oben) liegt links,
+   Seite B rechts – Seite A ist immer links vom Schreiber. */
 function placeBench(quer, gap){
   var c = $('court'), bA = $('benchA'), bB = $('benchB');
   var cx = c.offsetLeft + c.offsetWidth/2, cy = c.offsetTop + c.offsetHeight/2;
   var visW = quer ? c.offsetHeight : c.offsetWidth, visH = quer ? c.offsetWidth : c.offsetHeight;
   if (quer){
     bA.style.height = visH + 'px'; bB.style.height = visH + 'px';
-    bB.style.left = (cx - visW/2 - bB.offsetWidth - gap) + 'px';
-    bB.style.top  = (cy - bB.offsetHeight/2) + 'px';
-    bA.style.left = (cx + visW/2 + gap) + 'px';
+    bA.style.left = (cx - visW/2 - bA.offsetWidth - gap) + 'px';
     bA.style.top  = (cy - bA.offsetHeight/2) + 'px';
+    bB.style.left = (cx + visW/2 + gap) + 'px';
+    bB.style.top  = (cy - bB.offsetHeight/2) + 'px';
   } else {
     bA.style.left = (cx - bA.offsetWidth/2) + 'px';
     bA.style.top  = (cy - visH/2 - bA.offsetHeight - gap) + 'px';
@@ -1471,11 +1488,11 @@ function renderBoard(){
   $('targetLbl').textContent = targetLabel();
   $('ptsA').setAttribute('aria-live','polite');
   $('ptsB').setAttribute('aria-live','polite');
-  // Querformat: Stand gross in der Mitte, links die linke Hälfte (Team B)
+  // Querformat: Stand gross in der Mitte, links Seite A (oben), rechts Seite B
   var sl = $('scL'), sr = $('scR');
   if (sl && sr){
-    sl.textContent = S.points[bot]; sr.textContent = S.points[top];
-    paintTeam(sl, bot); paintTeam(sr, top);
+    sl.textContent = S.points[top]; sr.textContent = S.points[bot];
+    paintTeam(sl, top); paintTeam(sr, bot);
   }
 }
 
@@ -1526,8 +1543,8 @@ function renderCourt(){
       var wasOff = el.classList.contains('off');
       var p = slotPos(t, slot);
       if (wasOff){ el.style.transition = 'none'; }
-      el.querySelector('.ini').textContent = initials(S.teams[t].players[pi]);
-      el.querySelector('.nm').textContent  = S.teams[t].players[pi];
+      el.querySelector('.ini').textContent = pMark(t, pi);
+      el.querySelector('.nm').textContent  = pName(t, pi);
       el.querySelector('.po').textContent  = POSN[slot];
       // Erst den Aufschläger kennzeichnen, dann messen: seine Karte ist
       // grösser, sonst fällt der Sicherheitsabstand zu klein aus.
@@ -1668,11 +1685,11 @@ function renderBench(){
     var chips = '';
     for (var k=0;k<b.length;k++){
       var qk = openPairFor(t, b[k]);
-      var tip = qk && qk.out === b[k] ? ' – darf nur für '+S.teams[t].players[qk.in]+' zurück' : ' – auf einen Feldspieler ziehen';
+      var tip = qk && qk.out === b[k] ? ' – darf nur für '+pLabel(t, qk.in)+' zurück' : ' – auf einen Feldspieler ziehen';
       chips += '<button class="bchip'+(qk ? ' paired' : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
-               ' title="'+esc(S.teams[t].players[b[k]])+esc(tip)+'"' +
-               ' aria-label="Ersatz '+esc(S.teams[t].players[b[k]])+'"'+(dis?' disabled':'')+'>' +
-               esc(initials(S.teams[t].players[b[k]])) + '</button>';
+               ' title="'+esc(pLabel(t, b[k]))+esc(tip)+'"' +
+               ' aria-label="Ersatz '+esc(pLabel(t, b[k]))+'"'+(dis?' disabled':'')+'>' +
+               esc(pMark(t, b[k])) + '</button>';
     }
     var bar = $(i === 0 ? 'benchA' : 'benchB');
     if (bar){
@@ -1808,12 +1825,13 @@ function confirmDlg(title, text, okLabel, onOk, danger){
 function dlgTools(){
   var canEdit = !S.locked && !S.finished;
   var bd = dlg(
-    '<h2>Werkzeuge</h2><p class="dsc">Satz '+S.setNo+' · Stand '+S.points[0]+':'+S.points[1]+'</p>' +
+    '<h2>Einstellungen</h2><p class="dsc">Satz '+S.setNo+' · Stand '+S.points[0]+':'+S.points[1]+'</p>' +
     '<div class="menu">' +
       '<button data-x="undo"'+(!UNDO.length||S.locked?' disabled':'')+'>Rückgängig<small>letzte Aktion zurücknehmen</small></button>' +
       '<button data-x="pen"'+(canEdit?'':' disabled')+'>Strafpunkt<small>Punkt und Aufschlag an den Gegner</small></button>' +
       '<button data-x="cor"'+(S.locked?' disabled':'')+'>Korrektur<small>Stand, Aufschlag und Aufstellung setzen</small></button>' +
       '<button data-x="rep">Spielbericht<small>ansehen, kopieren, sichern, teilen</small></button>' +
+      '<button data-x="names" aria-pressed="'+(view.names?'true':'false')+'">Spielernamen auf dem Feld<small>'+(view.names ? 'ein – Nummer und Name' : 'aus – nur Trikotnummer')+'</small></button>' +
       '<button data-x="view">Darstellung<small>Helligkeit, Farbwelt, Teamfarben</small></button>' +
       '<button data-x="abo" class="danger"'+(canEdit?'':' disabled')+'>Spiel abbrechen<small>Rückzug, Verletzung, unvollständig</small></button>' +
       '<button data-x="new" class="danger">Neues Spiel<small>aktuelles Spiel ins Archiv</small></button>' +
@@ -1825,6 +1843,7 @@ function dlgTools(){
     cor:  function(){ dlgCorrect(); },
     rep:  function(){ dlgReport(); },
     view: function(){ dlgView(); },
+    names:function(){ view.names = !view.names; saveView(); applyView(); dlgTools(); },
     abo:  function(){ dlgAbort(); },
     'new':function(){ confirmDlg('Neues Spiel','Das aktuelle Spiel wird ins Archiv gelegt und die Erfassung beginnt von vorne.','Neues Spiel', newMatch, true); },
     close:function(){ closeDlg(); }
@@ -1855,20 +1874,20 @@ function dlgSub(t, presetSlot, presetBench){
     '<button class="btn primary" data-x="ok" disabled>Wechseln</button></div>');
 
   function paint(){
-    var hf='', hb='', i, names = S.teams[t].players;
+    var hf='', hb='', i;
     for (i=0;i<S.lineup[t].length;i++){
       var cur = S.lineup[t][i], q = openPairFor(t, cur);
-      var hint = 'Position '+POSN[i] + (q && q.in === cur ? ' · nur für '+esc(names[q.out]) : '');
+      var hint = 'Position '+POSN[i] + (q && q.in === cur ? ' · nur für '+esc(pLabel(t, q.out)) : '');
       var blocked = selBench>=0 ? !!subCheck(t, i, selBench) : false;
       hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'"'+(blocked?' disabled':'')+'>' +
-            esc(names[cur]) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
+            esc(pLabel(t, cur)) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
     }
     for (i=0;i<b.length;i++){
       var qb = openPairFor(t, b[i]);
-      var hintB = 'Ersatz' + (qb && qb.out === b[i] ? ' · nur für '+esc(names[qb.in]) : '');
+      var hintB = 'Ersatz' + (qb && qb.out === b[i] ? ' · nur für '+esc(pLabel(t, qb.in)) : '');
       var blockedB = selSlot>=0 ? !!subCheck(t, selSlot, b[i]) : false;
       hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'"'+(blockedB?' disabled':'')+'>' +
-            esc(names[b[i]]) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
+            esc(pLabel(t, b[i])) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
     }
     bd.querySelector('#colF').innerHTML = hf;
     bd.querySelector('#colB').innerHTML = hb;
@@ -1966,13 +1985,13 @@ function openPairFor(t, pi){            // offenes Paar, in dem pi drin- oder dr
   return null;
 }
 function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
-  var cur = S.lineup[t][slot], names = S.teams[t].players;
+  var cur = S.lineup[t][slot];
   var qc = openPairFor(t, cur);
   if (qc && qc.in === cur && qc.out !== pi)
-    return 'Position ' + POSN[slot] + ' ist gesperrt: für ' + names[cur] + ' darf nur ' + names[qc.out] + ' zurück aufs Feld.';
+    return 'Position ' + POSN[slot] + ' ist gesperrt: für ' + pLabel(t, cur) + ' darf nur ' + pLabel(t, qc.out) + ' zurück aufs Feld.';
   var qp = openPairFor(t, pi);
   if (qp && qp.out === pi && qp.in !== cur)
-    return names[pi] + ' darf nur für ' + names[qp.in] + ' (Position ' + POSN[S.lineup[t].indexOf(qp.in)] + ') wieder eingewechselt werden.';
+    return pLabel(t, pi) + ' darf nur für ' + pLabel(t, qp.in) + ' (Position ' + POSN[S.lineup[t].indexOf(qp.in)] + ') wieder eingewechselt werden.';
   return '';
 }
 function doSub(t, slot, pi){
@@ -1985,9 +2004,9 @@ function doSub(t, slot, pi){
   var q = openPairFor(t, out), back = false;
   if (q && q.in === out && q.out === pi){ q.done = true; back = true; }
   else subPairs(t).push({ out: out, in: pi, slot: slot });
-  pushLog('sub', t, S.teams[t].players[pi] + ' für ' + S.teams[t].players[out] + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
+  pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
   render(); save();
-  toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + S.teams[t].players[pi]);
+  toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + pLabel(t, pi));
 }
 
 /* ---------- Auszeit ---------- */
@@ -2071,7 +2090,7 @@ function lineupEditorHTML(){
     for (var p=0;p<S.count;p++){
       h += '<div class="field"><label class="lbl" for="le'+t+'_'+p+'">Position '+POSN[p]+'</label><select id="le'+t+'_'+p+'">';
       for (var i=0;i<S.teams[t].players.length;i++){
-        h += '<option value="'+i+'"'+(S.lineup[t][p]===i?' selected':'')+'>'+esc(S.teams[t].players[i])+'</option>';
+        h += '<option value="'+i+'"'+(S.lineup[t][p]===i?' selected':'')+'>'+esc(pLabel(t, i))+'</option>';
       }
       h += '</select></div>';
     }
@@ -2377,12 +2396,12 @@ function reportText(st){
     L.push('-'.repeat(64));
     var fieldIdx = s.lineup[t], i;
     for (i=0;i<fieldIdx.length;i++){
-      L.push('  ' + pad2(POSN[i], 5) + s.teams[t].players[fieldIdx[i]] +
+      L.push('  ' + pad2(POSN[i], 5) + pLabel(t, fieldIdx[i], s) +
              (s.teams[t].captain === fieldIdx[i] ? '  (C)' : ''));
     }
     var b = [];
     for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0)
-      b.push(s.teams[t].players[i] + (s.teams[t].captain===i ? ' (C)' : ''));
+      b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : ''));
     L.push('  ' + pad2('Bank', 5) + (b.length ? b.join(', ') : '–'));
     L.push('');
   }
@@ -2680,11 +2699,11 @@ function buildMatchPdf(s){
       d.text(cx, yy, s.teams[t].name, 10, {bold:true}); yy += 13;
       for (i=0;i<fieldIdx.length;i++){
         d.text(cx, yy, POSN[i], 8.5, {gray:.45});
-        d.text(cx+22, yy, s.teams[t].players[fieldIdx[i]] + (s.teams[t].captain === fieldIdx[i] ? '  (C)' : ''), 9.5);
+        d.text(cx+22, yy, pLabel(t, fieldIdx[i], s) + (s.teams[t].captain === fieldIdx[i] ? '  (C)' : ''), 9.5);
         yy += 12;
       }
       var b = [];
-      for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0) b.push(s.teams[t].players[i] + (s.teams[t].captain===i ? ' (C)' : ''));
+      for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0) b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : ''));
       d.text(cx, yy, 'Bank', 8.5, {gray:.45});
       d.wrap(b.length ? b.join(', ') : '–', 9.5, colW-6-22).forEach(function(l, j){ if (j) yy += 12; d.text(cx+22, yy, l, 9.5); });
       ys[t] = yy + 12;
@@ -3002,10 +3021,17 @@ function doToss(onDone){
   });
 }
 var MAX_BENCH = 5;
+/* Ein Spieler im Setup: {first, last, num}. Ältere Vorbereitungen mit
+   blossen Namen werden beim Laden umgewandelt. */
+function normPlayer(v){
+  if (v && typeof v === 'object') return { first: String(v.first||''), last: String(v.last||''), num: String(v.num||'') };
+  return { first: String(v||''), last: '', num: '' };
+}
 function ensurePlayers(){
   var n = +$('cfgCount').value;
   for (var t=0;t<2;t++){
-    while (P[t].length < n) P[t].push('');
+    P[t] = P[t].map(normPlayer);
+    while (P[t].length < n) P[t].push(normPlayer(''));
     while (P[t].length > n + MAX_BENCH) P[t].pop();
     if (CAP[t] >= P[t].length) CAP[t] = 0;
   }
@@ -3020,8 +3046,12 @@ function renderSetup(){
       if (i === n) h += '</ul><div class="divider">Ersatzbank</div><ul class="plist">';
       h += '<li class="'+(isField?'field-slot':'bench-slot')+'">' +
            '<span class="pos">'+(isField ? POSN[i] : 'E'+(i-n+1))+'</span>' +
-           '<input type="text" data-t="'+t+'" data-i="'+i+'" value="'+esc(P[t][i])+'" ' +
-           'placeholder="Spieler '+(i+1)+'" autocomplete="off">' +
+           '<input type="text" class="num" inputmode="numeric" maxlength="3" data-t="'+t+'" data-i="'+i+'" data-f="num" value="'+esc(P[t][i].num)+'" ' +
+           'placeholder="Nr." aria-label="Trikotnummer" autocomplete="off">' +
+           '<div class="names">' +
+           '<input type="text" data-t="'+t+'" data-i="'+i+'" data-f="first" value="'+esc(P[t][i].first)+'" placeholder="Vorname" autocomplete="off">' +
+           '<input type="text" data-t="'+t+'" data-i="'+i+'" data-f="last" value="'+esc(P[t][i].last)+'" placeholder="Nachname" autocomplete="off">' +
+           '</div>' +
            '<label class="cap" title="Mannschaftsführer"><input type="radio" name="cap'+t+'" data-capt="'+t+'" data-capi="'+i+'"'+(CAP[t]===i?' checked':'')+'>C</label>' +
            (isField ? '' : '<button class="del" type="button" data-del="'+t+'" data-deli="'+i+'" aria-label="Entfernen">×</button>') +
            '</li>';
@@ -3035,8 +3065,12 @@ function renderSetup(){
 }
 function readSetupInputs(){
   for (var t=0;t<2;t++){
-    var ins = $('pl'+t).querySelectorAll('input[type=text]');
-    for (var i=0;i<ins.length;i++) P[t][+ins[i].dataset.i] = ins[i].value;
+    var ins = $('pl'+t).querySelectorAll('input[type=text][data-f]');
+    for (var i=0;i<ins.length;i++){
+      var k = +ins[i].dataset.i;
+      P[t][k] = normPlayer(P[t][k]);
+      P[t][k][ins[i].dataset.f] = ins[i].value;
+    }
   }
 }
 function loadSettings(){
@@ -3225,15 +3259,17 @@ function startMatch(){
   var c = cfg();
   var teams = [];
   for (var t=0;t<2;t++){
-    var names = [];
+    var names = [], nums = [];
     for (var i=0;i<P[t].length;i++){
-      var v = String(P[t][i]||'').trim();
-      if (i < c.count) names.push(v || ('Spieler ' + (i+1)));
-      else if (v) names.push(v);
+      var pl = normPlayer(P[t][i]);
+      var full = (pl.first.trim() + ' ' + pl.last.trim()).trim(), num = pl.num.trim();
+      if (i < c.count){ names.push(full || ('Spieler ' + (i+1))); nums.push(num); }
+      else if (full || num){ names.push(full || ('Spieler ' + (i+1))); nums.push(num); }
     }
     teams.push({
       name: (t===0 ? ($('tn0').value.trim() || 'Heim') : ($('tn1').value.trim() || 'Gast')),
       players: names,
+      numbers: nums,
       captain: Math.min(CAP[t], names.length-1)
     });
   }
@@ -3386,8 +3422,10 @@ function wire(){
   // Setup
   document.addEventListener('input', function(e){
     var i = e.target;
-    if (i.matches && i.matches('#pl0 input[type=text], #pl1 input[type=text]')){
-      P[+i.dataset.t][+i.dataset.i] = i.value;
+    if (i.matches && i.matches('#pl0 input[type=text][data-f], #pl1 input[type=text][data-f]')){
+      var tt = +i.dataset.t, ii = +i.dataset.i;
+      P[tt][ii] = normPlayer(P[tt][ii]);
+      P[tt][ii][i.dataset.f] = i.value;
     }
   });
   document.addEventListener('input', onViewInput);
