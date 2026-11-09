@@ -1767,6 +1767,7 @@ function logText(e){
     case 'pen': return 'Strafpunkt für ' + n + (e.txt ? ' ('+e.txt+')' : '');
     case 'sub': return n + ' – Wechsel: ' + e.txt;
     case 'to':  return n + ' – Auszeit';
+    case 'med': return n + ' – Medizinische Auszeit (3 min)' + (e.txt ? ': ' + e.txt : '');
     case 'cor': return 'Korrektur: ' + e.txt;
     case 'set': return 'Satzende – ' + e.txt + ' an ' + n;
     case 'end': return 'Spielende' + (e.txt ? ' – ' + e.txt : '');
@@ -1842,6 +1843,7 @@ function dlgTools(){
     '<div class="menu">' +
       '<button data-x="undo"'+(!UNDO.length||S.locked?' disabled':'')+'>Rückgängig<small>letzte Aktion zurücknehmen</small></button>' +
       '<button data-x="pen"'+(canEdit?'':' disabled')+'>Strafpunkt<small>Punkt und Aufschlag an den Gegner</small></button>' +
+      '<button data-x="med"'+(canEdit?'':' disabled')+'>Medizinische Auszeit<small>3 Minuten, zählt nicht als Auszeit</small></button>' +
       '<button data-x="cor"'+(S.locked?' disabled':'')+'>Korrektur<small>Stand, Aufschlag und Aufstellung setzen</small></button>' +
       '<button data-x="rep">Spielbericht<small>ansehen, kopieren, sichern, teilen</small></button>' +
       '<button data-x="names" aria-pressed="'+(view.names?'true':'false')+'">Spielernamen auf dem Feld<small>'+(view.names ? 'ein – Nummer und Name' : 'aus – nur Trikotnummer')+'</small></button>' +
@@ -1853,6 +1855,7 @@ function dlgTools(){
   var map = {
     undo: function(){ closeDlg(); undo(); },
     pen:  function(){ dlgPenalty(); },
+    med:  function(){ dlgMedical(); },
     cor:  function(){ dlgCorrect(); },
     rep:  function(){ dlgReport(); },
     view: function(){ dlgView(); },
@@ -2050,6 +2053,68 @@ function dlgTimeout(t){
       signal();
       c.classList.add('flash');
       bd.querySelector('#toHint').textContent = 'Auszeit beendet.';
+    }
+  }, 1000);
+  render();
+}
+
+/* ---------- Medizinische Auszeit (3 Minuten, zählt nicht als Auszeit) ---------- */
+function dlgMedical(){
+  var sel = -1, bd = dlg('<h2>Medizinische Auszeit</h2>' +
+    '<p class="dsc">3 Minuten Behandlungszeit. Zählt nicht zu den Auszeiten der Mannschaft.</p>' +
+    '<div class="field"><span class="lbl">Mannschaft</span><div class="opts">' +
+      '<button class="opt" type="button" data-t="0" aria-pressed="false">'+esc(S.teams[0].name)+'</button>' +
+      '<button class="opt" type="button" data-t="1" aria-pressed="false">'+esc(S.teams[1].name)+'</button>' +
+    '</div></div>' +
+    '<div class="field"><label class="lbl" for="medP">Spieler (optional)</label><select id="medP" disabled><option value="">–</option></select></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn primary" data-x="ok" disabled>3 Minuten starten</button></div>');
+  bd.addEventListener('click', function(e){
+    var o = e.target.closest('[data-t]');
+    if (o){
+      sel = +o.dataset.t;
+      var all = bd.querySelectorAll('[data-t]');
+      for (var i=0;i<all.length;i++) all[i].setAttribute('aria-pressed', String(+all[i].dataset.t === sel));
+      var ps = bd.querySelector('#medP'), oh = '<option value="">–</option>';
+      for (var k=0;k<S.teams[sel].players.length;k++) oh += '<option value="'+k+'">'+esc(pLabel(sel, k))+'</option>';
+      ps.innerHTML = oh; ps.disabled = false;
+      bd.querySelector('[data-x=ok]').disabled = false;
+      return;
+    }
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no') return closeDlg();
+    var pv = bd.querySelector('#medP').value;
+    startMedical(sel, pv === '' ? -1 : +pv);
+  });
+}
+function startMedical(t, pi){
+  snapshot();
+  pushLog('med', t, pi >= 0 ? pLabel(t, pi) : '');
+  save();
+  var total = 180, left = total;
+  function fmt(s){ return Math.floor(s/60) + ':' + pad(s%60); }
+  var bd = dlg('<h2>Medizinische Auszeit – '+esc(S.teams[t].name)+'</h2>' +
+    '<p class="dsc">'+(pi >= 0 ? esc(pLabel(t, pi))+' · ' : '')+'Stand '+S.points[0]+':'+S.points[1]+' · Satz '+S.setNo+'</p>' +
+    '<div class="count" id="toCount">'+fmt(left)+'</div>' +
+    '<div class="bar"><i id="toBar" style="width:100%"></i></div>' +
+    '<p class="hint" id="toHint">Punkteingabe ist während der Behandlung gesperrt. Spätestens nach 3 Minuten muss weitergespielt oder gewechselt werden.</p>' +
+    '<div class="acts"><button class="btn" data-x="sub">Auswechseln</button><button class="btn primary" data-x="go">Weiterspielen</button></div>', {esc:false});
+  bd.querySelector('[data-x=go]').onclick = function(){ clearInterval(toTimer); toTimer = null; closeDlg(); };
+  bd.querySelector('[data-x=sub]').onclick = function(){
+    clearInterval(toTimer); toTimer = null; closeDlg();
+    dlgSub(t, pi >= 0 ? S.lineup[t].indexOf(pi) : -1);
+  };
+  toTimer = setInterval(function(){
+    left--;
+    var c = bd.querySelector('#toCount'), b2 = bd.querySelector('#toBar');
+    if (!c){ clearInterval(toTimer); toTimer=null; return; }
+    c.textContent = fmt(Math.max(0,left));
+    b2.style.width = Math.max(0, (left/total)*100) + '%';
+    if (left <= 0){
+      clearInterval(toTimer); toTimer = null;
+      signal();
+      c.classList.add('flash');
+      bd.querySelector('#toHint').textContent = 'Behandlungszeit abgelaufen.';
     }
   }, 1000);
   render();
