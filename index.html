@@ -975,7 +975,8 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <div class="field"><label class="lbl" for="mCompetition">Wettbewerb</label><input type="text" id="mCompetition" autocomplete="off"></div>
         <div class="field"><label class="lbl" for="mCategory">Kategorie</label><input type="text" id="mCategory" autocomplete="off"></div>
         <div class="field"><label class="lbl" for="mVenue">Austragungsort</label><input type="text" id="mVenue" autocomplete="off"></div>
-        <div class="field"><label class="lbl" for="mReferee">Schiedsrichter</label><input type="text" id="mReferee" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mReferee">1. Schiedsrichter</label><input type="text" id="mReferee" autocomplete="off"></div>
+        <div class="field"><label class="lbl" for="mReferee2">2. Schiedsrichter</label><input type="text" id="mReferee2" autocomplete="off"></div>
         <div class="field"><label class="lbl" for="mScorer">Schreiber</label><input type="text" id="mScorer" autocomplete="off"></div>
       </div>
       <div class="field"><label class="lbl" for="mNote">Bemerkung</label><textarea id="mNote"></textarea></div>
@@ -1062,7 +1063,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.6.0';
+var APP = '2.6.1';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -2589,7 +2590,7 @@ function dlgEnd(keep){
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
-    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern und dem 1. Schiedsrichter unterzeichnet – das Spiel ist gesperrt.<br>' +
+    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern und dem 1. Schiedsrichter unterzeichnet – das Spiel ist gesperrt. 2. Schiedsrichter und Schreiber können weiterhin unterschreiben.<br>' +
          esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
          esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')' +
          (S.refSig ? ' · '+esc(S.refSig.name)+' ('+fmtTime(S.refSig.at)+')' : '') + '</div>';
@@ -2616,11 +2617,11 @@ function dlgEnd(keep){
     h += '<p class="hint" style="margin:0 0 8px">Kein Protest vermerkt.</p>';
   }
   h += '<div class="divider">Unterschriften</div>' +
-       '<p class="hint" style="margin:0 0 10px">Pflicht: beide Mannschaftsführer und der 1. Schiedsrichter (Reglement 11.2). Die Trainer unterschreiben zusätzlich (11.4). Nach den drei Pflichtunterschriften ist das Spiel gesperrt.</p>';
+       '<p class="hint" style="margin:0 0 10px">Pflicht: beide Mannschaftsführer und der 1. Schiedsrichter (Reglement 11.2) – danach ist das Spiel gesperrt. Zusätzlich unterschreiben der 2. Schiedsrichter und der Schreiber (11.4).</p>';
   SIG_KEYS.forEach(function(k){
     var c = sigRecord(k);
     h += '<div class="field"><label class="lbl" for="cf'+k+'">'+esc(sigLabel(k)) +
-         (sigRequired(k) ? '' : ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span>') + '</label>';
+         (sigRequired(k) ? '' : ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(zusätzlich)</span>') + '</label>';
     if (c){
       h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
       if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
@@ -2695,26 +2696,33 @@ function dlgEnd(keep){
   });
 }
 /* Unterschriften am Schluss: 0/1 Mannschaftsführer, ref = 1. Schieds-
-   richter (alle drei Pflicht, 11.2), c0/c1 = Trainer (11.4). */
-var SIG_KEYS = [0, 1, 'ref', 'c0', 'c1'];
+   richter (alle drei Pflicht, 11.2), ref2 = 2. Schiedsrichter,
+   scorer = Schreiber (11.4). */
+var SIG_KEYS = [0, 1, 'ref', 'ref2', 'scorer'];
 function sigRecord(k){
   if (k === 'ref') return S.refSig || null;
-  if (k === 'c0' || k === 'c1') return (S.coachSig && S.coachSig[+k.charAt(1)]) || null;
+  if (k === 'ref2') return S.ref2Sig || null;
+  if (k === 'scorer') return S.scorerSig || null;
   return S.confirmed[k];
 }
 function sigStore(k, rec){
   if (k === 'ref') S.refSig = rec;
-  else if (k === 'c0' || k === 'c1'){ if (!S.coachSig) S.coachSig = [null,null]; S.coachSig[+k.charAt(1)] = rec; }
+  else if (k === 'ref2') S.ref2Sig = rec;
+  else if (k === 'scorer') S.scorerSig = rec;
   else S.confirmed[k] = rec;
 }
 function sigRequired(k){ return k === 0 || k === 1 || k === 'ref'; }
 function sigLabel(k){
   if (k === 'ref') return '1. Schiedsrichter';
-  if (k === 'c0' || k === 'c1') return S.teams[+k.charAt(1)].name + ' – Trainer';
+  if (k === 'ref2') return '2. Schiedsrichter';
+  if (k === 'scorer') return 'Schreiber';
   return S.teams[k].name + ' – Mannschaftsführer';
 }
-function sigPlaceholder(k){ return k === 'ref' ? 'Name Schiedsrichter' : (k === 'c0' || k === 'c1') ? 'Name Trainer' : 'Name Mannschaftsführer'; }
-function sigDefaultName(k){ return k === 'ref' ? ((S.meta && S.meta.referee) || '') : (k === 'c0' || k === 'c1') ? '' : capName(k); }
+function sigPlaceholder(k){ return (k === 'ref' || k === 'ref2') ? 'Name Schiedsrichter' : k === 'scorer' ? 'Name Schreiber' : 'Name Mannschaftsführer'; }
+function sigDefaultName(k){
+  var m = S.meta || {};
+  return k === 'ref' ? (m.referee || '') : k === 'ref2' ? (m.referee2 || '') : k === 'scorer' ? (m.scorer || '') : capName(k);
+}
 /* Spielerliste vor dem Spiel: beide Mannschaftsführer bestätigen mit
    Unterschrift die Aufstellung (Reglement 5.1, 6.2). */
 function rosterOpen(){
@@ -2848,7 +2856,8 @@ function reportText(st){
   line('Beginn', fmtTime(s.started));
   line('Ende', s.result ? fmtTime(s.result.endedAt) : '–');
   line('Dauer', s.result ? fmtDur(s.started, s.result.endedAt) : '–');
-  line('Schiedsrichter', m.referee || '–');
+  line('1. Schiedsrichter', m.referee || '–');
+  line('2. Schiedsrichter', m.referee2 || '–');
   line('Schreiber', m.scorer || '–');
   line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
        (s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget);
@@ -2951,7 +2960,8 @@ function reportText(st){
   }
   for (var c=0;c<2;c++) sigLine(s.teams[c].name + ' (MF)', s.confirmed && s.confirmed[c]);
   sigLine('1. Schiedsrichter', s.refSig);
-  for (var c2=0;c2<2;c2++) sigLine(s.teams[c2].name + ' (Trainer)', s.coachSig && s.coachSig[c2]);
+  sigLine('2. Schiedsrichter', s.ref2Sig);
+  sigLine('Schreiber', s.scorerSig);
   L.push('');
   L.push('Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'));
   return L.join('\n');
@@ -3139,7 +3149,7 @@ function sigToJpeg(dataUrl){
 }
 function buildMatchPdf(s){
   var sigs = [s.confirmed && s.confirmed[0], s.confirmed && s.confirmed[1], s.refSig,
-              s.coachSig && s.coachSig[0], s.coachSig && s.coachSig[1]];
+              s.ref2Sig, s.scorerSig];
   return Promise.all(sigs.map(function(c){ return sigToJpeg(c && c.sig); })).then(function(imgs){
     var d = pdfDoc(), M = d.M, W = d.W, CW = W - 2*M, y = M, m = s.meta || {};
     function h2(t){ y += 8; d.text(M, y, t.toUpperCase(), 8.5, {bold:true, gray:0.35}); y += 4; d.line(M, y, W-M, y, 0.6, 0.25); y += 13; }
@@ -3162,7 +3172,7 @@ function buildMatchPdf(s){
     y += 4;
 
     h2('Angaben zum Spiel');
-    var short = [['Wettbewerb', m.competition||'–'],['Kategorie', m.category||'–'],['Austragungsort', m.venue||'–'],['Schiedsrichter', m.referee||'–'],
+    var short = [['Wettbewerb', m.competition||'–'],['Kategorie', m.category||'–'],['Austragungsort', m.venue||'–'],['Schiedsrichter', (m.referee||'–') + (m.referee2 ? ' · ' + m.referee2 : '')],
                  ['Beginn', fmtTime(s.started)],['Ende', s.result?fmtTime(s.result.endedAt):'–'],['Dauer', s.result?fmtDur(s.started,s.result.endedAt):'–'],['Schreiber', m.scorer||'–']];
     var colW = CW/2, labW = 72, y0 = y;
     short.forEach(function(r, i){
@@ -3243,7 +3253,7 @@ function buildMatchPdf(s){
     });
 
     h2('Unterschriften');
-    var labels = [s.teams[0].name + ' (MF)', s.teams[1].name + ' (MF)', '1. Schiedsrichter', s.teams[0].name + ' (Trainer)', s.teams[1].name + ' (Trainer)'];
+    var labels = [s.teams[0].name + ' (MF)', s.teams[1].name + ' (MF)', '1. Schiedsrichter', '2. Schiedsrichter', 'Schreiber'];
     var bw = (CW - 4*8)/5, bh = 92;
     if (y + bh > d.H - M - 24){ d.page(); y = M; }
     for (var k=0;k<5;k++){
@@ -3257,7 +3267,7 @@ function buildMatchPdf(s){
       if (rec){
         d.text(bx+5, y+76, d.wrap(rec.name, 8.5, bw-10)[0], 8.5, {bold:true});
         d.text(bx+5, y+86, fmtDate(rec.at) + ' ' + fmtTime(rec.at), 7, {gray:.4});
-      } else d.text(bx+5, y+86, k < 3 ? 'nicht unterzeichnet' : 'optional', 7, {gray:.55});
+      } else d.text(bx+5, y+86, 'nicht unterzeichnet', 7, {gray:.55});
     }
     y += bh;
 
@@ -3642,6 +3652,7 @@ function loadSettings(){
     $('mCategory').value = s.meta.category||'';
     $('mVenue').value = s.meta.venue||'';
     $('mReferee').value = s.meta.referee||'';
+    $('mReferee2').value = s.meta.referee2||'';
     $('mScorer').value = s.meta.scorer||'';
     $('mNote').value = s.meta.note||'';
   }
@@ -3658,7 +3669,7 @@ var PREP_ID = null;   // gerade geladene Vorbereitung
 function metaFromForm(){
   return {
     competition: $('mCompetition').value.trim(), category: $('mCategory').value.trim(),
-    venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(),
+    venue: $('mVenue').value.trim(), referee: $('mReferee').value.trim(), referee2: $('mReferee2').value.trim(),
     scorer: $('mScorer').value.trim(), note: $('mNote').value.trim()
   };
 }
@@ -3668,6 +3679,7 @@ function metaToForm(m){
   $('mCategory').value = m.category||'';
   $('mVenue').value = m.venue||'';
   $('mReferee').value = m.referee||'';
+  $('mReferee2').value = m.referee2||'';
   $('mScorer').value = m.scorer||'';
   $('mNote').value = m.note||'';
 }
@@ -3872,7 +3884,7 @@ function startMatch(){
     setNo: 1, setStartedAt: iso(), sideSwapped: false,
     subs: [0,0], setSubs: [0,0], subPairs: [[],[]], timeouts: [0,0],
     log: [], finished: false, result: null,
-    confirmed: [null,null], refSig: null, coachSig: [null,null], rosterSig: [null,null], locked: false,
+    confirmed: [null,null], refSig: null, ref2Sig: null, scorerSig: null, rosterSig: [null,null], locked: false,
     setStartLineup: [line.slice(), line.slice()], sanctions: [], excluded: [[],[]],
     breakEnds: null, toss2: null, protest: null,
     started: iso()
