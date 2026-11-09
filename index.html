@@ -1584,7 +1584,7 @@ function showRotation(t){
     pts.push([p[0], Math.max(pad, Math.min(100 - pad, p[1])) * 1.2]);
     // Kreisradius in viewBox-Einheiten (x: 100 = Feldbreite), plus Luft
     var ini = el ? el.querySelector('.ini') : null;
-    rads.push(ini ? (ini.offsetWidth/2 + 4) / cw * 100 : 9);
+    rads.push(ini ? (ini.offsetWidth/2 + 9) / cw * 100 : 10);
   }
 
   var cx = 0, cy = 0;
@@ -1598,8 +1598,9 @@ function showRotation(t){
     var vx = b[0] - a[0], vy = b[1] - a[1];
     var len = Math.sqrt(vx*vx + vy*vy) || 1;
     var ux = vx/len, uy = vy/len;
-    // Enden an den Kreisrändern freilassen, damit Kreise und Namen frei bleiben
-    var trimA = Math.min(len * 0.4, rads[i]), trimB = Math.min(len * 0.4, rads[(i - 1 + n) % n]);
+    // Enden deutlich vor den Kreisrändern beenden; am Ziel zusätzlich Platz
+    // für die Pfeilspitze, die über das Pfadende hinausragt
+    var trimA = Math.min(len * 0.42, rads[i] + 1), trimB = Math.min(len * 0.42, rads[(i - 1 + n) % n] + 3.6);
     var ax = a[0] + ux*trimA, ay = a[1] + uy*trimA;
     var bx = b[0] - ux*trimB, by = b[1] - uy*trimB;
     var mx = (ax+bx)/2, my = (ay+by)/2;
