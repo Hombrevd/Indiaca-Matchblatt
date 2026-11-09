@@ -2590,7 +2590,7 @@ function dlgEnd(keep){
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
-    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern und dem 1. Schiedsrichter unterzeichnet – das Spiel ist gesperrt. 2. Schiedsrichter und Schreiber können weiterhin unterschreiben.<br>' +
+    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern und dem 1. Schiedsrichter unterzeichnet – das Spiel ist gesperrt.<br>' +
          esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
          esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')' +
          (S.refSig ? ' · '+esc(S.refSig.name)+' ('+fmtTime(S.refSig.at)+')' : '') + '</div>';
@@ -2617,11 +2617,11 @@ function dlgEnd(keep){
     h += '<p class="hint" style="margin:0 0 8px">Kein Protest vermerkt.</p>';
   }
   h += '<div class="divider">Unterschriften</div>' +
-       '<p class="hint" style="margin:0 0 10px">Pflicht: beide Mannschaftsführer und der 1. Schiedsrichter (Reglement 11.2) – danach ist das Spiel gesperrt. Zusätzlich unterschreiben der 2. Schiedsrichter und der Schreiber (11.4).</p>';
+       '<p class="hint" style="margin:0 0 10px">Es unterschreiben beide Mannschaftsführer, der 1. und der 2. Schiedsrichter sowie der Schreiber (Reglement 11.2, 11.4). Nach den Unterschriften beider Mannschaftsführer und des 1. Schiedsrichters ist das Spiel gesperrt.</p>';
   SIG_KEYS.forEach(function(k){
     var c = sigRecord(k);
     h += '<div class="field"><label class="lbl" for="cf'+k+'">'+esc(sigLabel(k)) +
-         (sigRequired(k) ? '' : ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(zusätzlich)</span>') + '</label>';
+         '</label>';
     if (c){
       h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
       if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
