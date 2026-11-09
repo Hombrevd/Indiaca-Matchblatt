@@ -321,8 +321,8 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 .benchbar.v{flex-direction:column}
 .benchbar .bl{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
 .benchbar.v .bl{writing-mode:vertical-rl;transform:rotate(180deg)}
-.bchip{width:38px;height:38px;min-height:0;border-radius:50%;border:2px dashed var(--tc-on);background:var(--tc);
-  color:var(--tc-on);font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:700;font-size:14px;padding:0;
+.bchip{width:48px;height:48px;min-height:0;border-radius:50%;border:2px dashed var(--tc-on);background:var(--tc);
+  color:var(--tc-on);font-family:"Barlow Condensed",system-ui,sans-serif;font-weight:700;font-size:17px;padding:0;
   touch-action:none;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}
 .bchip:disabled{opacity:.4;cursor:default}
 .midscore{display:none}
@@ -333,7 +333,7 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 .pcard.locked{opacity:.45}
 .bchip.paired{border-style:solid;box-shadow:0 0 0 2px var(--ball),0 1px 4px rgba(0,0,0,.25)}
 body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
-@media (max-height:520px){ .bchip{width:32px;height:32px;font-size:12px} }
+@media (max-height:520px){ .bchip{width:44px;height:44px;font-size:16px} }
 .court{
   position:relative;aspect-ratio:5/6;max-width:100%;max-height:100%;
   background:var(--court);border:2px solid var(--line-strong);overflow:hidden;
@@ -478,8 +478,9 @@ body:not(.shownames) .pcard .nm{display:none}
    Nichts scrollt – zum Punktevergeben darf man nie scrollen müssen.
    Das Spielfeld bekommt den Platz, der übrig bleibt.
    ============================================================ */
+body.game-open{overflow:hidden;overscroll-behavior:none}
 #game{
-  max-width:1280px;height:100%;overflow:hidden;
+  max-width:1280px;height:100%;overflow:hidden;touch-action:none;overscroll-behavior:none;
   display:flex;flex-direction:column;padding:18px 16px 10px;
 }
 #game .gwrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:8px}
@@ -816,7 +817,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   .board .mid #targetLbl{grid-area:tgt}
   /* Bänke seitlich am Feld, bei Platznot in zwei Spalten */
   .benchbar.v{flex-wrap:wrap;justify-content:center;align-content:center;gap:5px}
-  .bchip{width:32px;height:32px;font-size:12px}
+  .bchip{width:64px;height:64px;font-size:22px}
 }
 @media (orientation:landscape) and (max-height:430px){
   #game{padding:4px 8px 4px}
@@ -830,7 +831,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   .ptbtn{min-height:44px;padding:4px 12px}
   .board .mid{padding:2px 12px;min-width:130px}
   .midscore{font-size:clamp(24px,8vh,40px)}
-  .bchip{width:28px;height:28px;font-size:11px}
+  .bchip{width:56px;height:56px;font-size:19px}
 }
 </style>
 <script>
@@ -1046,7 +1047,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.4.0';
+var APP = '2.4.1';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -3310,6 +3311,7 @@ function uuid(){
 function enterGame(){
   $('setup').hidden = true;
   $('game').hidden = false;
+  document.body.classList.add('game-open');
   buildCourt();
   fitCourt();
   render();
@@ -3326,6 +3328,7 @@ function newMatch(){
   S = null; UNDO = [];
   $('game').hidden = true;
   $('setup').hidden = false;
+  document.body.classList.remove('game-open');
   window.scrollTo(0,0);
   PREP_ID = null;
   loadSettings();
