@@ -232,6 +232,8 @@ body.has-update .screen{padding-top:54px}
 .plist .pos{flex:0 0 30px;text-align:center;font-size:16px;font-weight:700;color:var(--muted)}
 .plist li.field-slot .pos{color:var(--tc)}
 .plist input{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--ink-2);cursor:pointer}
+.chk input{width:20px;height:20px;min-height:0;flex:0 0 auto;accent-color:var(--home)}
 .plist input.num{flex:0 0 58px;text-align:center;padding-left:4px;padding-right:4px}
 .plist .names{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .plist .names input{width:100%}
@@ -332,6 +334,7 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 .pcard.over .ini{outline-style:solid;transform:scale(1.12)}
 .pcard.locked{opacity:.45}
 .bchip.paired{border-style:solid;box-shadow:0 0 0 2px var(--ball),0 1px 4px rgba(0,0,0,.25)}
+.bchip.spent{opacity:.45;border-style:solid}
 body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 @media (max-height:520px){ .bchip{width:40px;height:40px;font-size:14px} }
 .court{
@@ -910,8 +913,9 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <select id="cfgCount"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select></div>
       <div class="field"><label class="lbl" for="cfgTarget">Satz bis</label>
         <select id="cfgTarget"><option>15</option><option>21</option><option selected>25</option></select></div>
-      <div class="field"><label class="lbl" for="cfgWin">Gewinnsätze</label>
-        <select id="cfgWin"><option>1</option><option selected>2</option><option>3</option></select></div>
+      <div class="field"><label class="lbl" for="cfgWin" id="cfgWinLbl">Gewinnsätze</label>
+        <select id="cfgWin"><option>1</option><option selected>2</option><option>3</option></select>
+        <label class="chk"><input type="checkbox" id="cfgFixed"> Feste Satzzahl – alle Sätze werden gespielt</label></div>
       <div class="field"><label class="lbl" for="cfgDec">Entscheidungssatz bis</label>
         <select id="cfgDec"><option selected>15</option><option>21</option><option>25</option></select></div>
       <div class="field"><label class="lbl" for="cfgTo">Auszeitdauer</label>
@@ -926,6 +930,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
     </div>
     <p class="hint" style="margin:6px 0 0">Satzgewinn mit 2 Punkten Vorsprung: bei 24:24 geht es bis 26, bei 25:25 bis 27 usw.</p>
+    <p class="hint" style="margin:6px 0 0">Gewinnsätze: Das Spiel endet, sobald ein Team die gewählte Zahl Sätze gewonnen hat. Feste Satzzahl: Alle Sätze werden gespielt, bei gleich vielen Satzgewinnen endet das Spiel unentschieden.</p>
     <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
   </div>
 
@@ -1047,7 +1052,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.4.2';
+var APP = '2.5.0';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1063,7 +1068,7 @@ var SNAP = ['points','setsWon','sets','serving','firstServer','topTeam','setNo',
             'setStartedAt','sideSwapped','lineup','subs','setSubs','subPairs','timeouts',
             'log','finished','result'];
 var RESULT_LABEL = {
-  regulaer:'Regulär', forfait:'Rückzug (Forfait)',
+  regulaer:'Regulär', unentschieden:'Unentschieden', forfait:'Rückzug (Forfait)',
   abbruch:'Abbruch', unvollstaendig:'Unvollständige Mannschaft'
 };
 
@@ -1278,6 +1283,8 @@ function undo(){
    Regellogik
    ============================================================ */
 function isDecider(){
+  if (S.fixedSets)   // feste Satzzahl: letzter Satz nur bei Gleichstand ein Entscheidungssatz
+    return S.winSets > 1 && S.sets.length === S.winSets - 1 && S.setsWon[0] === S.setsWon[1];
   return S.winSets > 1 && (S.setsWon[0] + S.setsWon[1]) === (S.winSets*2 - 2);
 }
 function targetNow(){ return isDecider() ? S.deciderTarget : S.target; }
@@ -1359,10 +1366,15 @@ function finishSet(w){
   S.setsWon[w]++;
   var pts = S.points.slice();
 
-  if (S.setsWon[w] >= S.winSets){
+  // Spielende: bei Gewinnsätzen sobald ein Team genug Sätze hat, bei
+  // fester Satzzahl nach dem letzten Satz (Gleichstand = unentschieden)
+  var over = S.fixedSets ? (S.sets.length >= S.winSets) : (S.setsWon[w] >= S.winSets);
+  if (over){
     pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
     S.sets[S.sets.length-1].log = clone(S.log);
-    finishMatch('regulaer', w, '');
+    var winner = w;
+    if (S.fixedSets) winner = S.setsWon[0] === S.setsWon[1] ? null : (S.setsWon[0] > S.setsWon[1] ? 0 : 1);
+    finishMatch(winner === null ? 'unentschieden' : 'regulaer', winner, '');
     return;
   }
   pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
@@ -1584,7 +1596,7 @@ function showRotation(t){
     pts.push([p[0], Math.max(pad, Math.min(100 - pad, p[1])) * 1.2]);
     // Kreisradius in viewBox-Einheiten (x: 100 = Feldbreite), plus Luft
     var ini = el ? el.querySelector('.ini') : null;
-    rads.push(ini ? (ini.offsetWidth/2 + 4) / cw * 100 : 9);
+    rads.push(ini ? (ini.offsetWidth/2 + 9) / cw * 100 : 10);
   }
 
   var cx = 0, cy = 0;
@@ -1598,8 +1610,9 @@ function showRotation(t){
     var vx = b[0] - a[0], vy = b[1] - a[1];
     var len = Math.sqrt(vx*vx + vy*vy) || 1;
     var ux = vx/len, uy = vy/len;
-    // Enden an den Kreisrändern freilassen, damit Kreise und Namen frei bleiben
-    var trimA = Math.min(len * 0.4, rads[i]), trimB = Math.min(len * 0.4, rads[(i - 1 + n) % n]);
+    // Enden deutlich vor den Kreisrändern beenden; am Ziel zusätzlich Platz
+    // für die Pfeilspitze, die über das Pfadende hinausragt
+    var trimA = Math.min(len * 0.42, rads[i] + 1), trimB = Math.min(len * 0.42, rads[(i - 1 + n) % n] + 3.6);
     var ax = a[0] + ux*trimA, ay = a[1] + uy*trimA;
     var bx = b[0] - ux*trimB, by = b[1] - uy*trimB;
     var mx = (ax+bx)/2, my = (ay+by)/2;
@@ -1686,8 +1699,8 @@ function renderBench(){
     var chips = '';
     for (var k=0;k<b.length;k++){
       var qk = openPairFor(t, b[k]);
-      var tip = qk && qk.out === b[k] ? ' – darf nur für '+pLabel(t, qk.in)+' zurück' : ' – auf einen Feldspieler ziehen';
-      chips += '<button class="bchip'+(qk ? ' paired' : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
+      var tip = qk ? (qk.done ? ' – hat in diesem Satz bereits gewechselt' : ' – darf in diesem Satz nur für '+pLabel(t, pairPartner(qk, b[k]))+' aufs Feld') : ' – auf einen Feldspieler ziehen';
+      chips += '<button class="bchip'+(qk ? (qk.done ? ' spent' : ' paired') : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
                ' title="'+esc(pLabel(t, b[k]))+esc(tip)+'"' +
                ' aria-label="Ersatz '+esc(pLabel(t, b[k]))+'"'+(dis?' disabled':'')+'>' +
                esc(pMark(t, b[k])) + '</button>';
@@ -1755,6 +1768,7 @@ function logText(e){
     case 'pen': return 'Strafpunkt für ' + n + (e.txt ? ' ('+e.txt+')' : '');
     case 'sub': return n + ' – Wechsel: ' + e.txt;
     case 'to':  return n + ' – Auszeit';
+    case 'med': return n + ' – Medizinische Auszeit (3 min)' + (e.txt ? ': ' + e.txt : '');
     case 'cor': return 'Korrektur: ' + e.txt;
     case 'set': return 'Satzende – ' + e.txt + ' an ' + n;
     case 'end': return 'Spielende' + (e.txt ? ' – ' + e.txt : '');
@@ -1830,6 +1844,7 @@ function dlgTools(){
     '<div class="menu">' +
       '<button data-x="undo"'+(!UNDO.length||S.locked?' disabled':'')+'>Rückgängig<small>letzte Aktion zurücknehmen</small></button>' +
       '<button data-x="pen"'+(canEdit?'':' disabled')+'>Strafpunkt<small>Punkt und Aufschlag an den Gegner</small></button>' +
+      '<button data-x="med"'+(canEdit?'':' disabled')+'>Medizinische Auszeit<small>3 Minuten, zählt nicht als Auszeit</small></button>' +
       '<button data-x="cor"'+(S.locked?' disabled':'')+'>Korrektur<small>Stand, Aufschlag und Aufstellung setzen</small></button>' +
       '<button data-x="rep">Spielbericht<small>ansehen, kopieren, sichern, teilen</small></button>' +
       '<button data-x="names" aria-pressed="'+(view.names?'true':'false')+'">Spielernamen auf dem Feld<small>'+(view.names ? 'ein – Nummer und Name' : 'aus – nur Trikotnummer')+'</small></button>' +
@@ -1841,6 +1856,7 @@ function dlgTools(){
   var map = {
     undo: function(){ closeDlg(); undo(); },
     pen:  function(){ dlgPenalty(); },
+    med:  function(){ dlgMedical(); },
     cor:  function(){ dlgCorrect(); },
     rep:  function(){ dlgReport(); },
     view: function(){ dlgView(); },
@@ -1878,14 +1894,14 @@ function dlgSub(t, presetSlot, presetBench){
     var hf='', hb='', i;
     for (i=0;i<S.lineup[t].length;i++){
       var cur = S.lineup[t][i], q = openPairFor(t, cur);
-      var hint = 'Position '+POSN[i] + (q && q.in === cur ? ' · nur für '+esc(pLabel(t, q.out)) : '');
+      var hint = 'Position '+POSN[i] + (q ? (q.done ? ' · bereits gewechselt' : ' · nur gegen '+esc(pLabel(t, pairPartner(q, cur)))) : '');
       var blocked = selBench>=0 ? !!subCheck(t, i, selBench) : false;
       hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'"'+(blocked?' disabled':'')+'>' +
             esc(pLabel(t, cur)) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
     }
     for (i=0;i<b.length;i++){
       var qb = openPairFor(t, b[i]);
-      var hintB = 'Ersatz' + (qb && qb.out === b[i] ? ' · nur für '+esc(pLabel(t, qb.in)) : '');
+      var hintB = 'Ersatz' + (qb ? (qb.done ? ' · bereits gewechselt' : ' · nur für '+esc(pLabel(t, pairPartner(qb, b[i])))) : '');
       var blockedB = selSlot>=0 ? !!subCheck(t, selSlot, b[i]) : false;
       hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'"'+(blockedB?' disabled':'')+'>' +
             esc(pLabel(t, b[i])) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
@@ -1973,26 +1989,35 @@ function benchPointerUp(e){
   }
   doSub(d.t, slot, d.pi);
 }
-/* Wechselpaare eines Satzes: Wurde A durch B ersetzt, darf B nur durch
-   A ersetzt werden, und A darf nur für B zurück. Für andere Ersatzspieler
-   ist diese Position gesperrt, bis A zurück ist. */
+/* Wechselregel je Satz: Ein Spieler der Startaufstellung darf das Spiel
+   einmal verlassen und einmal wieder aufnehmen, und zwar auf seiner
+   vorherigen Position. Ein Auswechselspieler nimmt die Position eines
+   Startspielers einmal ein und kann nur durch denselben Startspieler
+   ersetzt werden. Ein Paar {out: A, in: B} erlaubt also genau Hinaus
+   (A→B) und Zurück (B→A); danach ist das Paar abgeschlossen (done) und
+   beide sind für weitere Wechsel in diesem Satz gesperrt. */
 function subPairs(t){
   if (!S.subPairs) S.subPairs = [[],[]];
   return S.subPairs[t];
 }
-function openPairFor(t, pi){            // offenes Paar, in dem pi drin- oder draussen ist
+function openPairFor(t, pi){            // Paar, in dem pi drin- oder draussen ist
   var P = subPairs(t);
-  for (var i=0;i<P.length;i++) if (!P[i].done && (P[i].in === pi || P[i].out === pi)) return P[i];
+  for (var i=0;i<P.length;i++) if (P[i].in === pi || P[i].out === pi) return P[i];
   return null;
 }
+function pairPartner(q, pi){ return q.in === pi ? q.out : q.in; }
 function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
   var cur = S.lineup[t][slot];
   var qc = openPairFor(t, cur);
-  if (qc && qc.in === cur && qc.out !== pi)
-    return 'Position ' + POSN[slot] + ' ist gesperrt: für ' + pLabel(t, cur) + ' darf nur ' + pLabel(t, qc.out) + ' zurück aufs Feld.';
+  if (qc && qc.done)
+    return 'Position ' + POSN[slot] + ' ist gesperrt: ' + pLabel(t, cur) + ' hat in diesem Satz schon gewechselt und ist zurückgekehrt.';
+  if (qc && pairPartner(qc, cur) !== pi)
+    return 'Position ' + POSN[slot] + ' ist gesperrt: ' + pLabel(t, cur) + ' darf in diesem Satz nur gegen ' + pLabel(t, pairPartner(qc, cur)) + ' getauscht werden.';
   var qp = openPairFor(t, pi);
-  if (qp && qp.out === pi && qp.in !== cur)
-    return pLabel(t, pi) + ' darf nur für ' + pLabel(t, qp.in) + ' (Position ' + POSN[S.lineup[t].indexOf(qp.in)] + ') wieder eingewechselt werden.';
+  if (qp && qp.done)
+    return pLabel(t, pi) + ' hat in diesem Satz bereits gewechselt und darf nicht mehr eingewechselt werden.';
+  if (qp && pairPartner(qp, pi) !== cur)
+    return pLabel(t, pi) + ' darf in diesem Satz nur für ' + pLabel(t, pairPartner(qp, pi)) + ' eingewechselt werden.';
   return '';
 }
 function doSub(t, slot, pi){
@@ -2002,8 +2027,9 @@ function doSub(t, slot, pi){
   var out = S.lineup[t][slot];
   S.lineup[t][slot] = pi;
   S.setSubs[t]++; S.subs[t]++;
-  var q = openPairFor(t, out), back = false;
-  if (q && q.in === out && q.out === pi){ q.done = true; back = true; }
+  // Bestehendes Paar: Rückwechsel schliesst das Paar ab; sonst neues Paar
+  var q = openPairFor(t, out), back = !!(q && !q.done && pairPartner(q, out) === pi);
+  if (back) q.done = true;
   else subPairs(t).push({ out: out, in: pi, slot: slot });
   pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
   render(); save();
@@ -2036,6 +2062,68 @@ function dlgTimeout(t){
       signal();
       c.classList.add('flash');
       bd.querySelector('#toHint').textContent = 'Auszeit beendet.';
+    }
+  }, 1000);
+  render();
+}
+
+/* ---------- Medizinische Auszeit (3 Minuten, zählt nicht als Auszeit) ---------- */
+function dlgMedical(){
+  var sel = -1, bd = dlg('<h2>Medizinische Auszeit</h2>' +
+    '<p class="dsc">3 Minuten Behandlungszeit. Zählt nicht zu den Auszeiten der Mannschaft.</p>' +
+    '<div class="field"><span class="lbl">Mannschaft</span><div class="opts">' +
+      '<button class="opt" type="button" data-t="0" aria-pressed="false">'+esc(S.teams[0].name)+'</button>' +
+      '<button class="opt" type="button" data-t="1" aria-pressed="false">'+esc(S.teams[1].name)+'</button>' +
+    '</div></div>' +
+    '<div class="field"><label class="lbl" for="medP">Spieler (optional)</label><select id="medP" disabled><option value="">–</option></select></div>' +
+    '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+    '<button class="btn primary" data-x="ok" disabled>3 Minuten starten</button></div>');
+  bd.addEventListener('click', function(e){
+    var o = e.target.closest('[data-t]');
+    if (o){
+      sel = +o.dataset.t;
+      var all = bd.querySelectorAll('[data-t]');
+      for (var i=0;i<all.length;i++) all[i].setAttribute('aria-pressed', String(+all[i].dataset.t === sel));
+      var ps = bd.querySelector('#medP'), oh = '<option value="">–</option>';
+      for (var k=0;k<S.teams[sel].players.length;k++) oh += '<option value="'+k+'">'+esc(pLabel(sel, k))+'</option>';
+      ps.innerHTML = oh; ps.disabled = false;
+      bd.querySelector('[data-x=ok]').disabled = false;
+      return;
+    }
+    var x = e.target.closest('[data-x]'); if (!x) return;
+    if (x.dataset.x === 'no') return closeDlg();
+    var pv = bd.querySelector('#medP').value;
+    startMedical(sel, pv === '' ? -1 : +pv);
+  });
+}
+function startMedical(t, pi){
+  snapshot();
+  pushLog('med', t, pi >= 0 ? pLabel(t, pi) : '');
+  save();
+  var total = 180, left = total;
+  function fmt(s){ return Math.floor(s/60) + ':' + pad(s%60); }
+  var bd = dlg('<h2>Medizinische Auszeit – '+esc(S.teams[t].name)+'</h2>' +
+    '<p class="dsc">'+(pi >= 0 ? esc(pLabel(t, pi))+' · ' : '')+'Stand '+S.points[0]+':'+S.points[1]+' · Satz '+S.setNo+'</p>' +
+    '<div class="count" id="toCount">'+fmt(left)+'</div>' +
+    '<div class="bar"><i id="toBar" style="width:100%"></i></div>' +
+    '<p class="hint" id="toHint">Punkteingabe ist während der Behandlung gesperrt. Spätestens nach 3 Minuten muss weitergespielt oder gewechselt werden.</p>' +
+    '<div class="acts"><button class="btn" data-x="sub">Auswechseln</button><button class="btn primary" data-x="go">Weiterspielen</button></div>', {esc:false});
+  bd.querySelector('[data-x=go]').onclick = function(){ clearInterval(toTimer); toTimer = null; closeDlg(); };
+  bd.querySelector('[data-x=sub]').onclick = function(){
+    clearInterval(toTimer); toTimer = null; closeDlg();
+    dlgSub(t, pi >= 0 ? S.lineup[t].indexOf(pi) : -1);
+  };
+  toTimer = setInterval(function(){
+    left--;
+    var c = bd.querySelector('#toCount'), b2 = bd.querySelector('#toBar');
+    if (!c){ clearInterval(toTimer); toTimer=null; return; }
+    c.textContent = fmt(Math.max(0,left));
+    b2.style.width = Math.max(0, (left/total)*100) + '%';
+    if (left <= 0){
+      clearInterval(toTimer); toTimer = null;
+      signal();
+      c.classList.add('flash');
+      bd.querySelector('#toHint').textContent = 'Behandlungszeit abgelaufen.';
     }
   }, 1000);
   render();
@@ -2220,7 +2308,9 @@ function dlgEnd(keep){
   var h = '<h2>Spiel beendet</h2>' +
     '<p class="dsc">'+esc(RESULT_LABEL[r.type]||r.type)+(r.note?' · '+esc(r.note):'')+'</p>' +
     '<div class="setsline">'+setsLineHTML()+'</div>' +
-    '<p style="margin:0 0 14px"><span class="tag ok">Sieger</span> <b style="color:var(--ink)">'+esc(win)+'</b> ' +
+    '<p style="margin:0 0 14px">' + (r.type === 'unentschieden'
+        ? '<span class="tag">Unentschieden</span> '
+        : '<span class="tag ok">Sieger</span> <b style="color:var(--ink)">'+esc(win)+'</b> ') +
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
@@ -2387,7 +2477,7 @@ function reportText(st){
   line('Schiedsrichter', m.referee || '–');
   line('Schreiber', m.scorer || '–');
   line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
-       ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
+       (s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget);
   line('Auslosung', s.toss || '–');
   if (m.note) line('Bemerkung', m.note);
   L.push('');
@@ -2431,7 +2521,7 @@ function reportText(st){
   line('Sätze', s.setsWon[0] + ' : ' + s.setsWon[1]);
   if (s.result){
     line('Ergebnisart', RESULT_LABEL[s.result.type] || s.result.type);
-    line('Sieger', (s.result.winner===0||s.result.winner===1) ? s.teams[s.result.winner].name : '–');
+    line('Sieger', (s.result.winner===0||s.result.winner===1) ? s.teams[s.result.winner].name : (s.result.type==='unentschieden' ? 'Unentschieden' : '–'));
     if (s.result.note) line('Grund/Bemerkung', s.result.note);
   } else {
     line('Status', 'Spiel läuft');
@@ -2652,7 +2742,7 @@ function buildMatchPdf(s){
     y += 14;
     d.text(M, y, 'Heim', 8, {gray:.45}); d.text(W/2, y, 'Sätze', 8, {gray:.45, align:'center'}); d.text(W-M, y, 'Gast', 8, {gray:.45, align:'right'});
     y += 16;
-    var resLine = s.result ? ((winner ? 'Sieger: '+winner : 'Kein Sieger') + ' · ' + (RESULT_LABEL[s.result.type]||s.result.type) +
+    var resLine = s.result ? ((winner ? 'Sieger: '+winner : (s.result.type==='unentschieden' ? 'Unentschieden' : 'Kein Sieger')) + ' · ' + (RESULT_LABEL[s.result.type]||s.result.type) +
                               (s.result.note ? ' · '+s.result.note : '')) : 'Spiel läuft';
     d.text(W/2, y, resLine, 10, {align:'center'});
     y += 4;
@@ -2667,7 +2757,7 @@ function buildMatchPdf(s){
       d.text(cx+labW, cy, d.wrap(r[1], 9.5, colW-labW-10)[0], 9.5);
     });
     y = y0 + 4*13 + 2;
-    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget],
+    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+(s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget],
                 ['Auslosung', s.toss||'–']];
     if (m.note) long.push(['Bemerkung', m.note]);
     long.forEach(function(r){
@@ -2908,7 +2998,7 @@ function saveSettings(){
   store.set(K_SET, {
     schema: SCHEMA,
     theme: keep.theme, palette: keep.palette, colors: keep.colors,
-    count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets,
+    count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets, fixedSets: !!S.fixedSets,
     toLen: S.toLen, maxTimeouts: S.maxTimeouts, maxSubs: S.maxSubs, firstServer: S.firstServer,
     startSide: S.topTeam,
     names: [S.teams[0].name, S.teams[1].name],
@@ -2922,11 +3012,15 @@ function saveSettings(){
 var P = [[],[]];      // Spielernamen je Team
 var CAP = [0,0];      // Mannschaftsführer (Index in P[t])
 
+function syncWinLabel(){
+  var l = $('cfgWinLbl'); if (l) l.textContent = $('cfgFixed').checked ? 'Anzahl Sätze' : 'Gewinnsätze';
+}
 function cfg(){
   return {
     count: +$('cfgCount').value,
     target: +$('cfgTarget').value,
     winSets: +$('cfgWin').value,
+    fixedSets: $('cfgFixed').checked,
     deciderTarget: +$('cfgDec').value,
     toLen: +$('cfgTo').value,
     maxTimeouts: +$('cfgMaxTo').value,
@@ -3080,6 +3174,7 @@ function loadSettings(){
   if (s.count) $('cfgCount').value = s.count;
   if (s.target) $('cfgTarget').value = s.target;
   if (s.winSets) $('cfgWin').value = s.winSets;
+  $('cfgFixed').checked = !!s.fixedSets; syncWinLabel();
   if (s.deciderTarget) $('cfgDec').value = s.deciderTarget;
   if (s.toLen) $('cfgTo').value = s.toLen;
   if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
@@ -3146,6 +3241,7 @@ function applySetup(rec){
   if (c.count) $('cfgCount').value = c.count;
   if (c.target) $('cfgTarget').value = c.target;
   if (c.winSets) $('cfgWin').value = c.winSets;
+  $('cfgFixed').checked = !!c.fixedSets; syncWinLabel();
   if (c.deciderTarget) $('cfgDec').value = c.deciderTarget;
   if (c.toLen) $('cfgTo').value = c.toLen;
   if (c.maxTimeouts !== undefined) $('cfgMaxTo').value = c.maxTimeouts;
@@ -3281,7 +3377,7 @@ function startMatch(){
     schema: SCHEMA,
     id: uuid(),
     app: APP,
-    count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets,
+    count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets, fixedSets: !!c.fixedSets,
     toLen: c.toLen, maxTimeouts: c.maxTimeouts, maxSubs: c.maxSubs,
     meta: metaFromForm(),
     teams: teams,
@@ -3432,6 +3528,7 @@ function wire(){
     }
   });
   document.addEventListener('input', onViewInput);
+  $('cfgFixed').addEventListener('change', syncWinLabel);
   document.addEventListener('change', function(e){
     var el = e.target;
     onViewInput(e);
