@@ -334,6 +334,7 @@ details.meta summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--i
 .pcard.over .ini{outline-style:solid;transform:scale(1.12)}
 .pcard.locked{opacity:.45}
 .bchip.paired{border-style:solid;box-shadow:0 0 0 2px var(--ball),0 1px 4px rgba(0,0,0,.25)}
+.bchip.spent{opacity:.45;border-style:solid}
 body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
 @media (max-height:520px){ .bchip{width:40px;height:40px;font-size:14px} }
 .court{
@@ -1698,8 +1699,8 @@ function renderBench(){
     var chips = '';
     for (var k=0;k<b.length;k++){
       var qk = openPairFor(t, b[k]);
-      var tip = qk ? ' – darf in diesem Satz nur für '+pLabel(t, pairPartner(qk, b[k]))+' aufs Feld' : ' – auf einen Feldspieler ziehen';
-      chips += '<button class="bchip'+(qk ? ' paired' : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
+      var tip = qk ? (qk.done ? ' – hat in diesem Satz bereits gewechselt' : ' – darf in diesem Satz nur für '+pLabel(t, pairPartner(qk, b[k]))+' aufs Feld') : ' – auf einen Feldspieler ziehen';
+      chips += '<button class="bchip'+(qk ? (qk.done ? ' spent' : ' paired') : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
                ' title="'+esc(pLabel(t, b[k]))+esc(tip)+'"' +
                ' aria-label="Ersatz '+esc(pLabel(t, b[k]))+'"'+(dis?' disabled':'')+'>' +
                esc(pMark(t, b[k])) + '</button>';
@@ -1893,14 +1894,14 @@ function dlgSub(t, presetSlot, presetBench){
     var hf='', hb='', i;
     for (i=0;i<S.lineup[t].length;i++){
       var cur = S.lineup[t][i], q = openPairFor(t, cur);
-      var hint = 'Position '+POSN[i] + (q ? ' · nur gegen '+esc(pLabel(t, pairPartner(q, cur))) : '');
+      var hint = 'Position '+POSN[i] + (q ? (q.done ? ' · bereits gewechselt' : ' · nur gegen '+esc(pLabel(t, pairPartner(q, cur)))) : '');
       var blocked = selBench>=0 ? !!subCheck(t, i, selBench) : false;
       hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'"'+(blocked?' disabled':'')+'>' +
             esc(pLabel(t, cur)) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
     }
     for (i=0;i<b.length;i++){
       var qb = openPairFor(t, b[i]);
-      var hintB = 'Ersatz' + (qb ? ' · nur für '+esc(pLabel(t, pairPartner(qb, b[i]))) : '');
+      var hintB = 'Ersatz' + (qb ? (qb.done ? ' · bereits gewechselt' : ' · nur für '+esc(pLabel(t, pairPartner(qb, b[i])))) : '');
       var blockedB = selSlot>=0 ? !!subCheck(t, selSlot, b[i]) : false;
       hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'"'+(blockedB?' disabled':'')+'>' +
             esc(pLabel(t, b[i])) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
@@ -1988,10 +1989,13 @@ function benchPointerUp(e){
   }
   doSub(d.t, slot, d.pi);
 }
-/* Wechselpaare eines Satzes: Wurde A durch B ersetzt, sind A und B für
-   den Rest des Satzes aneinander gebunden. B darf nur durch A ersetzt
-   werden und A nur für B zurück – auch nach dem Rückwechsel bleibt die
-   Paarung bestehen. Für alle anderen ist diese Position gesperrt. */
+/* Wechselregel je Satz: Ein Spieler der Startaufstellung darf das Spiel
+   einmal verlassen und einmal wieder aufnehmen, und zwar auf seiner
+   vorherigen Position. Ein Auswechselspieler nimmt die Position eines
+   Startspielers einmal ein und kann nur durch denselben Startspieler
+   ersetzt werden. Ein Paar {out: A, in: B} erlaubt also genau Hinaus
+   (A→B) und Zurück (B→A); danach ist das Paar abgeschlossen (done) und
+   beide sind für weitere Wechsel in diesem Satz gesperrt. */
 function subPairs(t){
   if (!S.subPairs) S.subPairs = [[],[]];
   return S.subPairs[t];
@@ -2005,9 +2009,13 @@ function pairPartner(q, pi){ return q.in === pi ? q.out : q.in; }
 function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
   var cur = S.lineup[t][slot];
   var qc = openPairFor(t, cur);
+  if (qc && qc.done)
+    return 'Position ' + POSN[slot] + ' ist gesperrt: ' + pLabel(t, cur) + ' hat in diesem Satz schon gewechselt und ist zurückgekehrt.';
   if (qc && pairPartner(qc, cur) !== pi)
     return 'Position ' + POSN[slot] + ' ist gesperrt: ' + pLabel(t, cur) + ' darf in diesem Satz nur gegen ' + pLabel(t, pairPartner(qc, cur)) + ' getauscht werden.';
   var qp = openPairFor(t, pi);
+  if (qp && qp.done)
+    return pLabel(t, pi) + ' hat in diesem Satz bereits gewechselt und darf nicht mehr eingewechselt werden.';
   if (qp && pairPartner(qp, pi) !== cur)
     return pLabel(t, pi) + ' darf in diesem Satz nur für ' + pLabel(t, pairPartner(qp, pi)) + ' eingewechselt werden.';
   return '';
@@ -2019,9 +2027,10 @@ function doSub(t, slot, pi){
   var out = S.lineup[t][slot];
   S.lineup[t][slot] = pi;
   S.setSubs[t]++; S.subs[t]++;
-  // Bestehendes Paar: Rückwechsel (Paarung bleibt bestehen); sonst neues Paar
-  var q = openPairFor(t, out), back = !!(q && pairPartner(q, out) === pi);
-  if (!back) subPairs(t).push({ out: out, in: pi, slot: slot });
+  // Bestehendes Paar: Rückwechsel schliesst das Paar ab; sonst neues Paar
+  var q = openPairFor(t, out), back = !!(q && !q.done && pairPartner(q, out) === pi);
+  if (back) q.done = true;
+  else subPairs(t).push({ out: out, in: pi, slot: slot });
   pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
   render(); save();
   toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + pLabel(t, pi));
