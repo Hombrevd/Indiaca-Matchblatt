@@ -235,6 +235,9 @@ body.has-update .screen{padding-top:54px}
 .chk{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--ink-2);cursor:pointer}
 .chk input{width:20px;height:20px;min-height:0;flex:0 0 auto;accent-color:var(--home)}
 .plist input.num{flex:0 0 58px;text-align:center;padding-left:4px;padding-right:4px}
+.plist input.num.bad{border-color:var(--guest);box-shadow:inset 0 0 0 1px var(--guest)}
+.fixval{min-height:44px;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--ink)}
+.fixval small{font-size:12px;font-weight:400;color:var(--muted);line-height:1.3}
 .plist .names{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .plist .names input{width:100%}
 @media (min-width:600px){ .plist .names{flex-direction:row} }
@@ -741,6 +744,12 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
   padding:2px 8px;background:var(--ink);color:var(--halle)}
 .tag.ok{background:var(--ok);color:#fff}
 .tag.warn{background:var(--ball);color:#101010}
+.tag.green{background:#1E8E3E;color:#fff}
+.tag.red{background:#C62828;color:#fff}
+.tag.redyellow{background:linear-gradient(135deg,var(--ball) 50%,#C62828 50%);color:#101010}
+.count.sm{font-size:clamp(44px,12vw,64px);margin:4px 0 10px}
+.sanlist{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:6px}
+.sanlist li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);flex-wrap:wrap}
 .banner{border:1px solid var(--line);border-left:5px solid var(--ball);background:var(--surface);
   border-radius:var(--radius);padding:11px 13px;font-size:14px;margin-bottom:12px}
 
@@ -893,7 +902,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl0"></ul>
     <div class="row"><button class="btn sm" type="button" id="addBench0" data-add="0">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
+    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer 1–99, je Team nur einmal (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card teamcard" id="teamcard1" style="--tc:var(--guest);--tc-on:var(--guest-on)">
@@ -903,14 +912,15 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     <div class="divider">Startaufstellung</div>
     <ul class="plist" id="pl1"></ul>
     <div class="row"><button class="btn sm" type="button" id="addBench1" data-add="1">+ Ersatzspieler</button></div>
-    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
+    <p class="hint" style="margin:8px 0 0">Nr. = Trikotnummer 1–99, je Team nur einmal (steht im Kreis auf dem Feld) · C = Mannschaftsführer · Ersatzbank max. 5</p>
   </div>
 
   <div class="card">
     <h2>Modus</h2>
     <div class="grid2">
-      <div class="field"><label class="lbl" for="cfgCount">Feldspieler</label>
-        <select id="cfgCount"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select></div>
+      <div class="field"><span class="lbl">Feldspieler</span>
+        <input type="hidden" id="cfgCount" value="5">
+        <div class="fixval">5 <small>mit 4 nur als Ausnahme nach Verletzung oder Platzverweis (im Spiel unter Einstellungen)</small></div></div>
       <div class="field"><label class="lbl" for="cfgTarget">Satz bis</label>
         <select id="cfgTarget"><option>15</option><option>21</option><option selected>25</option></select></div>
       <div class="field"><label class="lbl" for="cfgWin" id="cfgWinLbl">Gewinnsätze</label>
@@ -921,7 +931,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
       <div class="field"><label class="lbl" for="cfgTo">Auszeitdauer</label>
         <select id="cfgTo"><option value="10">10 s</option><option value="30" selected>30 s</option><option value="60">60 s</option></select></div>
       <div class="field"><label class="lbl" for="cfgMaxTo">Auszeiten je Team und Satz</label>
-        <select id="cfgMaxTo"><option value="0">unbegrenzt</option><option value="1" selected>1</option><option value="2">2</option></select></div>
+        <select id="cfgMaxTo"><option value="0">unbegrenzt</option><option value="1">1</option><option value="2" selected>2</option></select></div>
       <div class="field"><label class="lbl" for="cfgMaxSub">Auswechslungen je Team und Satz</label>
         <select id="cfgMaxSub"><option value="5" selected>5</option><option value="3">3</option><option value="6">6</option><option value="0">unbegrenzt</option></select></div>
       <div class="field"><label class="lbl" for="cfgFirst">Erster Aufschlag</label>
@@ -931,7 +941,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
     </div>
     <p class="hint" style="margin:6px 0 0">Satzgewinn mit 2 Punkten Vorsprung: bei 24:24 geht es bis 26, bei 25:25 bis 27 usw.</p>
     <p class="hint" style="margin:6px 0 0">Gewinnsätze: Das Spiel endet, sobald ein Team die gewählte Zahl Sätze gewonnen hat. Feste Satzzahl: Alle Sätze werden gespielt, bei gleich vielen Satzgewinnen endet das Spiel unentschieden.</p>
-    <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
+    <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben. Vor einem Entscheidungssatz wird neu ausgelost, die Seiten werden vorher nicht gewechselt.</p>
   </div>
 
   <div class="card">
@@ -1052,7 +1062,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.5.0';
+var APP = '2.6.0';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1066,11 +1076,25 @@ var POS = {
 };
 var SNAP = ['points','setsWon','sets','serving','firstServer','topTeam','setNo',
             'setStartedAt','sideSwapped','lineup','subs','setSubs','subPairs','timeouts',
-            'log','finished','result'];
+            'log','finished','result','setStartLineup','sanctions','excluded','breakEnds','toss2','protest'];
 var RESULT_LABEL = {
-  regulaer:'Regulär', unentschieden:'Unentschieden', forfait:'Rückzug (Forfait)',
+  regulaer:'Regulär', unentschieden:'Unentschieden', forfait:'Nichtantreten / Rückzug (Forfait)',
   abbruch:'Abbruch', unvollstaendig:'Unvollständige Mannschaft'
 };
+/* Sanktionen nach Reglement 9.2 / 10.2. Spielerbezogene Sanktionen
+   (Ermahnung, Verwarnung, Platzverweis, Disqualifikation) stehen mit dem
+   Spieler im Bericht; Verzögerungssanktionen gelten für die Mannschaft.
+   pt = Vorgabe «Strafpunkt und Aufschlag an den Gegner». */
+var SANCTIONS = [
+  { k:'ermahnung',    label:'Ermahnung',               card:'grün',      pt:false, player:true,  hint:'ohne Punkt, nur vermerkt' },
+  { k:'verwarnung',   label:'Verwarnung',              card:'gelb',      pt:true,  player:true,  hint:'Strafpunkt und Aufschlag an den Gegner' },
+  { k:'platzverweis', label:'Platzverweis',            card:'rot',       pt:true,  player:true,  hint:'Spieler für den Rest des Satzes vom Feld, muss ersetzt werden', out:'set' },
+  { k:'disq',         label:'Disqualifikation',        card:'gelb+rot',  pt:true,  player:true,  hint:'Spieler für den Rest des Spiels vom Feld, muss ersetzt werden', out:'match' },
+  { k:'vz_ermahnung', label:'Verzögerungsermahnung',   card:'',          pt:false, player:false, hint:'Mannschaft, ohne Punkt' },
+  { k:'vz_verwarnung',label:'Verzögerungsverwarnung',  card:'',          pt:true,  player:false, hint:'Mannschaft, Strafpunkt und Aufschlag an den Gegner' }
+];
+function sanctionDef(k){ for (var i=0;i<SANCTIONS.length;i++) if (SANCTIONS[i].k === k) return SANCTIONS[i]; return null; }
+var BREAK_LEN = 180;   // Satzpause in Sekunden (Reglement 9.4)
 
 /* ============================================================
    Kleinkram
@@ -1302,10 +1326,24 @@ function targetLabel(){
   return 'bis ' + targetShown() + (inOvertime() ? ' · Verlängerung' : '') +
          (isDecider() ? ' · Entscheidung' : '');
 }
+/* Ausschlüsse nach Platzverweis (bis Satzende) und Disqualifikation
+   (bis Spielende) – ausgeschlossene Spieler fehlen auf der Bank. */
+function excludedList(t){ if (!S.excluded) S.excluded = [[],[]]; return S.excluded[t]; }
+function isExcluded(t, pi){
+  var E = excludedList(t);
+  for (var i=0;i<E.length;i++) if (E[i].pi === pi) return E[i];
+  return null;
+}
 function bench(t){
   var out=[], L=S.lineup[t];
-  for (var i=0;i<S.teams[t].players.length;i++) if (L.indexOf(i)<0) out.push(i);
+  for (var i=0;i<S.teams[t].players.length;i++) if (L.indexOf(i)<0 && !isExcluded(t, i)) out.push(i);
   return out;
+}
+function startLineupTxt(t, L, s){
+  s = s || S;
+  var a = [];
+  for (var i=0;i<L.length;i++) a.push(POSN[i] + ' ' + pLabel(t, L[i], s));
+  return a.join(' · ');
 }
 function pushLog(kind, t, txt){
   S.log.push({ ts: iso(), a: S.points[0], b: S.points[1], t: t, kind: kind, txt: txt||'' });
@@ -1315,7 +1353,7 @@ function rotate(t){
   S.lineup[t] = L.slice(1).concat([L[0]]);
 }
 
-function addPoint(t, kind){
+function addPoint(t, kind, noSnap){
   kind = kind || 'pt';
   if (!S || S.finished || S.locked) return;
   if (dlgOpen && kind === 'pt') return;
@@ -1324,7 +1362,7 @@ function addPoint(t, kind){
   lastTap = { t:t, ts:now };
   clearRotation();   // Pfeile des vorigen Ballwechsels verwerfen
 
-  snapshot();
+  if (!noSnap) snapshot();   // Sanktion mit Strafpunkt: Schnappschuss liegt schon vor
   S.points[t]++;
   var rotated = false;
   if (S.serving !== t){
@@ -1361,7 +1399,8 @@ function finishSet(w){
   S.sets.push({
     pts: S.points.slice(), startedAt: S.setStartedAt, endedAt: iso(),
     timeouts: S.timeouts.slice(), subs: S.setSubs.slice(),
-    log: clone(S.log), no: S.setNo
+    log: clone(S.log), no: S.setNo,
+    start: clone(S.setStartLineup || S.lineup)
   });
   S.setsWon[w]++;
   var pts = S.points.slice();
@@ -1391,7 +1430,14 @@ function finishSet(w){
   S.setStartedAt = iso();
   S.firstServer = 1 - S.firstServer;
   S.serving = S.firstServer;
-  S.topTeam = 1 - S.topTeam;
+  // Platzverweise gelten bis Satzende, Disqualifikationen bis Spielende
+  for (var t=0;t<2;t++) S.excluded[t] = excludedList(t).filter(function(x){ return x.until === 'match'; });
+  // Vor dem Entscheidungssatz wird neu ausgelost und nicht gewechselt
+  // (Reglement 7.2, 8.5, 9.4); sonst Seitenwechsel.
+  if (!isDecider()) S.topTeam = 1 - S.topTeam;
+  S.toss2 = null;
+  S.setStartLineup = clone(S.lineup);
+  S.breakEnds = Date.now() + BREAK_LEN*1000;
   clearRotation();
   render();
   dlgSetBreak(w, no, pts);
@@ -1538,7 +1584,8 @@ function onCardClick(e){
    Eine Quelle für Spielerkarten und Rotationspfeile. */
 function slotPos(team, slot){
   var isTop = (team === S.topTeam);
-  var x = POS[S.count][slot][0], y = POS[S.count][slot][1];
+  var P5 = POS[S.lineup[team].length] || POS[S.count];
+  var x = P5[slot][0], y = P5[slot][1];
   if (!isTop){ x = 100 - x; y = 100 - y; }
   if (slot === 0) y += (isTop ? -5 : 5);   // Aufschläger hinter die Grundlinie
   return [x, y];
@@ -1586,7 +1633,7 @@ function showRotation(t){
   if (!svg || !g) return;
   clearTimeout(rotTimer); clearTimeout(rotFade);
 
-  var n = S.count, pts = [], rads = [], i;
+  var n = S.lineup[t].length, pts = [], rads = [], i;
   var cw = $('court').clientWidth || 1;
   for (i=0;i<n;i++){
     var el = cards[t][S.lineup[t][i]];
@@ -1766,6 +1813,11 @@ function logText(e){
     case 'pt':  return n + ' – Punkt';
     case 'rot': return n + ' – Punkt, Aufschlagwechsel und Rotation';
     case 'pen': return 'Strafpunkt für ' + n + (e.txt ? ' ('+e.txt+')' : '');
+    case 'san': return 'Sanktion ' + n + ': ' + e.txt;
+    case 'red4': return n + ' – spielt mit 4 Feldspielern weiter: ' + e.txt;
+    case 'toss': return 'Auslosung Entscheidungssatz: ' + e.txt;
+    case 'roster': return n + ' – Spielerliste bestätigt (' + e.txt + ')';
+    case 'protest': return 'Protest ' + n + ': ' + e.txt;
     case 'sub': return n + ' – Wechsel: ' + e.txt;
     case 'to':  return n + ' – Auszeit';
     case 'med': return n + ' – Medizinische Auszeit (3 min)' + (e.txt ? ': ' + e.txt : '');
@@ -1843,8 +1895,10 @@ function dlgTools(){
     '<h2>Einstellungen</h2><p class="dsc">Satz '+S.setNo+' · Stand '+S.points[0]+':'+S.points[1]+'</p>' +
     '<div class="menu">' +
       '<button data-x="undo"'+(!UNDO.length||S.locked?' disabled':'')+'>Rückgängig<small>letzte Aktion zurücknehmen</small></button>' +
-      '<button data-x="pen"'+(canEdit?'':' disabled')+'>Strafpunkt<small>Punkt und Aufschlag an den Gegner</small></button>' +
+      '<button data-x="pen"'+(canEdit?'':' disabled')+'>Sanktion<small>Ermahnung, Verwarnung, Platzverweis, Disqualifikation, Verzögerung</small></button>' +
       '<button data-x="med"'+(canEdit?'':' disabled')+'>Medizinische Auszeit<small>3 Minuten, zählt nicht als Auszeit</small></button>' +
+      '<button data-x="red4"'+(canEdit?'':' disabled')+'>Mit 4 weiterspielen<small>Ausnahme nach Verletzung oder Platzverweis ohne Ersatz</small></button>' +
+      (rosterOpen() ? '<button data-x="roster">Spielerliste unterzeichnen<small>Mannschaftsführer bestätigen die Spielerliste</small></button>' : '') +
       '<button data-x="cor"'+(S.locked?' disabled':'')+'>Korrektur<small>Stand, Aufschlag und Aufstellung setzen</small></button>' +
       '<button data-x="rep">Spielbericht<small>ansehen, kopieren, sichern, teilen</small></button>' +
       '<button data-x="names" aria-pressed="'+(view.names?'true':'false')+'">Spielernamen auf dem Feld<small>'+(view.names ? 'ein – Nummer und Name' : 'aus – nur Trikotnummer')+'</small></button>' +
@@ -1855,8 +1909,10 @@ function dlgTools(){
     '<div class="acts"><button class="btn" data-x="close">Schliessen</button></div>');
   var map = {
     undo: function(){ closeDlg(); undo(); },
-    pen:  function(){ dlgPenalty(); },
+    pen:  function(){ dlgSanction(); },
     med:  function(){ dlgMedical(); },
+    red4: function(){ dlgReduce(-1, ''); },
+    roster:function(){ dlgRosterSign(); },
     cor:  function(){ dlgCorrect(); },
     rep:  function(){ dlgReport(); },
     view: function(){ dlgView(); },
@@ -2020,21 +2076,94 @@ function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
     return pLabel(t, pi) + ' darf in diesem Satz nur für ' + pLabel(t, pairPartner(qp, pi)) + ' eingewechselt werden.';
   return '';
 }
-function doSub(t, slot, pi){
-  var why = subCheck(t, slot, pi);
+function doSub(t, slot, pi, force){
+  var why = force ? '' : subCheck(t, slot, pi);
   if (why) return confirmDlg('Wechsel nicht erlaubt', why, 'Verstanden', function(){}, false);
   snapshot();
   var out = S.lineup[t][slot];
   S.lineup[t][slot] = pi;
   S.setSubs[t]++; S.subs[t]++;
-  // Bestehendes Paar: Rückwechsel schliesst das Paar ab; sonst neues Paar
+  // Bestehendes Paar: Rückwechsel schliesst das Paar ab; sonst neues Paar.
+  // Ein Ausnahmewechsel (Platzverweis, Verletzung) bildet kein Paar.
   var q = openPairFor(t, out), back = !!(q && !q.done && pairPartner(q, out) === pi);
-  if (back) q.done = true;
+  if (force){ /* kein Paar */ }
+  else if (back) q.done = true;
   else subPairs(t).push({ out: out, in: pi, slot: slot });
-  pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
+  pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (force ? ', Ausnahmewechsel' : (back ? ', Rückwechsel' : '')) + ')');
   render(); save();
-  toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + pLabel(t, pi));
+  toast((force ? 'Ausnahmewechsel: ' : (back ? 'Rückwechsel: ' : 'Wechsel: ')) + pLabel(t, pi));
 }
+/* Erzwungener Wechsel nach Platzverweis/Disqualifikation: der Spieler
+   muss vom Feld. Gibt es einen Ersatzspieler, wird er gewählt (Ausnahme-
+   wechsel ohne Paarbindung); sonst spielt die Mannschaft mit 4 weiter. */
+function dlgForcedSub(t, pi, why){
+  var slot = S.lineup[t].indexOf(pi);
+  if (slot < 0) return;
+  var b = bench(t);
+  if (!b.length) return dlgReduce(t, why, pi);
+  var h = '<h2>Ersatz nötig – '+esc(S.teams[t].name)+'</h2>' +
+    '<p class="dsc">'+esc(why)+': '+esc(pLabel(t, pi))+' (Position '+POSN[slot]+') muss das Feld verlassen. Wer übernimmt die Position?</p>' +
+    '<div class="opts">';
+  for (var i=0;i<b.length;i++) h += '<button class="opt" type="button" data-b="'+b[i]+'">'+esc(pLabel(t, b[i]))+'</button>';
+  h += '</div><div class="acts"><button class="btn" data-x="four">Kein Ersatz – mit 4 weiterspielen</button></div>';
+  var bd = dlg(h, {esc:false});
+  bd.addEventListener('click', function(e){
+    var o = e.target.closest('[data-b]');
+    if (o){ closeDlg(); doSub(t, slot, +o.dataset.b, true); return; }
+    if (e.target.closest('[data-x=four]')){ closeDlg(); dlgReduce(t, why, pi); }
+  });
+}
+/* Ausnahme nach Reglement 5.1 / 9.3: Weiterspielen mit 4 Feldspielern,
+   wenn nach Verletzung oder Platzverweis kein Ersatz möglich ist. */
+function dlgReduce(presetT, why, presetPi){
+  var t = presetT, pi = presetPi >= 0 ? presetPi : -1;
+  function body(){
+    var h = '<h2>Mit 4 Feldspielern weiterspielen</h2>' +
+      '<p class="dsc">Ausnahme nach Verletzung oder Platzverweis, wenn kein Ersatz möglich ist. Der gewählte Spieler verlässt das Feld, die übrigen Positionen rücken nach.</p>';
+    if (t < 0){
+      h += '<div class="field"><span class="lbl">Mannschaft</span><div class="opts">' +
+        '<button class="opt" type="button" data-t="0">'+esc(S.teams[0].name)+'</button>' +
+        '<button class="opt" type="button" data-t="1">'+esc(S.teams[1].name)+'</button></div></div>';
+    } else {
+      var L = S.lineup[t];
+      if (L.length <= 4){
+        h += '<p class="err">'+esc(S.teams[t].name)+' spielt bereits mit '+L.length+' Feldspielern.</p>';
+      } else {
+        h += '<div class="field"><span class="lbl">'+esc(S.teams[t].name)+' – wer verlässt das Feld?</span><div class="opts">';
+        for (var i=0;i<L.length;i++) h += '<button class="opt" type="button" data-p="'+L[i]+'" aria-pressed="'+(pi===L[i])+'">'+esc(pLabel(t, L[i]))+'<small>Position '+POSN[i]+'</small></button>';
+        h += '</div></div>' +
+          '<div class="field"><label class="lbl" for="rdR">Grund</label><input type="text" id="rdR" autocomplete="off" value="'+esc(why||'')+'" placeholder="Verletzung, Platzverweis …"></div>';
+      }
+    }
+    h += '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
+         (t >= 0 && S.lineup[t].length > 4 ? '<button class="btn danger" data-x="ok"'+(pi<0?' disabled':'')+'>Mit 4 weiterspielen</button>' : '') + '</div>';
+    return h;
+  }
+  var bd = dlg(body());
+  bd.addEventListener('click', function(e){
+    var ot = e.target.closest('[data-t]');
+    if (ot){ t = +ot.dataset.t; bd.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">'+body()+'</div>'; return; }
+    var op = e.target.closest('[data-p]');
+    if (op){
+      pi = +op.dataset.p;
+      var all = bd.querySelectorAll('[data-p]');
+      for (var i=0;i<all.length;i++) all[i].setAttribute('aria-pressed', String(+all[i].dataset.p === pi));
+      bd.querySelector('[data-x=ok]').disabled = false;
+      return;
+    }
+    var x = e.target.closest('[data-x]'); if (!x || x.disabled) return;
+    if (x.dataset.x === 'no') return closeDlg();
+    var reason = (bd.querySelector('#rdR') ? bd.querySelector('#rdR').value.trim() : '') || why || '';
+    var slot = S.lineup[t].indexOf(pi);
+    if (slot < 0) return closeDlg();
+    snapshot();
+    S.lineup[t].splice(slot, 1);
+    pushLog('red4', t, pLabel(t, pi) + ' verlässt das Feld (Position ' + POSN[slot] + ')' + (reason ? ' – ' + reason : ''));
+    closeDlg(); buildCourtKeep(); render(); save();
+    toast(S.teams[t].name + ' spielt mit 4 weiter');
+  });
+}
+function buildCourtKeep(){ buildCourt(); fitCourt(); }
 
 /* ---------- Auszeit ---------- */
 function dlgTimeout(t){
@@ -2107,11 +2236,18 @@ function startMedical(t, pi){
     '<div class="count" id="toCount">'+fmt(left)+'</div>' +
     '<div class="bar"><i id="toBar" style="width:100%"></i></div>' +
     '<p class="hint" id="toHint">Punkteingabe ist während der Behandlung gesperrt. Spätestens nach 3 Minuten muss weitergespielt oder gewechselt werden.</p>' +
-    '<div class="acts"><button class="btn" data-x="sub">Auswechseln</button><button class="btn primary" data-x="go">Weiterspielen</button></div>', {esc:false});
+    '<div class="acts">' +
+      (bench(t).length ? '<button class="btn" data-x="sub">Auswechseln</button>' : '<button class="btn" data-x="four">Mit 4 weiterspielen</button>') +
+      '<button class="btn primary" data-x="go">Weiterspielen</button></div>', {esc:false});
   bd.querySelector('[data-x=go]').onclick = function(){ clearInterval(toTimer); toTimer = null; closeDlg(); };
-  bd.querySelector('[data-x=sub]').onclick = function(){
+  var sb = bd.querySelector('[data-x=sub]'), fb = bd.querySelector('[data-x=four]');
+  if (sb) sb.onclick = function(){
     clearInterval(toTimer); toTimer = null; closeDlg();
     dlgSub(t, pi >= 0 ? S.lineup[t].indexOf(pi) : -1);
+  };
+  if (fb) fb.onclick = function(){
+    clearInterval(toTimer); toTimer = null; closeDlg();
+    dlgReduce(t, 'Verletzung', pi >= 0 && S.lineup[t].indexOf(pi) >= 0 ? pi : -1);
   };
   toTimer = setInterval(function(){
     left--;
@@ -2129,37 +2265,96 @@ function startMedical(t, pi){
   render();
 }
 
-/* ---------- Strafpunkt ---------- */
-function dlgPenalty(){
-  var bd = dlg('<h2>Strafpunkt</h2>' +
-    '<p class="dsc">Die bestrafte Mannschaft verliert Punkt und Aufschlag an den Gegner.</p>' +
-    '<div class="field"><span class="lbl">Bestrafte Mannschaft</span><div class="opts">' +
-      '<button class="opt" type="button" data-t="0" aria-pressed="false">'+esc(S.teams[0].name)+'<small>Punkt geht an '+esc(S.teams[1].name)+'</small></button>' +
-      '<button class="opt" type="button" data-t="1" aria-pressed="false">'+esc(S.teams[1].name)+'<small>Punkt geht an '+esc(S.teams[0].name)+'</small></button>' +
+/* ---------- Sanktionen (Reglement 9.2 / 10.2) ---------- */
+function sanctionTagClass(def){
+  return def.card === 'grün' ? 'green' : def.card === 'gelb' ? 'warn' : def.card === 'rot' ? 'red' : def.card === 'gelb+rot' ? 'redyellow' : '';
+}
+function sanctionText(x, s){
+  s = s || S;
+  var def = sanctionDef(x.type) || { label: x.type, card: '' };
+  return def.label + (def.card ? ' (' + def.card + ')' : '') +
+         (x.pi >= 0 ? ' – ' + pLabel(x.t, x.pi, s) : '') +
+         (x.pt ? ' · Strafpunkt' : '') + (x.note ? ' · ' + x.note : '');
+}
+function dlgSanction(){
+  var sel = -1, type = '', pi = -1;
+  var bd = dlg('<h2>Sanktion</h2>' +
+    '<p class="dsc">Spielerbezogene Sanktionen stehen mit dem Spieler im Bericht, Verzögerungssanktionen gelten für die Mannschaft.</p>' +
+    '<div class="field"><span class="lbl">Mannschaft</span><div class="opts">' +
+      '<button class="opt" type="button" data-t="0" aria-pressed="false">'+esc(S.teams[0].name)+'</button>' +
+      '<button class="opt" type="button" data-t="1" aria-pressed="false">'+esc(S.teams[1].name)+'</button>' +
     '</div></div>' +
-    '<div class="field"><label class="lbl" for="penR">Grund (optional)</label><input type="text" id="penR" autocomplete="off"></div>' +
+    '<div class="field"><label class="lbl" for="sanT">Sanktion</label><select id="sanT"><option value="">– wählen –</option>' +
+      SANCTIONS.map(function(d){ return '<option value="'+d.k+'">'+esc(d.label)+(d.card?' ('+d.card+')':'')+'</option>'; }).join('') +
+    '</select><p class="hint" id="sanHint" style="margin:6px 0 0"></p></div>' +
+    '<div class="field" id="sanPBox" hidden><label class="lbl" for="sanP">Spieler</label><select id="sanP" disabled><option value="">–</option></select></div>' +
+    '<label class="chk" id="sanPtBox" hidden><input type="checkbox" id="sanPt"> Strafpunkt und Aufschlag an den Gegner</label>' +
+    '<div class="field"><label class="lbl" for="sanN">Bemerkung (optional)</label><input type="text" id="sanN" autocomplete="off"></div>' +
+    '<p class="err" id="sanErr" hidden></p>' +
     '<div class="acts"><button class="btn" data-x="no">Abbrechen</button>' +
-    '<button class="btn primary" data-x="ok" disabled>Strafpunkt erteilen</button></div>');
-  var sel = -1;
+    '<button class="btn primary" data-x="ok" disabled>Sanktion erteilen</button></div>');
+  function refresh(){
+    var def = sanctionDef(type);
+    bd.querySelector('#sanHint').textContent = def ? def.hint : '';
+    bd.querySelector('#sanPBox').hidden = !(def && def.player);
+    bd.querySelector('#sanPtBox').hidden = !def;
+    var ps = bd.querySelector('#sanP');
+    if (sel >= 0){
+      var oh = '<option value="">– wählen –</option>';
+      for (var k=0;k<S.teams[sel].players.length;k++){
+        if (isExcluded(sel, k)) continue;
+        oh += '<option value="'+k+'"'+(pi===k?' selected':'')+'>'+esc(pLabel(sel, k))+(S.lineup[sel].indexOf(k)>=0?' (Feld)':' (Bank)')+'</option>';
+      }
+      ps.innerHTML = oh; ps.disabled = false;
+    }
+    bd.querySelector('[data-x=ok]').disabled = !(sel >= 0 && def && (!def.player || pi >= 0));
+  }
+  bd.querySelector('#sanT').addEventListener('change', function(e){
+    type = e.target.value; var def = sanctionDef(type);
+    if (def) bd.querySelector('#sanPt').checked = def.pt;
+    refresh();
+  });
+  bd.querySelector('#sanP').addEventListener('change', function(e){ pi = e.target.value === '' ? -1 : +e.target.value; refresh(); });
   bd.addEventListener('click', function(e){
     var o = e.target.closest('[data-t]');
     if (o){
-      sel = +o.dataset.t;
+      sel = +o.dataset.t; pi = -1;
       var all = bd.querySelectorAll('[data-t]');
       for (var i=0;i<all.length;i++) all[i].setAttribute('aria-pressed', String(+all[i].dataset.t === sel));
-      bd.querySelector('[data-x=ok]').disabled = false;
+      refresh();
       return;
     }
-    var x = e.target.closest('[data-x]'); if (!x) return;
+    var x = e.target.closest('[data-x]'); if (!x || x.disabled) return;
     if (x.dataset.x === 'no') return closeDlg();
-    var reason = bd.querySelector('#penR').value.trim();
+    var def = sanctionDef(type); if (!def) return;
+    var pt = bd.querySelector('#sanPt').checked, note = bd.querySelector('#sanN').value.trim();
     closeDlg();
-    penaltyPoint(sel, reason);
+    applySanction(sel, def, def.player ? pi : -1, pt, note);
   });
 }
-function penaltyPoint(against, reason){
+function applySanction(t, def, pi, pt, note){
+  snapshot();
+  var rec = { ts: iso(), set: S.setNo, score: S.points.slice(), t: t, pi: pi, type: def.k, pt: !!pt, note: note || '' };
+  if (!S.sanctions) S.sanctions = [];
+  S.sanctions.push(rec);
+  var txt = sanctionText(rec);
+  if (def.out){
+    excludedList(t).push({ pi: pi, until: def.out, set: S.setNo });
+  }
+  if (pt){
+    // Strafpunkt und Aufschlag an den Gegner; der Verlaufseintrag des
+    // Strafpunkts trägt die Sanktion, ein zweiter Eintrag entfällt.
+    penaltyPoint(t, txt.replace(' · Strafpunkt', ''), true);
+  } else { pushLog('san', t, txt); render(); save(); }
+  toast('Sanktion: ' + def.label);
+  // Spieler vom Feld: Ersatz erzwingen, solange das Spiel läuft
+  if (def.out && !S.finished && S.lineup[t].indexOf(pi) >= 0){
+    dlgForcedSub(t, pi, def.label);
+  }
+}
+function penaltyPoint(against, reason, noSnap){
   var to = 1 - against;
-  addPoint(to, 'pen');
+  addPoint(to, 'pen', noSnap);
   // Grund nachtragen
   for (var i=S.log.length-1;i>=0;i--){
     if (S.log[i].kind === 'pen'){ S.log[i].txt = reason || ''; break; }
@@ -2176,9 +2371,10 @@ function lineupEditorHTML(){
   var h = '<div class="grid2">';
   for (var t=0;t<2;t++){
     h += '<div><h3 style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;color:'+tc(t)+'">'+esc(S.teams[t].name)+'</h3>';
-    for (var p=0;p<S.count;p++){
+    for (var p=0;p<S.lineup[t].length;p++){
       h += '<div class="field"><label class="lbl" for="le'+t+'_'+p+'">Position '+POSN[p]+'</label><select id="le'+t+'_'+p+'">';
       for (var i=0;i<S.teams[t].players.length;i++){
+        if (isExcluded(t, i) && S.lineup[t][p] !== i) continue;
         h += '<option value="'+i+'"'+(S.lineup[t][p]===i?' selected':'')+'>'+esc(pLabel(t, i))+'</option>';
       }
       h += '</select></div>';
@@ -2190,7 +2386,7 @@ function lineupEditorHTML(){
 function readLineupEditor(bd){
   var out = [[],[]];
   for (var t=0;t<2;t++){
-    for (var p=0;p<S.count;p++){
+    for (var p=0;p<S.lineup[t].length;p++){
       var s = bd.querySelector('#le'+t+'_'+p);
       if (!s) return null;
       out[t].push(+s.value);
@@ -2239,32 +2435,92 @@ function dlgCorrect(){
   };
 }
 
-/* ---------- Satzpause ---------- */
+/* ---------- Satzpause (3 Minuten, Reglement 9.4) ----------
+   Ohne Argumente wird der letzte gespielte Satz gezeigt – so lässt sich
+   die Pause nach einem Neuladen oder einer Auslosung wieder öffnen. */
 function dlgSetBreak(w, no, pts){
+  if (w === undefined){
+    var last = S.sets[S.sets.length-1]; if (!last) return;
+    pts = last.pts; no = last.no; w = pts[0] > pts[1] ? 0 : 1;
+  }
+  var dec = isDecider();
+  function fmt(s){ return Math.floor(s/60) + ':' + pad(s%60); }
+  var left = S.breakEnds ? Math.max(0, Math.round((S.breakEnds - Date.now())/1000)) : 0;
+  var banner = dec
+    ? 'Entscheidungssatz bis '+targetNow()+' · <b>neue Auslosung</b> für Aufschlag und Seite, kein Seitenwechsel vor dem Satz (Wechsel bei '+Math.ceil(targetNow()/2)+' Punkten)' +
+      (S.toss2 ? '<br>'+esc(S.toss2) : '')
+    : 'Seiten gewechselt · Satz '+S.setNo+' bis '+targetNow()+' · Anspiel: <b>'+esc(S.teams[S.firstServer].name)+'</b>';
+  var decCtl = dec
+    ? '<div class="grid2" style="margin:0 0 6px">' +
+        '<div class="field"><label class="lbl" for="dsServe">Anspiel</label><select id="dsServe">' +
+          '<option value="0"'+(S.firstServer===0?' selected':'')+'>'+esc(S.teams[0].name)+'</option>' +
+          '<option value="1"'+(S.firstServer===1?' selected':'')+'>'+esc(S.teams[1].name)+'</option></select></div>' +
+        '<div class="field"><label class="lbl" for="dsSide">Seite A</label><select id="dsSide">' +
+          '<option value="0"'+(S.topTeam===0?' selected':'')+'>'+esc(S.teams[0].name)+'</option>' +
+          '<option value="1"'+(S.topTeam===1?' selected':'')+'>'+esc(S.teams[1].name)+'</option></select></div>' +
+      '</div>'
+    : '';
   var bd = dlg('<h2>Satz '+no+' – '+esc(S.teams[w].name)+'</h2>' +
-    '<p class="dsc">Satzresultat '+pts[0]+':'+pts[1]+'</p>' +
+    '<p class="dsc">Satzresultat '+pts[0]+':'+pts[1]+' · Satzpause 3 Minuten</p>' +
     '<div class="setsline">'+setsLineHTML()+'</div>' +
-    '<div class="banner" style="border-left-color:var(--home)">' +
-      'Seiten gewechselt · Satz '+S.setNo+' bis '+targetNow()+(isDecider()?' (Entscheidungssatz)':'')+' · Anspiel: <b>'+esc(S.teams[S.firstServer].name)+'</b>' +
-    '</div>' +
+    '<div class="count sm" id="toCount">'+fmt(left)+'</div>' +
+    '<div class="bar"><i id="toBar" style="width:'+(left/BREAK_LEN*100)+'%"></i></div>' +
+    '<p class="hint" id="toHint" style="margin:0 0 10px">'+(left>0 ? 'Pause läuft – nach 3 Minuten geht es weiter.' : 'Pause beendet.')+'</p>' +
+    '<div class="banner" style="border-left-color:var(--home)">' + banner + '</div>' +
+    decCtl +
     '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);padding:6px 0">Aufstellung anpassen</summary>' +
       '<div style="margin-top:10px">'+lineupEditorHTML()+'</div>' +
-      '<p class="hint">Übernommen aus dem letzten Satz. Änderungen gelten ab dem Anspiel.</p></details>' +
+      '<p class="hint">Übernommen aus dem letzten Satz. Änderungen gelten ab dem Anspiel und werden als Startaufstellung des Satzes festgehalten.</p></details>' +
     '<p class="err" id="sErr" hidden></p>' +
     '<div class="acts"><button class="btn" data-x="rep">Bericht</button>' +
+    (dec ? '<button class="btn" data-x="toss">Auslosen</button>' : '') +
     '<button class="btn primary" data-x="ok">Weiter</button></div>', {esc:false});
   bd.querySelector('[data-x=rep]').onclick = function(){ dlgReport(); };
+  var tb = bd.querySelector('[data-x=toss]');
+  if (tb) tb.onclick = function(){
+    doToss(function(){ dlgSetBreak(w, no, pts); }, {
+      names: function(t){ return S.teams[t].name; },
+      intro: 'Neue Auslosung vor dem Entscheidungssatz – der Gewinner wählt Aufschlag, Rückschlag oder Seite.',
+      skipLabel: 'Zurück ohne Auslosung',
+      onResult: function(server, sideA, text, winner){
+        S.firstServer = server; S.serving = server; S.topTeam = sideA; S.toss2 = text;
+        pushLog('toss', winner, text);
+        render(); save();
+      }
+    });
+  };
   bd.querySelector('[data-x=ok]').onclick = function(){
     var r = readLineupEditor(bd);
     if (r && r.error){ var e = bd.querySelector('#sErr'); e.textContent = r.error; e.hidden = false; return; }
     if (r && r.lineup) S.lineup = r.lineup;
+    if (dec){
+      S.firstServer = +bd.querySelector('#dsServe').value; S.serving = S.firstServer;
+      S.topTeam = +bd.querySelector('#dsSide').value;
+    }
+    S.setStartLineup = clone(S.lineup);
+    S.breakEnds = null;
     closeDlg(); render(); save();
   };
+  if (left > 0){
+    toTimer = setInterval(function(){
+      left = Math.max(0, Math.round((S.breakEnds - Date.now())/1000));
+      var c = bd.querySelector('#toCount'), b2 = bd.querySelector('#toBar');
+      if (!c){ clearInterval(toTimer); toTimer=null; return; }
+      c.textContent = fmt(left);
+      b2.style.width = (left/BREAK_LEN*100) + '%';
+      if (left <= 0){
+        clearInterval(toTimer); toTimer = null;
+        signal();
+        c.classList.add('flash');
+        bd.querySelector('#toHint').textContent = 'Pause beendet – weiterspielen.';
+      }
+    }, 1000);
+  }
 }
 function setsLineHTML(){
   var h = '';
   for (var i=0;i<S.sets.length;i++){
-    h += '<span>'+S.sets[i].pts[0]+':'+S.sets[i].pts[1]+(S.sets[i].aborted?' *':'')+'</span>';
+    h += '<span>'+S.sets[i].pts[0]+':'+S.sets[i].pts[1]+(S.sets[i].aborted?' *':'')+(S.sets[i].forfeit?' ᶠ':'')+'</span>';
   }
   return h || '<span>–</span>';
 }
@@ -2282,6 +2538,7 @@ function dlgAbort(){
       '<option value="0">'+esc(S.teams[0].name)+'</option>' +
       '<option value="1">'+esc(S.teams[1].name)+'</option></select></div>' +
     '<div class="field"><label class="lbl" for="abN">Bemerkung</label><textarea id="abN"></textarea></div>' +
+    '<p class="hint">Nichtantreten oder unvollständige Mannschaft mit Sieger: Die fehlenden Sätze werden nach Reglement 7.1 mit '+S.target+':0 für den Sieger gewertet (z. B. 0:2 Sätze, je 0:'+S.target+').</p>' +
     '<div class="acts"><button class="btn" data-x="no">Zurück</button>' +
     '<button class="btn danger" data-x="ok">Spiel abbrechen</button></div>');
   bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
@@ -2290,11 +2547,29 @@ function dlgAbort(){
     var wv = +bd.querySelector('#abW').value;
     var note = bd.querySelector('#abN').value.trim();
     snapshot();
-    if (S.points[0] || S.points[1]){
+    var forfeit = (type === 'forfait' || type === 'unvollstaendig') && wv >= 0;
+    if (forfeit){
+      // Laufender Satz geht an den Sieger, fehlende Sätze mit target:0
+      var lo = 1 - wv;
+      if (S.points[0] || S.points[1]){
+        var p = S.points.slice(); p[wv] = Math.max(p[wv], S.target, p[lo] + 2);
+        S.sets.push({ pts:p, startedAt:S.setStartedAt, endedAt:iso(), timeouts:S.timeouts.slice(), subs:S.setSubs.slice(),
+                      log:clone(S.log), no:S.setNo, forfeit:true, start: clone(S.setStartLineup || S.lineup) });
+        S.setsWon[wv]++; S.log = [];
+      }
+      var no = S.sets.length ? (S.sets[S.sets.length-1].no || S.sets.length) : 0;
+      while (S.setsWon[wv] < S.winSets){
+        var q = [0,0]; q[wv] = S.target; no++;
+        S.sets.push({ pts:q, startedAt:null, endedAt:null, timeouts:[0,0], subs:[0,0], log:[], no:no, forfeit:true, start:null });
+        S.setsWon[wv]++;
+      }
+      S.setNo = no;
+    } else if (S.points[0] || S.points[1]){
       S.sets.push({ pts:S.points.slice(), startedAt:S.setStartedAt, endedAt:iso(),
                     timeouts:S.timeouts.slice(), subs:S.setSubs.slice(),
-                    log:clone(S.log), no:S.setNo, aborted:true });
+                    log:clone(S.log), no:S.setNo, aborted:true, start: clone(S.setStartLineup || S.lineup) });
     }
+    S.breakEnds = null;
     closeDlg();
     finishMatch(type, wv<0?null:wv, note);
   };
@@ -2314,21 +2589,44 @@ function dlgEnd(keep){
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
-    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern unterzeichnet – das Spiel ist gesperrt.<br>' +
+    h += '<div class="banner" style="border-left-color:var(--ok)">Von beiden Mannschaftsführern und dem 1. Schiedsrichter unterzeichnet – das Spiel ist gesperrt.<br>' +
          esc(S.confirmed[0].name)+' ('+fmtTime(S.confirmed[0].at)+') · ' +
-         esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')</div>';
+         esc(S.confirmed[1].name)+' ('+fmtTime(S.confirmed[1].at)+')' +
+         (S.refSig ? ' · '+esc(S.refSig.name)+' ('+fmtTime(S.refSig.at)+')' : '') + '</div>';
   }
-  h += '<div class="divider">Unterschriften</div>';
+  if (S.sanctions && S.sanctions.length){
+    h += '<div class="divider">Sanktionen</div><ul class="sanlist">';
+    S.sanctions.forEach(function(x){
+      var def = sanctionDef(x.type) || {label:x.type, card:''};
+      h += '<li><span class="tag '+sanctionTagClass(def)+'">'+esc(def.label)+'</span> '+esc(S.teams[x.t].name)+(x.pi>=0?' · '+esc(pLabel(x.t, x.pi)):'')+' · Satz '+x.set+' bei '+x.score[0]+':'+x.score[1]+(x.pt?' · Strafpunkt':'')+(x.note?' · '+esc(x.note):'')+'</li>';
+    });
+    h += '</ul>';
+  }
+  // Protest des Mannschaftsführers (Reglement 6.2, 11.4) – vor den Unterschriften
+  h += '<div class="divider">Protest</div>';
+  if (S.protest){
+    h += '<div class="banner" style="border-left-color:var(--guest)"><b>Protest '+esc(S.teams[S.protest.t].name)+'</b> · '+fmtTime(S.protest.at)+'<br>'+esc(S.protest.text)+
+         (S.locked ? '' : '<div class="row" style="margin-top:8px"><button class="btn sm" type="button" data-x="unprot">Protest entfernen</button></div>') + '</div>';
+  } else if (!S.locked){
+    h += '<div class="field"><label class="lbl" for="prT">Mannschaftsführer von</label><select id="prT">' +
+         '<option value="">– kein Protest –</option><option value="0">'+esc(S.teams[0].name)+'</option><option value="1">'+esc(S.teams[1].name)+'</option></select></div>' +
+         '<div class="field"><label class="lbl" for="prX">Begründung</label><textarea id="prX" placeholder="Wortlaut des Protests">'+esc(keep.prX||'')+'</textarea></div>' +
+         '<div class="row" style="margin-bottom:6px"><button class="btn" type="button" data-x="prot">Protest vermerken</button></div>';
+  } else {
+    h += '<p class="hint" style="margin:0 0 8px">Kein Protest vermerkt.</p>';
+  }
+  h += '<div class="divider">Unterschriften</div>' +
+       '<p class="hint" style="margin:0 0 10px">Pflicht: beide Mannschaftsführer und der 1. Schiedsrichter (Reglement 11.2). Die Trainer unterschreiben zusätzlich (11.4). Nach den drei Pflichtunterschriften ist das Spiel gesperrt.</p>';
   SIG_KEYS.forEach(function(k){
     var c = sigRecord(k);
     h += '<div class="field"><label class="lbl" for="cf'+k+'">'+esc(sigLabel(k)) +
-         (k==='ref' ? ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span>' : '') + '</label>';
+         (sigRequired(k) ? '' : ' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span>') + '</label>';
     if (c){
       h += '<p style="margin:0"><span class="tag ok">unterzeichnet</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>';
       if (c.sig) h += '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">';
     } else {
       h += '<div class="row"><input type="text" id="cf'+k+'" style="flex:1;min-width:140px" ' +
-           'value="'+esc(sigDefaultName(k))+'" placeholder="'+(k==='ref'?'Name Schiedsrichter':'Name Mannschaftsführer')+'" autocomplete="off"></div>' +
+           'value="'+esc(sigDefaultName(k))+'" placeholder="'+esc(sigPlaceholder(k))+'" autocomplete="off"></div>' +
            '<div class="sigwrap"><canvas class="sigpad" id="sig'+k+'"></canvas>' +
            '<button class="sigclear" type="button" data-clr="'+k+'">Löschen</button></div>' +
            '<p class="sighint">Mit dem Finger oder der Maus im Feld oben unterschreiben.</p>' +
@@ -2359,7 +2657,7 @@ function dlgEnd(keep){
     });
     return o;
   }
-  function keyOf(v){ return v === 'ref' ? 'ref' : +v; }
+  function keyOf(v){ return /^\d$/.test(v) ? +v : v; }
   bd.addEventListener('click', function(e){
     var clr = e.target.closest('[data-clr]');
     if (clr){ var pad = pads[keyOf(clr.dataset.clr)]; if (pad) pad.clear(); return; }
@@ -2368,13 +2666,26 @@ function dlgEnd(keep){
       var k = keyOf(cf.dataset.cf);
       var nm = bd.querySelector('#cf'+k).value.trim() || sigLabel(k);
       var rec = { name: nm, at: iso(), sig: pads[k] ? pads[k].dataUrl() : null };
-      if (k === 'ref') S.refSig = rec; else S.confirmed[k] = rec;
-      if (S.confirmed[0] && S.confirmed[1]) S.locked = true;
+      sigStore(k, rec);
+      if (S.confirmed[0] && S.confirmed[1] && S.refSig) S.locked = true;
       archivePut(); saveNow();
-      dlgEnd(unsaved(k));
+      var kp = unsaved(k); var px = bd.querySelector('#prX'); if (px && px.value.trim()) kp.prX = px.value;
+      dlgEnd(kp);
       return;
     }
     var x = e.target.closest('[data-x]'); if (!x || x.disabled) return;
+    if (x.dataset.x === 'prot'){
+      var pt = bd.querySelector('#prT').value, ptx = bd.querySelector('#prX').value.trim();
+      if (pt === '' || !ptx){ toast('Mannschaft und Begründung angeben'); return; }
+      S.protest = { t: +pt, text: ptx, at: iso() };
+      pushLog('protest', +pt, ptx);
+      archivePut(); saveNow();
+      dlgEnd(unsaved(null));
+      return;
+    }
+    if (x.dataset.x === 'unprot'){
+      S.protest = null; archivePut(); saveNow(); dlgEnd(unsaved(null)); return;
+    }
     if (x.dataset.x === 'rep') return dlgReport(unsaved(null));
     if (x.dataset.x === 'pdf') return exportPdf();
     if (x.dataset.x === 'undo'){ closeDlg(); undo(); return; }
@@ -2383,10 +2694,73 @@ function dlgEnd(keep){
     }
   });
 }
-var SIG_KEYS = [0, 1, 'ref'];
-function sigRecord(k){ return k === 'ref' ? (S.refSig || null) : S.confirmed[k]; }
-function sigLabel(k){ return k === 'ref' ? 'Schiedsrichter' : S.teams[k].name; }
-function sigDefaultName(k){ return k === 'ref' ? ((S.meta && S.meta.referee) || '') : capName(k); }
+/* Unterschriften am Schluss: 0/1 Mannschaftsführer, ref = 1. Schieds-
+   richter (alle drei Pflicht, 11.2), c0/c1 = Trainer (11.4). */
+var SIG_KEYS = [0, 1, 'ref', 'c0', 'c1'];
+function sigRecord(k){
+  if (k === 'ref') return S.refSig || null;
+  if (k === 'c0' || k === 'c1') return (S.coachSig && S.coachSig[+k.charAt(1)]) || null;
+  return S.confirmed[k];
+}
+function sigStore(k, rec){
+  if (k === 'ref') S.refSig = rec;
+  else if (k === 'c0' || k === 'c1'){ if (!S.coachSig) S.coachSig = [null,null]; S.coachSig[+k.charAt(1)] = rec; }
+  else S.confirmed[k] = rec;
+}
+function sigRequired(k){ return k === 0 || k === 1 || k === 'ref'; }
+function sigLabel(k){
+  if (k === 'ref') return '1. Schiedsrichter';
+  if (k === 'c0' || k === 'c1') return S.teams[+k.charAt(1)].name + ' – Trainer';
+  return S.teams[k].name + ' – Mannschaftsführer';
+}
+function sigPlaceholder(k){ return k === 'ref' ? 'Name Schiedsrichter' : (k === 'c0' || k === 'c1') ? 'Name Trainer' : 'Name Mannschaftsführer'; }
+function sigDefaultName(k){ return k === 'ref' ? ((S.meta && S.meta.referee) || '') : (k === 'c0' || k === 'c1') ? '' : capName(k); }
+/* Spielerliste vor dem Spiel: beide Mannschaftsführer bestätigen mit
+   Unterschrift die Aufstellung (Reglement 5.1, 6.2). */
+function rosterOpen(){
+  if (!S || S.finished || S.locked) return false;
+  var r = S.rosterSig || [null,null];
+  return !r[0] || !r[1];
+}
+function dlgRosterSign(){
+  if (!S.rosterSig) S.rosterSig = [null,null];
+  var h = '<h2>Spielerliste bestätigen</h2>' +
+    '<p class="dsc">Vor dem Spiel bestätigen die Mannschaftsführer mit ihrer Unterschrift die Spielerliste und die Startaufstellung. Danach dürfen nur noch aufgeführte Spieler eingesetzt werden.</p>';
+  for (var t=0;t<2;t++){
+    var c = S.rosterSig[t], b = bench(t);
+    h += '<div class="divider">'+esc(S.teams[t].name)+'</div>' +
+         '<p style="margin:0 0 6px;font-size:13px;color:var(--ink-2)"><b>Feld:</b> '+esc(startLineupTxt(t, S.lineup[t]))+'<br><b>Bank:</b> '+
+         (b.length ? esc(b.map(function(i){ return pLabel(t, i); }).join(', ')) : '–')+'</p>';
+    if (c){
+      h += '<p style="margin:0 0 8px"><span class="tag ok">bestätigt</span> '+esc(c.name)+' · '+fmtTime(c.at)+'</p>' +
+           (c.sig ? '<img class="sigimg" src="'+c.sig+'" alt="Unterschrift '+esc(c.name)+'">' : '');
+    } else {
+      h += '<div class="row"><input type="text" id="rs'+t+'" style="flex:1;min-width:140px" value="'+esc(capName(t))+'" placeholder="Name Mannschaftsführer" autocomplete="off"></div>' +
+           '<div class="sigwrap"><canvas class="sigpad" id="rsig'+t+'"></canvas>' +
+           '<button class="sigclear" type="button" data-rclr="'+t+'">Löschen</button></div>' +
+           '<div class="row" style="margin-top:6px;margin-bottom:8px"><button class="btn" type="button" data-rcf="'+t+'">Unterzeichnen</button></div>';
+    }
+  }
+  h += '<div class="acts"><button class="btn'+(rosterOpen()?'':' primary')+'" data-x="close">'+(rosterOpen() ? 'Später unterzeichnen' : 'Schliessen')+'</button></div>';
+  var bd = dlg(h, {esc:true});
+  var pads = [null,null];
+  for (var k=0;k<2;k++){ var cv = bd.querySelector('#rsig'+k); if (cv) pads[k] = initSigPad(cv); }
+  bd.addEventListener('click', function(e){
+    var clr = e.target.closest('[data-rclr]');
+    if (clr){ var p = pads[+clr.dataset.rclr]; if (p) p.clear(); return; }
+    var cf = e.target.closest('[data-rcf]');
+    if (cf){
+      var t = +cf.dataset.rcf;
+      var nm = bd.querySelector('#rs'+t).value.trim() || capName(t) || 'Mannschaftsführer';
+      S.rosterSig[t] = { name: nm, at: iso(), sig: pads[t] ? pads[t].dataUrl() : null };
+      pushLog('roster', t, nm);
+      saveNow();
+      dlgRosterSign();
+      return;
+    }
+    if (e.target.closest('[data-x=close]')) closeDlg();
+  });
+}
 
 /* Unterschriften-Pad: zeichnet auf Canvas, Hintergrund immer weiss wie
    Papier (unabhängig vom Farbschema), damit die Unterschrift überall
@@ -2479,6 +2853,7 @@ function reportText(st){
   line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
        (s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget);
   line('Auslosung', s.toss || '–');
+  if (s.toss2) line('Entscheidungssatz', s.toss2);
   if (m.note) line('Bemerkung', m.note);
   L.push('');
 
@@ -2492,8 +2867,16 @@ function reportText(st){
     }
     var b = [];
     for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0)
-      b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : ''));
+      b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : '') + (isExcludedIn(s, t, i) ? ' [ausgeschlossen]' : ''));
     L.push('  ' + pad2('Bank', 5) + (b.length ? b.join(', ') : '–'));
+    // Startaufstellung je Satz (Reglement 7.2, 11.4)
+    var starts = setStarts(s, t);
+    if (starts.length){
+      L.push('  Startaufstellung je Satz:');
+      for (i=0;i<starts.length;i++) L.push('    ' + pad2('Satz '+starts[i].no, 8) + starts[i].txt);
+    }
+    var rs = s.rosterSig && s.rosterSig[t];
+    L.push('  ' + pad2('Liste', 6) + (rs ? 'bestätigt von ' + rs.name + (rs.sig ? ' [unterschrieben]' : '') + ' · ' + fmtTime(rs.at) : 'vor dem Spiel nicht unterzeichnet'));
     L.push('');
   }
 
@@ -2503,7 +2886,7 @@ function reportText(st){
   for (var k=0;k<s.sets.length;k++){
     var st2 = s.sets[k];
     L.push('  ' + pad2(st2.no || (k+1), 6) +
-           pad2(st2.pts[0]+':'+st2.pts[1] + (st2.aborted?' *':''), 11) +
+           pad2(st2.pts[0]+':'+st2.pts[1] + (st2.aborted?' *':'') + (st2.forfeit?' F':''), 11) +
            pad2(fmtTime(st2.startedAt), 8) + pad2(fmtTime(st2.endedAt), 8) +
            pad2(fmtDur(st2.startedAt, st2.endedAt), 11) +
            pad2(st2.timeouts[0]+':'+st2.timeouts[1], 10) +
@@ -2514,6 +2897,7 @@ function reportText(st){
            pad2(fmtTime(s.setStartedAt), 8) + pad2('läuft', 8));
   }
   if (s.sets.some(function(x){ return x.aborted; })) L.push('  * Satz beim Abbruch nicht beendet');
+  if (s.sets.some(function(x){ return x.forfeit; })) L.push('  F Wertung nach Reglement 7.1 (Nichtantreten / unvollständige Mannschaft)');
   L.push('');
 
   L.push('ENDERGEBNIS');
@@ -2526,6 +2910,20 @@ function reportText(st){
   } else {
     line('Status', 'Spiel läuft');
   }
+  L.push('');
+
+  L.push('SANKTIONEN');
+  L.push('-'.repeat(64));
+  if (!s.sanctions || !s.sanctions.length) L.push('  keine');
+  else s.sanctions.forEach(function(x){
+    L.push('  ' + fmtTime(x.ts) + '  Satz ' + x.set + ' ' + pad2(x.score[0]+':'+x.score[1], 7) + s.teams[x.t].name + ': ' + sanctionText(x, s));
+  });
+  L.push('');
+
+  L.push('PROTEST');
+  L.push('-'.repeat(64));
+  if (s.protest) L.push('  ' + s.teams[s.protest.t].name + ' (' + fmtTime(s.protest.at) + '): ' + s.protest.text);
+  else L.push('  kein Protest');
   L.push('');
 
   L.push('VERLAUF');
@@ -2551,11 +2949,26 @@ function reportText(st){
     L.push('  ' + pad2(label, 24) +
            (cf ? cf.name + (cf.sig ? ' [unterschrieben]' : '') + '   ' + fmtDate(cf.at) + ' ' + fmtTime(cf.at) : '________________________'));
   }
-  for (var c=0;c<2;c++) sigLine(s.teams[c].name, s.confirmed && s.confirmed[c]);
-  sigLine('Schiedsrichter', s.refSig);
+  for (var c=0;c<2;c++) sigLine(s.teams[c].name + ' (MF)', s.confirmed && s.confirmed[c]);
+  sigLine('1. Schiedsrichter', s.refSig);
+  for (var c2=0;c2<2;c2++) sigLine(s.teams[c2].name + ' (Trainer)', s.coachSig && s.coachSig[c2]);
   L.push('');
   L.push('Erfasst mit Indiaca Matchblatt ' + (s.app || APP) + ' · Spiel-ID ' + (s.id||'–'));
   return L.join('\n');
+}
+function isExcludedIn(s, t, pi){
+  var E = (s.excluded && s.excluded[t]) || [];
+  for (var i=0;i<E.length;i++) if (E[i].pi === pi) return true;
+  return false;
+}
+/* Startaufstellungen aller Sätze eines Teams, inkl. laufender Satz */
+function setStarts(s, t){
+  var out = [];
+  (s.sets || []).forEach(function(st, k){
+    if (st.start && st.start[t]) out.push({ no: st.no || (k+1), txt: startLineupTxt(t, st.start[t], s) });
+  });
+  if (!s.finished && s.setStartLineup && s.setStartLineup[t]) out.push({ no: s.setNo, txt: startLineupTxt(t, s.setStartLineup[t], s) });
+  return out;
 }
 function logTextFor(s, e){
   var save0 = S; S = s; var txt = logText(e); S = save0; return txt;
@@ -2725,7 +3138,8 @@ function sigToJpeg(dataUrl){
   });
 }
 function buildMatchPdf(s){
-  var sigs = [s.confirmed && s.confirmed[0], s.confirmed && s.confirmed[1], s.refSig];
+  var sigs = [s.confirmed && s.confirmed[0], s.confirmed && s.confirmed[1], s.refSig,
+              s.coachSig && s.coachSig[0], s.coachSig && s.coachSig[1]];
   return Promise.all(sigs.map(function(c){ return sigToJpeg(c && c.sig); })).then(function(imgs){
     var d = pdfDoc(), M = d.M, W = d.W, CW = W - 2*M, y = M, m = s.meta || {};
     function h2(t){ y += 8; d.text(M, y, t.toUpperCase(), 8.5, {bold:true, gray:0.35}); y += 4; d.line(M, y, W-M, y, 0.6, 0.25); y += 13; }
@@ -2759,7 +3173,9 @@ function buildMatchPdf(s){
     y = y0 + 4*13 + 2;
     var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+(s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget],
                 ['Auslosung', s.toss||'–']];
+    if (s.toss2) long.push(['Entscheidungssatz', s.toss2]);
     if (m.note) long.push(['Bemerkung', m.note]);
+    if (s.protest) long.push(['Protest', s.teams[s.protest.t].name + ' (' + fmtTime(s.protest.at) + '): ' + s.protest.text]);
     long.forEach(function(r){
       d.text(M, y, r[0], 8, {gray:.45});
       d.wrap(r[1], 9.5, CW-labW).forEach(function(l, i){ if (i) y += 12; d.text(M+labW, y, l, 9.5); });
@@ -2777,11 +3193,12 @@ function buildMatchPdf(s){
       d.line(M, y+4, W-M, y+4, 0.4, 0.8); y += 14;
     }
     s.sets.forEach(function(st, k){
-      setRow([String(st.no || (k+1)), String(st.pts[0]), String(st.pts[1]) + (st.aborted?' *':''), fmtTime(st.startedAt), fmtTime(st.endedAt),
+      setRow([String(st.no || (k+1)), String(st.pts[0]), String(st.pts[1]) + (st.aborted?' *':'') + (st.forfeit?' F':''), fmtTime(st.startedAt), fmtTime(st.endedAt),
               fmtDur(st.startedAt, st.endedAt), st.timeouts[0]+' : '+st.timeouts[1], st.subs[0]+' : '+st.subs[1]]);
     });
     if (!s.finished) setRow([String(s.setNo), String(s.points[0]), String(s.points[1]), fmtTime(s.setStartedAt), 'läuft', '', s.timeouts[0]+' : '+s.timeouts[1], s.setSubs[0]+' : '+s.setSubs[1]], true);
     if (s.sets.some(function(q){ return q.aborted; })){ d.text(M, y, '* Satz beim Abbruch nicht beendet', 7.5, {gray:.45}); y += 10; }
+    if (s.sets.some(function(q){ return q.forfeit; })){ d.text(M, y, 'F Wertung nach Reglement 7.1 (Nichtantreten / unvollständige Mannschaft)', 7.5, {gray:.45}); y += 10; }
 
     h2('Aufstellungen');
     var ys = [y, y];
@@ -2794,29 +3211,53 @@ function buildMatchPdf(s){
         yy += 12;
       }
       var b = [];
-      for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0) b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : ''));
+      for (i=0;i<s.teams[t].players.length;i++) if (fieldIdx.indexOf(i)<0) b.push(pLabel(t, i, s) + (s.teams[t].captain===i ? ' (C)' : '') + (isExcludedIn(s, t, i) ? ' [ausg.]' : ''));
       d.text(cx, yy, 'Bank', 8.5, {gray:.45});
       d.wrap(b.length ? b.join(', ') : '–', 9.5, colW-6-22).forEach(function(l, j){ if (j) yy += 12; d.text(cx+22, yy, l, 9.5); });
+      yy += 12;
+      // Startaufstellung je Satz (nur Trikotnummern bzw. Kürzel)
+      setStarts(s, t).forEach(function(st){
+        var nums = [];
+        var L2 = (s.sets.filter(function(q){ return (q.no||0) === st.no; })[0] || {}).start;
+        var arr = L2 && L2[t] ? L2[t] : (s.setStartLineup && s.setStartLineup[t]) || [];
+        for (var q=0;q<arr.length;q++) nums.push(pMark(t, arr[q], s));
+        d.text(cx, yy, 'Satz ' + st.no, 8.5, {gray:.45});
+        d.wrap('Start: ' + nums.join(' – '), 8.5, colW-6-40).forEach(function(l, j){ if (j) yy += 11; d.text(cx+40, yy, l, 8.5); });
+        yy += 11;
+      });
+      var rs = s.rosterSig && s.rosterSig[t];
+      d.text(cx, yy, 'Liste', 8.5, {gray:.45});
+      d.wrap(rs ? 'bestätigt von ' + rs.name + ' · ' + fmtTime(rs.at) : 'vor dem Spiel nicht unterzeichnet', 8.5, colW-6-40).forEach(function(l, j){ if (j) yy += 11; d.text(cx+40, yy, l, 8.5); });
       ys[t] = yy + 12;
     }
     y = Math.max(ys[0], ys[1]);
 
+    h2('Sanktionen');
+    if (!s.sanctions || !s.sanctions.length){ d.text(M, y, 'keine', 9.5, {gray:.4}); y += 13; }
+    else s.sanctions.forEach(function(x){
+      if (y > d.H - M - 40){ d.page(); y = M; }
+      d.text(M, y, fmtTime(x.ts), 8.5, {gray:.45});
+      d.text(M+34, y, 'Satz ' + x.set + ' · ' + x.score[0] + ':' + x.score[1], 8.5, {gray:.45});
+      d.wrap(s.teams[x.t].name + ': ' + sanctionText(x, s), 9.5, CW-110).forEach(function(l, j){ if (j) y += 12; d.text(M+110, y, l, 9.5); });
+      y += 13;
+    });
+
     h2('Unterschriften');
-    var labels = [s.teams[0].name + ' (Mannschaftsführer)', s.teams[1].name + ' (Mannschaftsführer)', 'Schiedsrichter'];
-    var bw = (CW - 2*10)/3, bh = 92;
+    var labels = [s.teams[0].name + ' (MF)', s.teams[1].name + ' (MF)', '1. Schiedsrichter', s.teams[0].name + ' (Trainer)', s.teams[1].name + ' (Trainer)'];
+    var bw = (CW - 4*8)/5, bh = 92;
     if (y + bh > d.H - M - 24){ d.page(); y = M; }
-    for (var k=0;k<3;k++){
-      var bx = M + k*(bw+10), rec = sigs[k], im = imgs[k];
+    for (var k=0;k<5;k++){
+      var bx = M + k*(bw+8), rec = sigs[k], im = imgs[k];
       d.rect(bx, y, bw, bh, null, 0.6);
-      d.text(bx+6, y+11, labels[k], 7.5, {gray:.45});
+      d.text(bx+5, y+11, d.wrap(labels[k], 7, bw-10)[0], 7, {gray:.45});
       if (im){
-        var maxW = bw-12, maxH = 46, sc = Math.min(maxW/im.width, maxH/im.height);
-        d.image(im, bx+6, y+16, im.width*sc, im.height*sc);
-      } else d.line(bx+8, y+62, bx+bw-8, y+62, 0.5, 0.75);
+        var maxW = bw-10, maxH = 44, sc = Math.min(maxW/im.width, maxH/im.height);
+        d.image(im, bx+5, y+16, im.width*sc, im.height*sc);
+      } else d.line(bx+6, y+62, bx+bw-6, y+62, 0.5, 0.75);
       if (rec){
-        d.text(bx+6, y+76, rec.name, 9, {bold:true});
-        d.text(bx+6, y+86, 'unterzeichnet ' + fmtDate(rec.at) + ' ' + fmtTime(rec.at), 7.5, {gray:.4});
-      } else d.text(bx+6, y+86, 'nicht unterzeichnet', 7.5, {gray:.55});
+        d.text(bx+5, y+76, d.wrap(rec.name, 8.5, bw-10)[0], 8.5, {bold:true});
+        d.text(bx+5, y+86, fmtDate(rec.at) + ' ' + fmtTime(rec.at), 7, {gray:.4});
+      } else d.text(bx+5, y+86, k < 3 ? 'nicht unterzeichnet' : 'optional', 7, {gray:.55});
     }
     y += bh;
 
@@ -2999,7 +3440,7 @@ function saveSettings(){
     schema: SCHEMA,
     theme: keep.theme, palette: keep.palette, colors: keep.colors,
     count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets, fixedSets: !!S.fixedSets,
-    toLen: S.toLen, maxTimeouts: S.maxTimeouts, maxSubs: S.maxSubs, firstServer: S.firstServer,
+    toLen: S.toLen, maxTimeouts: S.maxTimeouts, toV2: true, maxSubs: S.maxSubs, firstServer: S.firstServer,
     startSide: S.topTeam,
     names: [S.teams[0].name, S.teams[1].name],
     meta: clone(S.meta)
@@ -3023,7 +3464,7 @@ function cfg(){
     fixedSets: $('cfgFixed').checked,
     deciderTarget: +$('cfgDec').value,
     toLen: +$('cfgTo').value,
-    maxTimeouts: +$('cfgMaxTo').value,
+    maxTimeouts: +$('cfgMaxTo').value, toV2: true,
     maxSubs: +$('cfgMaxSub').value,
     firstServer: +$('cfgFirst').value,
     startSide: +$('cfgSide').value
@@ -3036,20 +3477,26 @@ var TOSS = null;
 function setupTeamName(t){
   return t===0 ? ($('tn0').value.trim()||'Heim') : ($('tn1').value.trim()||'Gast');
 }
-function doToss(onDone){
+/* opts (optional, für die Auslosung vor dem Entscheidungssatz):
+   names(t) Teamnamen, intro Text, skipLabel, onResult(server, sideA,
+   text, winner) statt Setup-Feldern, onBack beim Abbrechen. */
+function doToss(onDone, opts){
+  opts = opts || {};
+  var nameOf = opts.names || setupTeamName;
   var winner = Math.random() < 0.5 ? 0 : 1, loser = 1 - winner;
   var bd = dlg('<h2>Auslosung</h2>' +
-    '<p class="dsc">Der Indiaca wird geworfen – die Seite, auf der er landet, gewinnt den Wurf. Danach startet das Spiel.</p>' +
-    '<div class="tossbox"><div class="tosshalf" id="tossH0">'+esc(setupTeamName(0))+'</div>' +
-    '<div class="tosshalf" id="tossH1">'+esc(setupTeamName(1))+'</div>' +
+    '<p class="dsc">'+esc(opts.intro || 'Der Indiaca wird geworfen – die Seite, auf der er landet, gewinnt den Wurf. Danach startet das Spiel.')+'</p>' +
+    '<div class="tossbox"><div class="tosshalf" id="tossH0">'+esc(nameOf(0))+'</div>' +
+    '<div class="tosshalf" id="tossH1">'+esc(nameOf(1))+'</div>' +
     '<img class="tossshuttle" id="tossShuttle" src="indiaca.png" alt=""></div>' +
     '<div class="tossstep" id="tossStep"></div>' +
-    '<div class="acts"><button class="btn" data-x="no">Zurück</button>' +
-    '<button class="btn" data-x="skip">Ohne Auslosung starten</button></div>', {esc:true});
+    '<div class="acts">' + (opts.onResult ? '' : '<button class="btn" data-x="no">Zurück</button>') +
+    '<button class="btn" data-x="skip">'+esc(opts.skipLabel || 'Ohne Auslosung starten')+'</button></div>', {esc:!opts.onResult});
   paintTeam(bd.querySelector('#tossH0'), 0);
   paintTeam(bd.querySelector('#tossH1'), 1);
-  bd.querySelector('[data-x=no]').onclick = function(){ closeDlg(); };
-  bd.querySelector('[data-x=skip]').onclick = function(){ TOSS = null; closeDlg(); onDone(); };
+  var nb = bd.querySelector('[data-x=no]');
+  if (nb) nb.onclick = function(){ closeDlg(); };
+  bd.querySelector('[data-x=skip]').onclick = function(){ if (!opts.onResult) TOSS = null; closeDlg(true); onDone(); };
 
   var box = bd.querySelector('.tossbox'), sh = bd.querySelector('#tossShuttle'), step = bd.querySelector('#tossStep');
   sh.style.setProperty('--tx', ((winner===0 ? -1 : 1) * box.clientWidth * 0.25) + 'px');
@@ -3059,7 +3506,7 @@ function doToss(onDone){
     if (landed) return; landed = true;
     bd.querySelector('#tossH'+winner).classList.add('win');
     bd.querySelector('#tossH'+loser).classList.add('lose');
-    step.innerHTML = '<p style="margin:0"><b>'+esc(setupTeamName(winner))+'</b> gewinnt den Wurf und wählt:</p>' +
+    step.innerHTML = '<p style="margin:0"><b>'+esc(nameOf(winner))+'</b> gewinnt den Wurf und wählt:</p>' +
       '<div class="acts"><button class="btn primary" data-c="serve">Aufschlag</button>' +
       '<button class="btn primary" data-c="receive">Rückschlag</button>' +
       '<button class="btn primary" data-c="side">Seite</button></div>';
@@ -3072,26 +3519,32 @@ function doToss(onDone){
   // die verbleibende Wahl (Seite bzw. Aufschlag/Rückschlag).
   var server = null, sideA = null, label = '', chooser = winner;
   function finish(){
-    $('cfgFirst').value = String(server);
-    $('cfgSide').value = String(sideA);
-    TOSS = setupTeamName(winner) + ' gewinnt den Wurf und wählt ' + label +
-      ' · Aufschlag ' + setupTeamName(server) + ' · Seite A ' + setupTeamName(sideA);
-    closeDlg();
+    var text = nameOf(winner) + ' gewinnt den Wurf und wählt ' + label +
+      ' · Aufschlag ' + nameOf(server) + ' · Seite A ' + nameOf(sideA);
+    if (opts.onResult){
+      closeDlg(true);
+      opts.onResult(server, sideA, text, winner);
+    } else {
+      $('cfgFirst').value = String(server);
+      $('cfgSide').value = String(sideA);
+      TOSS = text;
+      closeDlg();
+    }
     onDone();
   }
   function askSide(t, lead){
     chooser = t;
-    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(setupTeamName(t))+'</b> wählt die Seite:</p>' +
+    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(nameOf(t))+'</b> wählt die Seite:</p>' +
       '<div class="acts"><button class="btn primary" data-s="A">Seite A</button>' +
       '<button class="btn primary" data-s="B">Seite B</button></div>';
   }
   function askServe(t, lead){
-    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(setupTeamName(t))+'</b> wählt:</p>' +
+    step.innerHTML = '<p style="margin:0">'+lead+' <b>'+esc(nameOf(t))+'</b> wählt:</p>' +
       '<div class="acts"><button class="btn primary" data-r="serve">Aufschlag</button>' +
       '<button class="btn primary" data-r="receive">Rückschlag</button></div>';
   }
   step.addEventListener('click', function(e){
-    var w = '<b>'+esc(setupTeamName(winner))+'</b>';
+    var w = '<b>'+esc(nameOf(winner))+'</b>';
     var c = e.target.closest('[data-c]');
     if (c){
       if (c.dataset.c === 'serve'){ label = 'Aufschlag'; server = winner; askSide(loser, w+' wählt den Aufschlag.'); }
@@ -3141,7 +3594,7 @@ function renderSetup(){
       if (i === n) h += '</ul><div class="divider">Ersatzbank</div><ul class="plist">';
       h += '<li class="'+(isField?'field-slot':'bench-slot')+'">' +
            '<span class="pos">'+(isField ? POSN[i] : 'E'+(i-n+1))+'</span>' +
-           '<input type="text" class="num" inputmode="numeric" maxlength="3" data-t="'+t+'" data-i="'+i+'" data-f="num" value="'+esc(P[t][i].num)+'" ' +
+           '<input type="text" class="num" inputmode="numeric" maxlength="2" data-t="'+t+'" data-i="'+i+'" data-f="num" value="'+esc(P[t][i].num)+'" ' +
            'placeholder="Nr." aria-label="Trikotnummer" autocomplete="off">' +
            '<div class="names">' +
            '<input type="text" data-t="'+t+'" data-i="'+i+'" data-f="first" value="'+esc(P[t][i].first)+'" placeholder="Vorname" autocomplete="off">' +
@@ -3171,13 +3624,14 @@ function readSetupInputs(){
 function loadSettings(){
   var s = store.get(K_SET);
   if (!s) { P = [[],[]]; renderSetup(); return; }
-  if (s.count) $('cfgCount').value = s.count;
+  // Feldspieler sind fix 5 (Reglement 5.1); 4 nur im Spiel als Ausnahme
   if (s.target) $('cfgTarget').value = s.target;
   if (s.winSets) $('cfgWin').value = s.winSets;
   $('cfgFixed').checked = !!s.fixedSets; syncWinLabel();
   if (s.deciderTarget) $('cfgDec').value = s.deciderTarget;
   if (s.toLen) $('cfgTo').value = s.toLen;
-  if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
+  // Vorgabe neu 2 Auszeiten je Satz: ältere Speicherungen mit der alten Vorgabe 1 nicht übernehmen
+  if (s.maxTimeouts !== undefined && s.toV2) $('cfgMaxTo').value = s.maxTimeouts;
   // 0 war die alte Vorgabe «unbegrenzt» – gespeicherte Nullen nicht übernehmen, damit die 5 greift
   if (s.maxSubs) $('cfgMaxSub').value = s.maxSubs;
   if (s.firstServer !== undefined) $('cfgFirst').value = s.firstServer;
@@ -3238,13 +3692,12 @@ function collectSetup(){
 function applySetup(rec){
   $('tn0').value = rec.names[0]||''; $('tn1').value = rec.names[1]||'';
   var c = rec.cfg || {};
-  if (c.count) $('cfgCount').value = c.count;
   if (c.target) $('cfgTarget').value = c.target;
   if (c.winSets) $('cfgWin').value = c.winSets;
   $('cfgFixed').checked = !!c.fixedSets; syncWinLabel();
   if (c.deciderTarget) $('cfgDec').value = c.deciderTarget;
   if (c.toLen) $('cfgTo').value = c.toLen;
-  if (c.maxTimeouts !== undefined) $('cfgMaxTo').value = c.maxTimeouts;
+  if (c.maxTimeouts !== undefined && c.toV2) $('cfgMaxTo').value = c.maxTimeouts;
   if (c.maxSubs !== undefined) $('cfgMaxSub').value = c.maxSubs;
   if (c.firstServer !== undefined) $('cfgFirst').value = c.firstServer;
   if (c.startSide !== undefined) $('cfgSide').value = c.startSide;
@@ -3351,6 +3804,37 @@ function dlgPrepChoose(){
   });
 }
 
+/* Trikotnummern 1–99, je Team ohne Doppelte (Reglement 5.3). Liefert
+   den Fehlertext oder '' und markiert die betroffenen Felder. */
+function checkNumbers(){
+  var errs = [], all = document.querySelectorAll('#pl0 input.num, #pl1 input.num');
+  for (var k=0;k<all.length;k++) all[k].classList.remove('bad');
+  for (var t=0;t<2;t++){
+    var seen = {}, n = +$('cfgCount').value;
+    for (var i=0;i<P[t].length;i++){
+      var pl = normPlayer(P[t][i]), num = pl.num.trim();
+      var used = i < n || pl.first.trim() || pl.last.trim() || num;
+      if (!used || !num) continue;
+      var inp = $('pl'+t).querySelector('input.num[data-i="'+i+'"]');
+      if (!/^\d{1,2}$/.test(num) || +num < 1 || +num > 99){
+        errs.push(setupTeamName(t) + ': Trikotnummer «' + num + '» ist ungültig – erlaubt sind 1 bis 99.');
+        if (inp) inp.classList.add('bad');
+        continue;
+      }
+      var key = String(+num);
+      if (seen[key] !== undefined){
+        errs.push(setupTeamName(t) + ': Trikotnummer ' + key + ' ist doppelt vergeben.');
+        if (inp) inp.classList.add('bad');
+        var first = $('pl'+t).querySelector('input.num[data-i="'+seen[key]+'"]'); if (first) first.classList.add('bad');
+      } else seen[key] = i;
+    }
+  }
+  return errs.join(' ');
+}
+function setupError(msg){
+  var e = $('setupErr'); e.textContent = msg || ''; e.hidden = !msg;
+  if (msg){ try { e.scrollIntoView({block:'center'}); } catch(x){} }
+}
 function startMatch(){
   readSetupInputs();
   var c = cfg();
@@ -3388,7 +3872,9 @@ function startMatch(){
     setNo: 1, setStartedAt: iso(), sideSwapped: false,
     subs: [0,0], setSubs: [0,0], subPairs: [[],[]], timeouts: [0,0],
     log: [], finished: false, result: null,
-    confirmed: [null,null], refSig: null, locked: false,
+    confirmed: [null,null], refSig: null, coachSig: [null,null], rosterSig: [null,null], locked: false,
+    setStartLineup: [line.slice(), line.slice()], sanctions: [], excluded: [[],[]],
+    breakEnds: null, toss2: null, protest: null,
     started: iso()
   };
   UNDO = [];
@@ -3396,6 +3882,7 @@ function startMatch(){
   saveSettings();
   if (PREP_ID){ prepRemove(PREP_ID); PREP_ID = null; }
   enterGame();
+  dlgRosterSign();
 }
 function uuid(){
   try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch(e){}
@@ -3415,6 +3902,7 @@ function enterGame(){
   saveNow();
   requestWake();
   if (S.finished) dlgEnd();
+  else if (S.breakEnds && Date.now() < S.breakEnds) dlgSetBreak();   // Satzpause läuft noch
 }
 function newMatch(){
   if (S && S.finished) archivePut();
@@ -3563,7 +4051,22 @@ function wire(){
     if (to && !to.disabled){ unlockAudio(); dlgTimeout(+to.dataset.to); return; }
   });
 
-  $('btnStart').addEventListener('click', function(){ unlockAudio(); doToss(startMatch); });
+  $('btnStart').addEventListener('click', function(){
+    unlockAudio();
+    readSetupInputs();
+    var err = checkNumbers();
+    setupError(err);
+    if (err) return;
+    doToss(startMatch);
+  });
+  // Trikotnummern beim Tippen prüfen, Fehlermeldung verschwindet sobald alles stimmt
+  document.addEventListener('input', function(e){
+    if (e.target.matches && e.target.matches('#pl0 input.num, #pl1 input.num')){
+      readSetupInputs();
+      var err = checkNumbers();
+      if (!$('setupErr').hidden || !err) setupError(err);
+    }
+  });
   $('btnArchive').addEventListener('click', dlgArchive);
   $('btnPrepSave').addEventListener('click', dlgPrepSave);
   $('prepList').addEventListener('click', function(e){
@@ -3653,7 +4156,9 @@ if (/[?&]debug=1/.test(location.search)){
     point: function(t,k){ addPoint(t,k); },
     undo: undo,
     penalty: penaltyPoint,
+    sanction: function(t, k, pi, pt, note){ applySanction(t, sanctionDef(k), pi, pt, note); },
     report: function(){ return reportText(S); },
+    pdf: function(){ return buildMatchPdf(S); },
     archive: function(){ return store.get(K_ARCH) || []; },
     set: function(patch){ Object.keys(patch).forEach(function(k){ S[k]=patch[k]; }); render(); }
   };
