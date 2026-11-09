@@ -232,6 +232,8 @@ body.has-update .screen{padding-top:54px}
 .plist .pos{flex:0 0 30px;text-align:center;font-size:16px;font-weight:700;color:var(--muted)}
 .plist li.field-slot .pos{color:var(--tc)}
 .plist input{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--ink-2);cursor:pointer}
+.chk input{width:20px;height:20px;min-height:0;flex:0 0 auto;accent-color:var(--home)}
 .plist input.num{flex:0 0 58px;text-align:center;padding-left:4px;padding-right:4px}
 .plist .names{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .plist .names input{width:100%}
@@ -910,8 +912,9 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <select id="cfgCount"><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select></div>
       <div class="field"><label class="lbl" for="cfgTarget">Satz bis</label>
         <select id="cfgTarget"><option>15</option><option>21</option><option selected>25</option></select></div>
-      <div class="field"><label class="lbl" for="cfgWin">Gewinnsätze</label>
-        <select id="cfgWin"><option>1</option><option selected>2</option><option>3</option></select></div>
+      <div class="field"><label class="lbl" for="cfgWin" id="cfgWinLbl">Gewinnsätze</label>
+        <select id="cfgWin"><option>1</option><option selected>2</option><option>3</option></select>
+        <label class="chk"><input type="checkbox" id="cfgFixed"> Feste Satzzahl – alle Sätze werden gespielt</label></div>
       <div class="field"><label class="lbl" for="cfgDec">Entscheidungssatz bis</label>
         <select id="cfgDec"><option selected>15</option><option>21</option><option>25</option></select></div>
       <div class="field"><label class="lbl" for="cfgTo">Auszeitdauer</label>
@@ -926,6 +929,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
         <select id="cfgSide"><option value="0" selected>Heim</option><option value="1">Gast</option></select></div>
     </div>
     <p class="hint" style="margin:6px 0 0">Satzgewinn mit 2 Punkten Vorsprung: bei 24:24 geht es bis 26, bei 25:25 bis 27 usw.</p>
+    <p class="hint" style="margin:6px 0 0">Gewinnsätze: Das Spiel endet, sobald ein Team die gewählte Zahl Sätze gewonnen hat. Feste Satzzahl: Alle Sätze werden gespielt, bei gleich vielen Satzgewinnen endet das Spiel unentschieden.</p>
     <p class="hint" style="margin:6px 0 0">Aufschlag und Startseite werden beim Start ausgelost – das Gewinnerteam wählt. Wer die Auslosung überspringt, spielt mit den Werten oben.</p>
   </div>
 
@@ -1047,7 +1051,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.4.3';
+var APP = '2.5.0';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1063,7 +1067,7 @@ var SNAP = ['points','setsWon','sets','serving','firstServer','topTeam','setNo',
             'setStartedAt','sideSwapped','lineup','subs','setSubs','subPairs','timeouts',
             'log','finished','result'];
 var RESULT_LABEL = {
-  regulaer:'Regulär', forfait:'Rückzug (Forfait)',
+  regulaer:'Regulär', unentschieden:'Unentschieden', forfait:'Rückzug (Forfait)',
   abbruch:'Abbruch', unvollstaendig:'Unvollständige Mannschaft'
 };
 
@@ -1278,6 +1282,8 @@ function undo(){
    Regellogik
    ============================================================ */
 function isDecider(){
+  if (S.fixedSets)   // feste Satzzahl: letzter Satz nur bei Gleichstand ein Entscheidungssatz
+    return S.winSets > 1 && S.sets.length === S.winSets - 1 && S.setsWon[0] === S.setsWon[1];
   return S.winSets > 1 && (S.setsWon[0] + S.setsWon[1]) === (S.winSets*2 - 2);
 }
 function targetNow(){ return isDecider() ? S.deciderTarget : S.target; }
@@ -1359,10 +1365,15 @@ function finishSet(w){
   S.setsWon[w]++;
   var pts = S.points.slice();
 
-  if (S.setsWon[w] >= S.winSets){
+  // Spielende: bei Gewinnsätzen sobald ein Team genug Sätze hat, bei
+  // fester Satzzahl nach dem letzten Satz (Gleichstand = unentschieden)
+  var over = S.fixedSets ? (S.sets.length >= S.winSets) : (S.setsWon[w] >= S.winSets);
+  if (over){
     pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
     S.sets[S.sets.length-1].log = clone(S.log);
-    finishMatch('regulaer', w, '');
+    var winner = w;
+    if (S.fixedSets) winner = S.setsWon[0] === S.setsWon[1] ? null : (S.setsWon[0] > S.setsWon[1] ? 0 : 1);
+    finishMatch(winner === null ? 'unentschieden' : 'regulaer', winner, '');
     return;
   }
   pushLog('set', w, 'Satz '+S.setNo+' '+pts[0]+':'+pts[1]);
@@ -2223,7 +2234,9 @@ function dlgEnd(keep){
   var h = '<h2>Spiel beendet</h2>' +
     '<p class="dsc">'+esc(RESULT_LABEL[r.type]||r.type)+(r.note?' · '+esc(r.note):'')+'</p>' +
     '<div class="setsline">'+setsLineHTML()+'</div>' +
-    '<p style="margin:0 0 14px"><span class="tag ok">Sieger</span> <b style="color:var(--ink)">'+esc(win)+'</b> ' +
+    '<p style="margin:0 0 14px">' + (r.type === 'unentschieden'
+        ? '<span class="tag">Unentschieden</span> '
+        : '<span class="tag ok">Sieger</span> <b style="color:var(--ink)">'+esc(win)+'</b> ') +
       '<span class="mono" style="color:var(--muted)">('+S.setsWon[0]+':'+S.setsWon[1]+' Sätze)</span></p>';
 
   if (S.locked){
@@ -2390,7 +2403,7 @@ function reportText(st){
   line('Schiedsrichter', m.referee || '–');
   line('Schreiber', m.scorer || '–');
   line('Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+
-       ' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget);
+       (s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget);
   line('Auslosung', s.toss || '–');
   if (m.note) line('Bemerkung', m.note);
   L.push('');
@@ -2434,7 +2447,7 @@ function reportText(st){
   line('Sätze', s.setsWon[0] + ' : ' + s.setsWon[1]);
   if (s.result){
     line('Ergebnisart', RESULT_LABEL[s.result.type] || s.result.type);
-    line('Sieger', (s.result.winner===0||s.result.winner===1) ? s.teams[s.result.winner].name : '–');
+    line('Sieger', (s.result.winner===0||s.result.winner===1) ? s.teams[s.result.winner].name : (s.result.type==='unentschieden' ? 'Unentschieden' : '–'));
     if (s.result.note) line('Grund/Bemerkung', s.result.note);
   } else {
     line('Status', 'Spiel läuft');
@@ -2655,7 +2668,7 @@ function buildMatchPdf(s){
     y += 14;
     d.text(M, y, 'Heim', 8, {gray:.45}); d.text(W/2, y, 'Sätze', 8, {gray:.45, align:'center'}); d.text(W-M, y, 'Gast', 8, {gray:.45, align:'right'});
     y += 16;
-    var resLine = s.result ? ((winner ? 'Sieger: '+winner : 'Kein Sieger') + ' · ' + (RESULT_LABEL[s.result.type]||s.result.type) +
+    var resLine = s.result ? ((winner ? 'Sieger: '+winner : (s.result.type==='unentschieden' ? 'Unentschieden' : 'Kein Sieger')) + ' · ' + (RESULT_LABEL[s.result.type]||s.result.type) +
                               (s.result.note ? ' · '+s.result.note : '')) : 'Spiel läuft';
     d.text(W/2, y, resLine, 10, {align:'center'});
     y += 4;
@@ -2670,7 +2683,7 @@ function buildMatchPdf(s){
       d.text(cx+labW, cy, d.wrap(r[1], 9.5, colW-labW-10)[0], 9.5);
     });
     y = y0 + 4*13 + 2;
-    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+' Gewinnsätze · Entscheidungssatz bis '+s.deciderTarget],
+    var long = [['Modus', s.count+' Feldspieler · Satz bis '+s.target+' (2 Punkte Vorsprung) · '+s.winSets+(s.fixedSets ? ' Sätze (alle werden gespielt)' : ' Gewinnsätze')+' · Entscheidungssatz bis '+s.deciderTarget],
                 ['Auslosung', s.toss||'–']];
     if (m.note) long.push(['Bemerkung', m.note]);
     long.forEach(function(r){
@@ -2911,7 +2924,7 @@ function saveSettings(){
   store.set(K_SET, {
     schema: SCHEMA,
     theme: keep.theme, palette: keep.palette, colors: keep.colors,
-    count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets,
+    count: S.count, target: S.target, deciderTarget: S.deciderTarget, winSets: S.winSets, fixedSets: !!S.fixedSets,
     toLen: S.toLen, maxTimeouts: S.maxTimeouts, maxSubs: S.maxSubs, firstServer: S.firstServer,
     startSide: S.topTeam,
     names: [S.teams[0].name, S.teams[1].name],
@@ -2925,11 +2938,15 @@ function saveSettings(){
 var P = [[],[]];      // Spielernamen je Team
 var CAP = [0,0];      // Mannschaftsführer (Index in P[t])
 
+function syncWinLabel(){
+  var l = $('cfgWinLbl'); if (l) l.textContent = $('cfgFixed').checked ? 'Anzahl Sätze' : 'Gewinnsätze';
+}
 function cfg(){
   return {
     count: +$('cfgCount').value,
     target: +$('cfgTarget').value,
     winSets: +$('cfgWin').value,
+    fixedSets: $('cfgFixed').checked,
     deciderTarget: +$('cfgDec').value,
     toLen: +$('cfgTo').value,
     maxTimeouts: +$('cfgMaxTo').value,
@@ -3083,6 +3100,7 @@ function loadSettings(){
   if (s.count) $('cfgCount').value = s.count;
   if (s.target) $('cfgTarget').value = s.target;
   if (s.winSets) $('cfgWin').value = s.winSets;
+  $('cfgFixed').checked = !!s.fixedSets; syncWinLabel();
   if (s.deciderTarget) $('cfgDec').value = s.deciderTarget;
   if (s.toLen) $('cfgTo').value = s.toLen;
   if (s.maxTimeouts !== undefined) $('cfgMaxTo').value = s.maxTimeouts;
@@ -3149,6 +3167,7 @@ function applySetup(rec){
   if (c.count) $('cfgCount').value = c.count;
   if (c.target) $('cfgTarget').value = c.target;
   if (c.winSets) $('cfgWin').value = c.winSets;
+  $('cfgFixed').checked = !!c.fixedSets; syncWinLabel();
   if (c.deciderTarget) $('cfgDec').value = c.deciderTarget;
   if (c.toLen) $('cfgTo').value = c.toLen;
   if (c.maxTimeouts !== undefined) $('cfgMaxTo').value = c.maxTimeouts;
@@ -3284,7 +3303,7 @@ function startMatch(){
     schema: SCHEMA,
     id: uuid(),
     app: APP,
-    count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets,
+    count: c.count, target: c.target, deciderTarget: c.deciderTarget, winSets: c.winSets, fixedSets: !!c.fixedSets,
     toLen: c.toLen, maxTimeouts: c.maxTimeouts, maxSubs: c.maxSubs,
     meta: metaFromForm(),
     teams: teams,
@@ -3435,6 +3454,7 @@ function wire(){
     }
   });
   document.addEventListener('input', onViewInput);
+  $('cfgFixed').addEventListener('change', syncWinLabel);
   document.addEventListener('change', function(e){
     var el = e.target;
     onViewInput(e);
