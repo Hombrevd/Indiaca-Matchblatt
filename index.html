@@ -1047,7 +1047,7 @@ pre.report{background:var(--surface);border:1px solid var(--line);border-radius:
 /* ============================================================
    Konstanten
    ============================================================ */
-var APP = '2.4.2';
+var APP = '2.4.3';
 var SCHEMA = 2;
 var K_MATCH = 'indiaca.match.v2';
 var K_SET   = 'indiaca.settings.v2';
@@ -1686,7 +1686,7 @@ function renderBench(){
     var chips = '';
     for (var k=0;k<b.length;k++){
       var qk = openPairFor(t, b[k]);
-      var tip = qk && qk.out === b[k] ? ' – darf nur für '+pLabel(t, qk.in)+' zurück' : ' – auf einen Feldspieler ziehen';
+      var tip = qk ? ' – darf in diesem Satz nur für '+pLabel(t, pairPartner(qk, b[k]))+' aufs Feld' : ' – auf einen Feldspieler ziehen';
       chips += '<button class="bchip'+(qk ? ' paired' : '')+'" type="button" data-bt="'+t+'" data-bp="'+b[k]+'"' +
                ' title="'+esc(pLabel(t, b[k]))+esc(tip)+'"' +
                ' aria-label="Ersatz '+esc(pLabel(t, b[k]))+'"'+(dis?' disabled':'')+'>' +
@@ -1878,14 +1878,14 @@ function dlgSub(t, presetSlot, presetBench){
     var hf='', hb='', i;
     for (i=0;i<S.lineup[t].length;i++){
       var cur = S.lineup[t][i], q = openPairFor(t, cur);
-      var hint = 'Position '+POSN[i] + (q && q.in === cur ? ' · nur für '+esc(pLabel(t, q.out)) : '');
+      var hint = 'Position '+POSN[i] + (q ? ' · nur gegen '+esc(pLabel(t, pairPartner(q, cur))) : '');
       var blocked = selBench>=0 ? !!subCheck(t, i, selBench) : false;
       hf += '<button class="opt" type="button" data-f="'+i+'" aria-pressed="'+(selSlot===i)+'"'+(blocked?' disabled':'')+'>' +
             esc(pLabel(t, cur)) + '<small>'+hint+(blocked?' · gesperrt':'')+'</small></button>';
     }
     for (i=0;i<b.length;i++){
       var qb = openPairFor(t, b[i]);
-      var hintB = 'Ersatz' + (qb && qb.out === b[i] ? ' · nur für '+esc(pLabel(t, qb.in)) : '');
+      var hintB = 'Ersatz' + (qb ? ' · nur für '+esc(pLabel(t, pairPartner(qb, b[i]))) : '');
       var blockedB = selSlot>=0 ? !!subCheck(t, selSlot, b[i]) : false;
       hb += '<button class="opt" type="button" data-b="'+b[i]+'" aria-pressed="'+(selBench===b[i])+'"'+(blockedB?' disabled':'')+'>' +
             esc(pLabel(t, b[i])) + '<small>'+hintB+(blockedB?' · gesperrt':'')+'</small></button>';
@@ -1973,26 +1973,28 @@ function benchPointerUp(e){
   }
   doSub(d.t, slot, d.pi);
 }
-/* Wechselpaare eines Satzes: Wurde A durch B ersetzt, darf B nur durch
-   A ersetzt werden, und A darf nur für B zurück. Für andere Ersatzspieler
-   ist diese Position gesperrt, bis A zurück ist. */
+/* Wechselpaare eines Satzes: Wurde A durch B ersetzt, sind A und B für
+   den Rest des Satzes aneinander gebunden. B darf nur durch A ersetzt
+   werden und A nur für B zurück – auch nach dem Rückwechsel bleibt die
+   Paarung bestehen. Für alle anderen ist diese Position gesperrt. */
 function subPairs(t){
   if (!S.subPairs) S.subPairs = [[],[]];
   return S.subPairs[t];
 }
-function openPairFor(t, pi){            // offenes Paar, in dem pi drin- oder draussen ist
+function openPairFor(t, pi){            // Paar, in dem pi drin- oder draussen ist
   var P = subPairs(t);
-  for (var i=0;i<P.length;i++) if (!P[i].done && (P[i].in === pi || P[i].out === pi)) return P[i];
+  for (var i=0;i<P.length;i++) if (P[i].in === pi || P[i].out === pi) return P[i];
   return null;
 }
+function pairPartner(q, pi){ return q.in === pi ? q.out : q.in; }
 function subCheck(t, slot, pi){         // '' = erlaubt, sonst Begründung
   var cur = S.lineup[t][slot];
   var qc = openPairFor(t, cur);
-  if (qc && qc.in === cur && qc.out !== pi)
-    return 'Position ' + POSN[slot] + ' ist gesperrt: für ' + pLabel(t, cur) + ' darf nur ' + pLabel(t, qc.out) + ' zurück aufs Feld.';
+  if (qc && pairPartner(qc, cur) !== pi)
+    return 'Position ' + POSN[slot] + ' ist gesperrt: ' + pLabel(t, cur) + ' darf in diesem Satz nur gegen ' + pLabel(t, pairPartner(qc, cur)) + ' getauscht werden.';
   var qp = openPairFor(t, pi);
-  if (qp && qp.out === pi && qp.in !== cur)
-    return pLabel(t, pi) + ' darf nur für ' + pLabel(t, qp.in) + ' (Position ' + POSN[S.lineup[t].indexOf(qp.in)] + ') wieder eingewechselt werden.';
+  if (qp && pairPartner(qp, pi) !== cur)
+    return pLabel(t, pi) + ' darf in diesem Satz nur für ' + pLabel(t, pairPartner(qp, pi)) + ' eingewechselt werden.';
   return '';
 }
 function doSub(t, slot, pi){
@@ -2002,9 +2004,9 @@ function doSub(t, slot, pi){
   var out = S.lineup[t][slot];
   S.lineup[t][slot] = pi;
   S.setSubs[t]++; S.subs[t]++;
-  var q = openPairFor(t, out), back = false;
-  if (q && q.in === out && q.out === pi){ q.done = true; back = true; }
-  else subPairs(t).push({ out: out, in: pi, slot: slot });
+  // Bestehendes Paar: Rückwechsel (Paarung bleibt bestehen); sonst neues Paar
+  var q = openPairFor(t, out), back = !!(q && pairPartner(q, out) === pi);
+  if (!back) subPairs(t).push({ out: out, in: pi, slot: slot });
   pushLog('sub', t, pLabel(t, pi) + ' für ' + pLabel(t, out) + ' (Position ' + POSN[slot] + (back ? ', Rückwechsel' : '') + ')');
   render(); save();
   toast((back ? 'Rückwechsel: ' : 'Wechsel: ') + pLabel(t, pi));
